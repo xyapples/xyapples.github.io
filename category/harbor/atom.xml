@@ -52,28 +52,20 @@ EOF
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;4-安装harbor&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-安装harbor&#34;&gt;#&lt;/a&gt; 4、安装 Harbor&lt;/h4&gt;
 &lt;pre&gt;&lt;code&gt;[root@harbor ~]# cd /soft/
-[root@harbor soft]# wget https://github.com/goharbor/harbor/releases/download/v2.6.1/harbor-offline-installer-v2.6.1.tgz
+[root@harbor ~]# wget https://github.com/goharbor/harbor/releases/download/v2.6.1/harbor-offline-installer-v2.6.1.tgz
 [root@harbor soft]# tar xf harbor-offline-installer-v2.6.1.tgz
 [root@harbor soft]# cd harbor
-[root@harbor harbor]# cp harbor.yml.tmpl harbor.yml
 [root@harbor harbor]# vim harbor.yml
 hostname: 192.168.1.134
 ...
-# http related config
-http:
-  # port for http, default is 80. If https enabled, this port will redirect to https port
-  port: 80
-
-# https related config
-https:
-  # https port for harbor, default is 443
-  port: 443
-  # The path of cert and key files for nginx
-  certificate: /soft/ssl/*.hmallleasing.com_chain.crt
-  private_key: /soft/ssl/*.hmallleasing.com_key.key
+#https:
+#  # https port for harbor, default is 443
+#  port: 443
+#  # The path of cert and key files for nginx
+#  certificate: /your/certificate/path
+#  private_key: /your/private/key/path
 ...
 harbor_admin_password: Harbor12345
-
 [root@harbor harbor]#  ./install.sh
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;5-配置nginx负载均衡调度&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#5-配置nginx负载均衡调度&#34;&gt;#&lt;/a&gt; 5、配置 Nginx 负载均衡调度&lt;/h4&gt;
@@ -121,7 +113,6 @@ server &amp;#123;
 [root@harbor harbor]# pwd
 /soft/harbor
 [root@harbor harbor]# docker-compose stop
- 
  #启动Harbor
 [root@harbor harbor]# docker-compose up -d
 [root@harbor harbor]# docker-compose start
