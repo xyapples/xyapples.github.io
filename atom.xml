@@ -3,5 +3,131 @@
     <id>http://xuyong.cn</id>
     <title>LinuxSre云原生</title>
     <link href="http://xuyong.cn" />
-    <updated>2025-03-30T07:56:55.627Z</updated>
+    <updated>2025-03-30T08:17:00.000Z</updated>
+    <category term="Harbor" />
+    <entry>
+        <id>http://xuyong.cn/posts/3071070978.html</id>
+        <title>企业级私有仓库Harbor搭建</title>
+        <link rel="alternate" href="http://xuyong.cn/posts/3071070978.html"/>
+        <content type="html">&lt;h3 id=&#34;企业级私有仓库harbor&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#企业级私有仓库harbor&#34;&gt;#&lt;/a&gt; 企业级私有仓库 Harbor&lt;/h3&gt;
+&lt;p&gt;企业部署 Kuberetes 集群环境之后，我们就可以将原来在传统虚拟机上运行的业务，迁移到 kubernetes 上，让 Kubernetes 通过容器的方式来管理。而一旦我们需要将传统业务使用容器的方式运行起来，就需要构建很多镜像，那么这些镜像就需要有一个专门的位置存储起来，为我们提供镜像上传和镜像下载等功能。但我们不能使用阿里云或者 Dockerhub 等仓库，首先拉取速度比较慢，其次镜像的安全性无法保证，所以就需要部署一个私有的镜像仓库来管理这些容器镜像。同时该仓库还需要提供高可用功能，确保随时都能上传和下载可用的容器镜像。&lt;/p&gt;
+&lt;h4 id=&#34;1-关闭防火墙-selinux-环境配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-关闭防火墙-selinux-环境配置&#34;&gt;#&lt;/a&gt; 1、关闭防火墙、Selinux、环境配置&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@harbor ~]# sudo mkdir -p /etc/docker
+[root@harbor ~]# hostnamectl set-hostname harbor
+[root@harbor ~]# systemctl stop firewalld
+[root@harbor ~]# systemctl disable firewalld
+[root@harbor ~]# sed -i &#39;s/^SELINUX=enforcing/SELINUX=disabled/g&#39; /etc/sysconfig/selinux
+[root@harbor ~]# yum install net-tools vim tree lrzsz wget unzip dos2unix bash-completion  lsof ntp ntpdate -y
+[root@harbor ~]# yum update -y
+[root@harbor ~]# mkdir /soft /data /scripts /backup
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;2-docker安装&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-docker安装&#34;&gt;#&lt;/a&gt; 2、Docker 安装&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@harbor ~]# yum install -y yum-utils device-mapper-persistent-data lvm2
+[root@harbor ~]# curl -o /etc/yum.repos.d/docker-ce.repo  https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+[root@harbor ~]# yum list docker-ce --showduplicates |sort -r 
+[root@harbor ~]# yum install docker-ce docker-compose -y
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;3-配置docker加速&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-配置docker加速&#34;&gt;#&lt;/a&gt; 3、配置 Docker 加速&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@harbor ~]# sudo mkdir -p /etc/docker
+[root@harbor ~]# sudo tee /etc/docker/daemon.json &amp;lt;&amp;lt;-&#39;EOF&#39;
+&amp;#123;
+  &amp;quot;registry-mirrors&amp;quot;: [
+	  &amp;quot;https://docker.credclouds.com&amp;quot;,
+	  &amp;quot;https://k8s.credclouds.com&amp;quot;,
+	  &amp;quot;https://quay.credclouds.com&amp;quot;,
+	  &amp;quot;https://gcr.credclouds.com&amp;quot;,
+	  &amp;quot;https://k8s-gcr.credclouds.com&amp;quot;,
+	  &amp;quot;https://ghcr.credclouds.com&amp;quot;,
+	  &amp;quot;https://do.nark.eu.org&amp;quot;,
+	  &amp;quot;https://docker.m.daocloud.io&amp;quot;,
+	  &amp;quot;https://docker.nju.edu.cn&amp;quot;,
+	  &amp;quot;https://docker.mirrors.sjtug.sjtu.edu.cn&amp;quot;,
+	  &amp;quot;https://docker.1panel.live&amp;quot;,
+	  &amp;quot;https://docker.rainbond.cc&amp;quot;
+  ], 
+  &amp;quot;exec-opts&amp;quot;: [&amp;quot;native.cgroupdriver=systemd&amp;quot;] 
+&amp;#125;
+EOF
+[root@harbor ~]# systemctl enable docker --now
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;4-安装harbor&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-安装harbor&#34;&gt;#&lt;/a&gt; 4、安装 Harbor&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@harbor ~]# cd /soft/
+[root@harbor soft]# wget https://github.com/goharbor/harbor/releases/download/v2.6.1/harbor-offline-installer-v2.6.1.tgz
+[root@harbor soft]# tar xf harbor-offline-installer-v2.6.1.tgz
+[root@harbor soft]# cd harbor
+[root@harbor harbor]# cp harbor.yml.tmpl harbor.yml
+[root@harbor harbor]# vim harbor.yml
+hostname: harbor.hmallleasing.com
+...
+# http related config
+http:
+  # port for http, default is 80. If https enabled, this port will redirect to https port
+  port: 80
+
+# https related config
+https:
+  # https port for harbor, default is 443
+  port: 443
+  # The path of cert and key files for nginx
+  certificate: /soft/ssl/*.hmallleasing.com_chain.crt
+  private_key: /soft/ssl/*.hmallleasing.com_key.key
+...
+harbor_admin_password: Harbor12345
+
+[root@harbor harbor]#  ./install.sh
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;5-配置nginx负载均衡调度&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#5-配置nginx负载均衡调度&#34;&gt;#&lt;/a&gt; 5、配置 Nginx 负载均衡调度&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@lb ~]# vim s.hmallleasing.com.conf
+server &amp;#123;
+    listen 443 ssl;
+    server_name harbor.hmallleasing.com;
+    client_max_body_size 1G; 
+    ssl_prefer_server_ciphers on;
+    ssl_certificate  /etc/nginx/sslkey/_.hmallleasing.com_chain.crt;
+    ssl_certificate_key  /etc/nginx/sslkey/_.hmallleasing.com_key.key;
+    location / &amp;#123;
+        proxy_pass http://192.168.1.134;
+#      include proxy_params;
+#        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        
+        proxy_connect_timeout 30;
+        proxy_send_timeout 60;
+        proxy_read_timeout 60;
+        
+        proxy_buffering on;
+        proxy_buffer_size 32k;
+        proxy_buffers 4 128k;
+        proxy_temp_file_write_size 10240k;		
+        proxy_max_temp_file_size 10240k;
+    &amp;#125;
+&amp;#125;
+
+server &amp;#123;
+    listen 80;
+    server_name s.hmallleasing.com;
+    return 302 https://$server_name$request_uri;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;6-推送镜像至harbor&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#6-推送镜像至harbor&#34;&gt;#&lt;/a&gt; 6、推送镜像至 Harbor&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@harbor harbor]# docker tag beae173ccac6 harbor.hmallleasing.com/ops/busybox.v1
+[root@harbor harbor]# docker push harbor.hmallleasing.com/ops/busybox.v1
+[root@harbor harbor]# docker login harbor.hmallleasing.com
+[root@harbor harbor]# docker push harbor.hmallleasing.com/ops/busybox.v1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;7-harbor停止与启动&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#7-harbor停止与启动&#34;&gt;#&lt;/a&gt; 7、Harbor 停止与启动&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;#停用Harbor
+[root@harbor harbor]# pwd
+/soft/harbor
+[root@harbor harbor]# docker-compose stop
+ 
+ #启动Harbor
+[root@harbor harbor]# docker-compose up -d
+[root@harbor harbor]# docker-compose start
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+        <category term="Harbor" />
+        <updated>2025-03-30T08:17:00.000Z</updated>
+    </entry>
 </feed>
