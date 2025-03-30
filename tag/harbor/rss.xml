@@ -62,7 +62,7 @@ EOF
 [root@harbor soft]# cd harbor
 [root@harbor harbor]# cp harbor.yml.tmpl harbor.yml
 [root@harbor harbor]# vim harbor.yml
-hostname: harbor.hmallleasing.com
+hostname: 192.168.1.134
 ...
 # http related config
 http:
