@@ -5,6 +5,16 @@
     "home_page_url": "http://xuyong.cn",
     "items": [
         {
+            "id": "http://xuyong.cn/posts/3071070979.html",
+            "url": "http://xuyong.cn/posts/3071070979.html",
+            "title": "企业级私有仓库Harbor搭建",
+            "date_published": "2025-04-09T10:28:34.000Z",
+            "content_html": "",
+            "tags": [
+                "默认tags"
+            ]
+        },
+        {
             "id": "http://xuyong.cn/posts/1922841233.html",
             "url": "http://xuyong.cn/posts/1922841233.html",
             "title": "Rsync服务实践",

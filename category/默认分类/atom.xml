@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>http://xuyong.cn</id>
+    <title>LinuxSre云原生 • Posts by &#34;默认分类&#34; category</title>
+    <link href="http://xuyong.cn" />
+    <updated>2025-04-09T10:28:34.000Z</updated>
+    <category term="Harbor" />
+    <category term="默认tags" />
+    <category term="rsync" />
+    <entry>
+        <id>http://xuyong.cn/posts/3071070979.html</id>
+        <title>企业级私有仓库Harbor搭建</title>
+        <link rel="alternate" href="http://xuyong.cn/posts/3071070979.html"/>
+        <content type="html"></content>
+        <category term="默认tags" />
+        <updated>2025-04-09T10:28:34.000Z</updated>
+    </entry>
+</feed>

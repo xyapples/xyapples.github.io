@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<rss version="2.0">
+    <channel>
+        <title>LinuxSre云原生 • Posts by &#34;默认tags&#34; tag</title>
+        <link>http://xuyong.cn</link>
+        <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
+        <language>zh-CN</language>
+        <pubDate>Wed, 09 Apr 2025 18:28:34 +0800</pubDate>
+        <lastBuildDate>Wed, 09 Apr 2025 18:28:34 +0800</lastBuildDate>
+        <category>Harbor</category>
+        <category>默认tags</category>
+        <category>rsync</category>
+        <item>
+            <guid isPermalink="true">http://xuyong.cn/posts/3071070979.html</guid>
+            <title>企业级私有仓库Harbor搭建</title>
+            <link>http://xuyong.cn/posts/3071070979.html</link>
+            <category>默认tags</category>
+            <pubDate>Wed, 09 Apr 2025 18:28:34 +0800</pubDate>
+            <description><![CDATA[  ]]></description>
+        </item>
+    </channel>
+</rss>
