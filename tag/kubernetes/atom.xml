@@ -5,8 +5,8 @@
     <link href="http://xuyong.cn" />
     <updated>2025-04-09T10:28:34.000Z</updated>
     <category term="Harbor" />
-    <category term="Kubernetes" />
     <category term="rsync" />
+    <category term="Kubernetes" />
     <entry>
         <id>http://xuyong.cn/posts/3166738000.html</id>
         <title>Kubeadm高可用安装K8s集群</title>
