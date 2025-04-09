@@ -10,8 +10,8 @@
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>rsync</category>
-        <category>MySQL</category>
         <category>Redis</category>
+        <category>MySQL</category>
         <item>
             <guid isPermalink="true">http://xuyong.cn/posts/2771271649.html</guid>
             <title>云原生K8s安全专家CKS认证考题详解</title>
