@@ -7,9 +7,10 @@
         <language>zh-CN</language>
         <pubDate>Wed, 09 Apr 2025 18:28:34 +0800</pubDate>
         <lastBuildDate>Wed, 09 Apr 2025 18:28:34 +0800</lastBuildDate>
+        <category>Kubernetes</category>
         <category>Harbor</category>
         <category>rsync</category>
-        <category>Kubernetes</category>
+        <category>Redis</category>
         <item>
             <guid isPermalink="true">http://xuyong.cn/posts/3166738000.html</guid>
             <title>Kubeadm高可用安装K8s集群</title>
