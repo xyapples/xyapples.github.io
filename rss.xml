@@ -8,13 +8,13 @@
         <pubDate>Wed, 09 Apr 2025 18:28:34 +0800</pubDate>
         <lastBuildDate>Wed, 09 Apr 2025 18:28:34 +0800</lastBuildDate>
         <category>Harbor</category>
-        <category>默认tags</category>
+        <category>Kubernetes</category>
         <category>rsync</category>
         <item>
             <guid isPermalink="true">http://xuyong.cn/posts/3166738000.html</guid>
             <title>Kubeadm高可用安装K8s集群</title>
             <link>http://xuyong.cn/posts/3166738000.html</link>
-            <category>默认tags</category>
+            <category>Kubernetes</category>
             <pubDate>Wed, 09 Apr 2025 18:28:34 +0800</pubDate>
             <description><![CDATA[ &lt;h2 id=&#34;kubeadm高可用安装k8s集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#kubeadm高可用安装k8s集群&#34;&gt;#&lt;/a&gt; Kubeadm 高可用安装 K8s 集群&lt;/h2&gt;
 &lt;h4 id=&#34;1-基本配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-基本配置&#34;&gt;#&lt;/a&gt; 1. 基本配置&lt;/h4&gt;

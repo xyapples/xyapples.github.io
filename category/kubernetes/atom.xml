@@ -1,22 +1,17 @@
 <?xml version="1.0"?>
-<rss version="2.0">
-    <channel>
-        <title>LinuxSre云原生 • Posts by &#34;默认分类&#34; category</title>
-        <link>http://xuyong.cn</link>
-        <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
-        <language>zh-CN</language>
-        <pubDate>Wed, 09 Apr 2025 18:28:34 +0800</pubDate>
-        <lastBuildDate>Wed, 09 Apr 2025 18:28:34 +0800</lastBuildDate>
-        <category>Harbor</category>
-        <category>默认tags</category>
-        <category>rsync</category>
-        <item>
-            <guid isPermalink="true">http://xuyong.cn/posts/3166738000.html</guid>
-            <title>Kubeadm高可用安装K8s集群</title>
-            <link>http://xuyong.cn/posts/3166738000.html</link>
-            <category>默认tags</category>
-            <pubDate>Wed, 09 Apr 2025 18:28:34 +0800</pubDate>
-            <description><![CDATA[ &lt;h2 id=&#34;kubeadm高可用安装k8s集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#kubeadm高可用安装k8s集群&#34;&gt;#&lt;/a&gt; Kubeadm 高可用安装 K8s 集群&lt;/h2&gt;
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>http://xuyong.cn</id>
+    <title>LinuxSre云原生 • Posts by &#34;kubernetes&#34; category</title>
+    <link href="http://xuyong.cn" />
+    <updated>2025-04-09T10:28:34.000Z</updated>
+    <category term="Harbor" />
+    <category term="Kubernetes" />
+    <category term="rsync" />
+    <entry>
+        <id>http://xuyong.cn/posts/3166738000.html</id>
+        <title>Kubeadm高可用安装K8s集群</title>
+        <link rel="alternate" href="http://xuyong.cn/posts/3166738000.html"/>
+        <content type="html">&lt;h2 id=&#34;kubeadm高可用安装k8s集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#kubeadm高可用安装k8s集群&#34;&gt;#&lt;/a&gt; Kubeadm 高可用安装 K8s 集群&lt;/h2&gt;
 &lt;h4 id=&#34;1-基本配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-基本配置&#34;&gt;#&lt;/a&gt; 1. 基本配置&lt;/h4&gt;
 &lt;h5 id=&#34;11-基本环境配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-基本环境配置&#34;&gt;#&lt;/a&gt; 1.1 基本环境配置&lt;/h5&gt;
 &lt;table&gt;
@@ -918,7 +913,8 @@ EOF
 # systemctl enable --now docker
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
- ]]></description>
-        </item>
-    </channel>
-</rss>
+</content>
+        <category term="Kubernetes" />
+        <updated>2025-04-09T10:28:34.000Z</updated>
+    </entry>
+</feed>
