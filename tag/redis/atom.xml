@@ -6,8 +6,8 @@
     <updated>2025-04-09T11:50:06.000Z</updated>
     <category term="Harbor" />
     <category term="Kubernetes" />
-    <category term="rsync" />
     <category term="MySQL" />
+    <category term="rsync" />
     <category term="Redis" />
     <category term="Windows" />
     <entry>

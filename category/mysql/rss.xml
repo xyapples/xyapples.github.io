@@ -9,8 +9,8 @@
         <lastBuildDate>Wed, 09 Apr 2025 22:02:40 +0800</lastBuildDate>
         <category>Harbor</category>
         <category>Kubernetes</category>
-        <category>rsync</category>
         <category>MySQL</category>
+        <category>rsync</category>
         <category>Redis</category>
         <category>Windows</category>
         <item>
@@ -499,22 +499,22 @@ CPU 瓶颈： 排序、分组、连接查询、聚合统计等 SQL 会耗费大�
 &lt;li&gt;每个库的数据都不一样。&lt;/li&gt;
 &lt;li&gt;所有库的并集是全量数据。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/a0f66e9cebc14bcabd67e4d038d2e1d1.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/8Vp5L6j.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;特点：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;每个表的表结构都一样 。&lt;/li&gt;
 &lt;li&gt;每个表的数据都不一样 。&lt;/li&gt;
 &lt;li&gt;所有表的并集是全量数据。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/1506ad73a5fb408988fec987ba0b6282.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/2ctPFwi.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;shardingJDBC：基于 AOP 原理，在应用程序中对本地执行的 SQL 进行拦截，解析、改写、路由处理。需要自行编码配置实现，只支持 java 语言，性能较高。&lt;/li&gt;
 &lt;li&gt;MyCat：数据库分库分表中间件，不用调整代码即可实现分库分表，支持多种语言，性能不及前者。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/32abcd34fd5742cb91944c1402918500.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/lgs1r8g.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
 &lt;h5 id=&#34;32-mycat概述&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#32-mycat概述&#34;&gt;#&lt;/a&gt; 3.2 Mycat 概述&lt;/h5&gt;
 &lt;p&gt;Mycat 是开源的、活跃的、基于 Java 语言编写的&lt;strong&gt; MySQL 数据库中间件&lt;/strong&gt;。可以像使用 mysql 一样来使用 mycat，对于开发人员来说根本感觉不到 mycat 的存在。&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/ee2bc7bf90354c73bcb89ca8aa0fa141.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/KFB4gQ8.png&#34; alt=&#34;5.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;优势：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;性能可靠稳定&lt;/li&gt;
@@ -584,14 +584,14 @@ drwxrwxrwx 2 root root    6 Oct 28  2016 logs
 [root@mycat ~]# rz /usr/local/mycat/lib/mysql-connector-java-8.0.25.jar
 [root@mycat lib]# chmod 777 mysql-connector-java-8.0.25.jar 
 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/1271af61dd794d77bf062037a7bd9207.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/9e8d0d07b6984b58a4205da0e0aad689.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/n86yXtx.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/U26clQE.png&#34; alt=&#34;6.png&#34; /&gt;&lt;/p&gt;
 &lt;h6 id=&#34;321-mycat入门&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#321-mycat入门&#34;&gt;#&lt;/a&gt; 3.2.1 Mycat 入门&lt;/h6&gt;
 &lt;p&gt;由于 tb_gorder 表中数据量很大，磁盘 IO 及容量都到达了瓶颈，现在需要对 tb_order 表进行数据分片，分为三个数据节点，每一个节点主机位于不同的服务器上，具体的结构，参考下图：&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/7a17499312664b0dbe44f2f712ddf566.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/883c1a5153274f409fe1235f9348dc5d.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/PQqJdjJ.png&#34; alt=&#34;8.png&#34; /&gt;&lt;/p&gt;
 &lt;h6 id=&#34;322-mycat配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#322-mycat配置&#34;&gt;#&lt;/a&gt; 3.2.2 Mycat 配置&lt;/h6&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/f1965885c11542f8a0006e9be3b6f6a1.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/iXUxPhi.png&#34; alt=&#34;9.png&#34; /&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;[root@mycat ~]# cat /usr/local/mycat/conf/schema.xml 
 &amp;lt;?xml version=&amp;quot;1.0&amp;quot;?&amp;gt;
 &amp;lt;!DOCTYPE mycat:schema SYSTEM &amp;quot;schema.dtd&amp;quot;&amp;gt;
@@ -626,7 +626,7 @@ drwxrwxrwx 2 root root    6 Oct 28  2016 logs
 	&amp;lt;/dataHost&amp;gt;
 &amp;lt;/mycat:schema&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/9c7db64a028149c697b4e3183764fb9d.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/KkUttwJ.png&#34; alt=&#34;10.png&#34; /&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;[root@mycat mycat]# cat /usr/local/mycat/conf/server.xml 
 &amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;
 &amp;lt;!-- - - Licensed under the Apache License, Version 2.0 (the &amp;quot;License&amp;quot;); 
@@ -847,32 +847,32 @@ mysql&amp;gt; INSERT INTO TB_ORDER(id,title) VALUES(15000001,&#39;guods15000001&
 ERROR 1064 (HY000): can&#39;t find any valid datanode :TB_ORDER -&amp;gt; ID -&amp;gt; 15000001
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h5 id=&#34;33-mycat配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#33-mycat配置&#34;&gt;#&lt;/a&gt; 3.3 Mycat 配置&lt;/h5&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/5419360b032f4ac689bae6cc3f116b31.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/I9QLBBR.png&#34; alt=&#34;11.png&#34; /&gt;&lt;/p&gt;
 &lt;h6 id=&#34;331-schema标签&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#331-schema标签&#34;&gt;#&lt;/a&gt; 3.3.1 Schema 标签&lt;/h6&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/46a044f4e39b492f901f75149fc93a83.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/TmYK7fP.png&#34; alt=&#34;13.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;schema 标签用于定义 MyCat 实例中的逻辑库，一个 MyCat 实例中，可以有多个逻辑库，可以通过 schema 标签来划分不同的逻辑库。MyCat 中的逻辑库的概念，等同于 MySQL 中的 database 概念，需要操作某个逻辑库下的表时也需要切换逻辑库 (use xxx)。&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/70c92df034f1430db113f402a64e60a1.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/faf24e9c66a140f7a44b3eb02181cddc.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/SGo0DCv.png&#34; alt=&#34;14.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/XtDxXWj.png&#34; alt=&#34;15.png&#34; /&gt;&lt;/p&gt;
 &lt;h6 id=&#34;332-datanode标签&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#332-datanode标签&#34;&gt;#&lt;/a&gt; 3.3.2 Datanode 标签&lt;/h6&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/b06d787c5cdb4a369c684ee97e11f937.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/phHZ48F.png&#34; alt=&#34;16.png&#34; /&gt;&lt;/p&gt;
 &lt;h6 id=&#34;333-datahost标签&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#333-datahost标签&#34;&gt;#&lt;/a&gt; 3.3.3 Datahost 标签&lt;/h6&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/39158b4dc09d40bb867926e331a877bb.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/fXBnwcS.png&#34; alt=&#34;17.png&#34; /&gt;&lt;/p&gt;
 &lt;h6 id=&#34;334-rulexml&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#334-rulexml&#34;&gt;#&lt;/a&gt; 3.3.4 rule.xml&lt;/h6&gt;
 &lt;p&gt;rule.xml 中定义所有拆分表的规则，在使用过程中可以灵活的使用分片算法，或者对同一个分片算法使用不同的参数，它让分片过程可配置化。主要包含两类标签： &lt;code&gt;tableRule&lt;/code&gt; 、 &lt;code&gt;Function&lt;/code&gt; 。&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/eb947d54cc5b4a849f2cafde330a882e.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Ecm1Nvr.png&#34; alt=&#34;18.png&#34; /&gt;&lt;/p&gt;
 &lt;h6 id=&#34;335-serverxml&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#335-serverxml&#34;&gt;#&lt;/a&gt; 3.3.5 server.xml&lt;/h6&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/d975eb41a0224765b0ebfa749ec41e7c.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/xIDxYpu.png&#34; alt=&#34;19.png&#34; /&gt;&lt;/p&gt;
 &lt;h5 id=&#34;34-mycat分片&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#34-mycat分片&#34;&gt;#&lt;/a&gt; 3.4 Mycat 分片&lt;/h5&gt;
 &lt;h6 id=&#34;341-分库分表-mycat分片-垂直分库&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#341-分库分表-mycat分片-垂直分库&#34;&gt;#&lt;/a&gt; 3.4.1 分库分表 - MyCat 分片 - 垂直分库&lt;/h6&gt;
 &lt;p&gt;场景：在业务系统中，涉及以下表结构，但是由于用户与订单每天都会产生大量的数据，单台服务器的数据存储及处理能力是有限的，可以对数据库表进行拆分，原有的数据库表如下。&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/e59c1067e38f401b915698c7b480ee2b.png&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/plSdAyY.png&#34; alt=&#34;20.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;ps: 分库不需要指定 rule，涉及分表需要使用 rule；&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;环境准备&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;①如图所示准备三台 Linux 服务器（ip 为：192.168.40.210、192.168.40.211、192.168.40.212）可以根据自己的实际情况进行准备。&lt;br /&gt;
 ②三台服务器上都安装 MySQL，在 192.168.40.213 服务器上安装 MyCat。&lt;br /&gt;
 ③三台服务器关闭防火墙或者开放对应的端口。&lt;br /&gt;
 ④分别在三台 MySQL 中创建数据库 shopping。&lt;br /&gt;
-&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/956d2339ccf1416ca76f9092339887f8.png&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/uMZB18q.png&#34; alt=&#34;21.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;schema.xml 文件配置如下：&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;[root@mycat ~]# cat /usr/local/mycat/conf/schema.xml 
 &amp;lt;?xml version=&amp;quot;1.0&amp;quot;?&amp;gt;
@@ -1046,7 +1046,7 @@ ERROR 1064 (HY000): invalid route in sql, multi tables found but datanode has no
 &lt;p&gt;&lt;em&gt;&lt;strong&gt;ps: 此查询语句涉及多个分片所以查询报错，为了解决这个问题需要进行全局表配置&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;全局表配置&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;对于省、市、区 / 县表 tb_areas_provinces，tb_areas_city，tb_areas_region，是属于数据字典表，在多个业务模块中都可能会遇到，可以将其设置为全局表，利于业务操作。&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/53feb8089b8f407d85736dd0b1726f13.png&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/EqJJ3Yv.png&#34; alt=&#34;22.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;1. 修改 MyCat—schema.xml 文件配置&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;schema.xml 文件配置如下：&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;[root@mycat ~]# cat /usr/local/mycat/conf/schema.xml 
@@ -1129,13 +1129,13 @@ mysql&amp;gt; SELECT order_id,payment,receiver,province,city,area FROM tb_order_
 &lt;li&gt;&lt;strong&gt;水平分表&lt;/strong&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;strong&gt;场景&lt;/strong&gt;：在业务系统中，有一张表（日志表），业务系统每天都会产生大量的日志数据，单台服务器的数据存储及处理能力是有限的，可以对数据库表进行拆分。&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/50c6b8bfbf2d4a8f86c457c9d7db0cde.png&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/0kMP4Ru.png&#34; alt=&#34;23.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;准备环境：&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;①如图所示准备三台 Linux 服务器（ip 为：192.168.40.210、192.168.40.211、192.168.40.212）可以根据自己的实际情况进行准备。&lt;br /&gt;
 ②三台服务器上都安装 MySQL，在 192.168.40.213 服务器上安装 MyCat。&lt;br /&gt;
 ③三台服务器关闭防火墙或者开放对应的端口。&lt;br /&gt;
 ④分别在三台 MySQL 中创建数据库 itcast。&lt;br /&gt;
-&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/3791fd8009f949f9b5a752400370a2ec.png&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/zTm8XwU.png&#34; alt=&#34;24.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;1. 三台 MySQL 中创建数据库 itcast&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;mysql&amp;gt; create database itcast default charset utf8mb4;
 mysql&amp;gt; create database itcast default charset utf8mb4;
@@ -1290,8 +1290,8 @@ INSERT INTO tb_log (id, model_name, model_value, return_value, return_class, ope
 &lt;h5 id=&#34;33-分库分表-分片规则&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#33-分库分表-分片规则&#34;&gt;#&lt;/a&gt; 3.3 分库分表 - 分片规则&lt;/h5&gt;
 &lt;h6 id=&#34;331-分库分表-分片规则-范围分片&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#331-分库分表-分片规则-范围分片&#34;&gt;#&lt;/a&gt; 3.3.1 分库分表 - 分片规则 - 范围分片&lt;/h6&gt;
 &lt;p&gt;&lt;strong&gt;范围分片&lt;/strong&gt;：根据指定的字段及其配置的范围与数据节点的对应情况，来决定该数据属于哪一个分片。&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/03a9b7c4bb2e46318de134cf7d88499d.png&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/80ec2db3bffc4e29835565145c89157d.png&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/sdd8bvs.png&#34; alt=&#34;25.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/R3ecZ4k.png&#34; alt=&#34;26.png&#34; /&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;[root@mycat ~]# cat /usr/local/mycat/conf/autopartition-long.txt
 # range start-end ,data node index
 # K=1000,M=10000.
@@ -1301,12 +1301,12 @@ INSERT INTO tb_log (id, model_name, model_value, return_value, return_class, ope
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h6 id=&#34;332-分库分表-分片规则-取模分片&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#332-分库分表-分片规则-取模分片&#34;&gt;#&lt;/a&gt; 3.3.2 分库分表 - 分片规则 - 取模分片&lt;/h6&gt;
 &lt;p&gt;&lt;strong&gt;取模分片&lt;/strong&gt;：根据指定的字段值与节点数量进行求模运算，根据运算结果，来决定该数据属于哪一个分片。&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/c863d1cdde204446b992374ed2802d49.png&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/e714e7a5524d4c6f92fca19565f711ba.png&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Xvn6sHi.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/aaey4H2.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
 &lt;h6 id=&#34;333-分库分表-分片规则-一致性hash算法&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#333-分库分表-分片规则-一致性hash算法&#34;&gt;#&lt;/a&gt; 3.3.3 分库分表 - 分片规则 - 一致性 hash 算法&lt;/h6&gt;
 &lt;p&gt;&lt;strong&gt;一致性 hash 算法&lt;/strong&gt;：所谓一致性哈希，相同的哈希因子计算值总是被划分到相同的分区表中，不会因为分区节点的增加而改变原来数据的分区位置。&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/02cd32046b4d447db16be17d418105a9.png&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/eb546ce3d10946bfb4819545cc2f0aba.png&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/6ANYtsD.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/8i8c5Le.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;一致性 hash 测试&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;schema.xml 配置&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;[root@mycat ~]# cat /usr/local/mycat/conf/schema.xml 
