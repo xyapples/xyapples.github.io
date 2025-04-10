@@ -1,6 +1,6 @@
 {
     "version": "https://jsonfeed.org/version/1",
-    "title": "LinuxSre云原生 • All posts by \"默认分类\" category",
+    "title": "LinuxSre云原生 • All posts by \"windows\" tag",
     "description": "专注于 Linux 运维、云计算、云原⽣等技术",
     "home_page_url": "http://xuyong.cn",
     "items": [
@@ -11,7 +11,7 @@
             "date_published": "2025-04-10T13:32:09.000Z",
             "content_html": "<h3 id=\"一键永久激活window-office教程\"><a class=\"anchor\" href=\"#一键永久激活window-office教程\">#</a> 一键永久激活 Window、office 教程</h3>\n<p>1、按下 Win 键 + R，调出运行对话框，输入 powershell 并回车，启动命令提示符窗口。接着输入以下指令执行激活：</p>\n<pre><code>irm https://get.activated.win | iex\n</code></pre>\n<p><a href=\"https://imgse.com/i/pE2UTxI\"><img loading=\"lazy\" data-src=\"https://s21.ax1x.com/2025/04/10/pE2UTxI.png\" alt=\"pE2UTxI.png\" /></a></p>\n<p>该脚本包含四个功能：首个命令用于 Windows 系统永久激活，第二个用于 Office 永久激活，第三个将系统有效期延长至 2038 年，第四个则实现每 180 天自动循环激活。</p>\n<p><a href=\"https://imgse.com/i/pE2UHMt\"><img loading=\"lazy\" data-src=\"https://s21.ax1x.com/2025/04/10/pE2UHMt.png\" alt=\"pE2UHMt.png\" /></a></p>\n<p>2. 我们再次使用 Windows 徽标 + R 快捷键打开运行框，输入 slmgr.vbs/xpr 就可以看到系统已经永久激活了。</p>\n<pre><code>slmgr.vbs /xpr\n</code></pre>\n<p><a href=\"https://imgse.com/i/pE2Uqqf\"><img loading=\"lazy\" data-src=\"https://s21.ax1x.com/2025/04/10/pE2Uqqf.png\" alt=\"pE2Uqqf.png\" /></a></p>\n<p>以上，既然看到这里了，如果觉得不错，随手点个赞、打赏一下吧，⭐～谢谢你看我的文章，我们下次再见。</p>\n",
             "tags": [
-                "默认tags"
+                "Windows"
             ]
         }
     ]

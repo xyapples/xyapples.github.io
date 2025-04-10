@@ -7,17 +7,17 @@
         <language>zh-CN</language>
         <pubDate>Thu, 10 Apr 2025 21:32:09 +0800</pubDate>
         <lastBuildDate>Thu, 10 Apr 2025 21:32:09 +0800</lastBuildDate>
-        <category>Harbor</category>
         <category>Kubernetes</category>
+        <category>Harbor</category>
         <category>rsync</category>
-        <category>MySQL</category>
+        <category>Windows</category>
         <category>Redis</category>
-        <category>默认tags</category>
+        <category>MySQL</category>
         <item>
             <guid isPermalink="true">http://xuyong.cn/posts/3071070979.html</guid>
             <title>一键永久激活Window、office教程</title>
             <link>http://xuyong.cn/posts/3071070979.html</link>
-            <category>默认tags</category>
+            <category>Windows</category>
             <pubDate>Thu, 10 Apr 2025 21:32:09 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;一键永久激活window-office教程&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一键永久激活window-office教程&#34;&gt;#&lt;/a&gt; 一键永久激活 Window、office 教程&lt;/h3&gt;
 &lt;p&gt;1、按下 Win 键 + R，调出运行对话框，输入 powershell 并回车，启动命令提示符窗口。接着输入以下指令执行激活：&lt;/p&gt;
