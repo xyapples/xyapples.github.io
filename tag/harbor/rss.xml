@@ -7,11 +7,11 @@
         <language>zh-CN</language>
         <pubDate>Sun, 30 Mar 2025 16:17:00 +0800</pubDate>
         <lastBuildDate>Sun, 30 Mar 2025 16:17:00 +0800</lastBuildDate>
-        <category>rsync</category>
-        <category>Kubernetes</category>
         <category>Harbor</category>
-        <category>Redis</category>
+        <category>Kubernetes</category>
+        <category>rsync</category>
         <category>MySQL</category>
+        <category>Redis</category>
         <category>默认tags</category>
         <item>
             <guid isPermalink="true">http://xuyong.cn/posts/3071070978.html</guid>
