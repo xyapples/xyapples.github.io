@@ -4,32 +4,29 @@
     <title>LinuxSre云原生</title>
     <link href="http://xuyong.cn" />
     <updated>2025-04-10T13:32:09.000Z</updated>
-    <category term="Harbor" />
-    <category term="Kubernetes" />
     <category term="rsync" />
-    <category term="MySQL" />
+    <category term="Kubernetes" />
+    <category term="Harbor" />
     <category term="Redis" />
+    <category term="MySQL" />
     <category term="默认tags" />
     <entry>
         <id>http://xuyong.cn/posts/3071070979.html</id>
         <title>企业级私有仓库Harbor搭建</title>
         <link rel="alternate" href="http://xuyong.cn/posts/3071070979.html"/>
-        <content type="html">&lt;div class=&#34;hbe hbe-container&#34; id=&#34;hexo-blog-encrypt&#34; data-wpm=&#34;抱歉, 这个密码看着不太对, 请再试试。&#34; data-whm=&#34;抱歉, 这个文章不能被校验, 不过您还是能看看解密后的内容。&#34;&gt;
-  &lt;script id=&#34;hbeData&#34; type=&#34;hbeData&#34; data-hmacdigest=&#34;720a909515d234abafbc607fd07e153d19b8463d93703161b6727909a54f3f16&#34;&gt;d025f0d3bd12bef569594886c37488b3f72b0f85e79b466e52addc3fcd9d3704193a4e118e398868fd407a588b5b61b2f74cee45749dff54109c1b965c10d7055b2a03ed8b4f0924c26702e244cad700d1c3c951ee635a9f471ee5a1ba062e73243761b6a5df47506b7ed094840c01b031cb8cfc6a4454b240daed07f2f19b5c472902d8f7ab95614573ed7eb29ad61b953699d2cdc7629bd83098a25a838e39bdf155366b8a7825a89e66de3c635465b8b18e8aee5ddfe1de220b39922dac9f83d20ec3d569da5faa3f434b4436894eff2c805bd8b3e49d74d490f24aa836064a8181a3ffad1a97d424148f3bc4f71fd09a7b1be5b5c324060a1268b1476662ed1b9471e6cf16874d5ca40691d2fc4f79953487d0ae12f88ec8238cee1d7183a0b4d6b5271098ca16d32ecfc1018a4f8e149255ebf3c395038bc1152994306534c86fb3b838ea43f55543c5242ddd1768d2b220526e2b259d40672d30c65c279532539a81a34eeec2119757c89f86f4d235abcca78c309fed00f59f4045363e07b093e0fce3bf6b4a19a64724effbad3f0405ee83760e564c89daacce4cd07cf1ea634936fd1d73ae9180ec1f8b680002e1e29dfd8b79a2f2db005275981e11b1702d08adff1c652df6984a2cbf8a3897ad5ded8b27f74a2423cba7c47d2d9337777ebe9a95de8c3e75cca6ff209615cbf047bea74f2cdb7a98374d82d46cce65c4cdbc0a606e13b9d9903430b159777bf6aaaa85413a332ea577cf5197f106d9054c88693387f53114a0efa5260583667508693099d55412d2d5c851db69944acf2148d1978146126470c16b9650e3067240a3b4b7cafdc6069f83b51a7c53812fd790df3628f5dce01325c6640b802afb17f9bc253db8004c756acac1ae15a243c804a588d7492289f6f16f1163bce0fa20baeadb08ce35717fdc88b5b179435b7acbd3c24d707cd1ae0f48ad04b9e03e7d46f5413bd693de8e9ef0db4c9167cfaf17545bb2b0e05b4d9003343a4255d0591a7874a196356a894aaeaa15353381369c903fc444e07a5c1a2ed79fbdbd7bae4fb755ada91329725bd765de08ba797f8a9da0a8c146a49c5242bafa1c23b9467f43478dccb41bf432844fb4289c662eede9872c1ba33c94c8f1b8f31411ef94d226af7e0f1cd66b99c23403dc8cd2ec4962c95faaa7b2eb90a2777dad5558222312abd357eb02d6891d58adf248b0f1e6c4c69e592a532c795df6f905846e5ccf82d69c10666243b2abd2f7175af4d90d08ae7f9ed77c9fa192187cc11b501ca9cb2019a2357c3f6fedcd7329a73b952cd8d503ab2949f563510a302a968aa03937ac5f1a0f3950eaed8479f6b8b7b52589764c27cd587c949ea62881354cf8808d6ad9c9e7a4104b87b6a696e16ba5478cba7f9047a4457360e2dd37291dac311caa95e199b11482dd30329042c0937375f3588ab630fe8e17163a0369be2e24c7cf40b1f4fe50d5de9c96cf093ebea4389606e63924ad8225e1c3a213f7cf9bee949555716c7932b6712a5aff0703b28d8d620498b8bcb9d93d6cf1fb515bc189682deba558f1599ae900c649930b3765dbeffbca49ea71bdba9d0cf95056720ea06eed2347c4277c395c4da9a728ecd43d76e22086444caf08075dc0579bd82302aba8ee9329f0e75b5caef5d70983afbb0478509e50e146dac3b8a0f724bef76203d67cd014c0c995cc4ba3ee00644b91e7963dfac43fa2f88bfbd91823d30b8cef56f68095796f82160646f0293cb23ebbce6440dcf709241b5d98bd6e3db298d5741d7929f873d1b6402c87d989a7015e98d2fd1125e37d3eb0fcae2b43e2f733f0b80280a904f76c54791bc059f64f8b0563bcdf148d8af25e149443b6c65cdc39fb6a994fe3bcb82f6dd3e52127cebd55a117a1ca03e81623b3986abede04dc59121ef84da69b1612aacc581f9b56f1a2a7fa256f88f362bb0bf16e24633ab48ea72f2f799dcc4001&lt;/script&gt;
-  &lt;div class=&#34;hbe hbe-content&#34;&gt;
-    &lt;div class=&#34;hbe hbe-input hbe-input-xray&#34;&gt;
-      &lt;input class=&#34;hbe hbe-input-field hbe-input-field-xray&#34; type=&#34;password&#34; id=&#34;hbePass&#34;&gt;
-      &lt;label class=&#34;hbe hbe-input-label hbe-input-label-xray&#34; for=&#34;hbePass&#34;&gt;
-        &lt;span class=&#34;hbe hbe-input-label-content hbe-input-label-content-xray&#34;&gt;您好, 这里需要输入密码。&lt;/span&gt;
-      &lt;/label&gt;
-      &lt;svg class=&#34;hbe hbe-graphic hbe-graphic-xray&#34; width=&#34;300%&#34; height=&#34;100%&#34; viewBox=&#34;0 0 1200 60&#34; preserveAspectRatio=&#34;none&#34;&gt;
-        &lt;path d=&#34;M0,56.5c0,0,298.666,0,399.333,0C448.336,56.5,513.994,46,597,46c77.327,0,135,10.5,200.999,10.5c95.996,0,402.001,0,402.001,0&#34;&gt;&lt;/path&gt;
-        &lt;path d=&#34;M0,2.5c0,0,298.666,0,399.333,0C448.336,2.5,513.994,13,597,13c77.327,0,135-10.5,200.999-10.5c95.996,0,402.001,0,402.001,0&#34;&gt;&lt;/path&gt;
-      &lt;/svg&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
-&lt;script data-pjax src=&#34;/lib/hbe.js&#34;&gt;&lt;/script&gt;&lt;link href=&#34;/css/hbe.style.css&#34; rel=&#34;stylesheet&#34; type=&#34;text/css&#34;&gt;</content>
+        <content type="html">&lt;h3 id=&#34;一键永久激活window-office教程&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一键永久激活window-office教程&#34;&gt;#&lt;/a&gt; 一键永久激活 Window、office 教程&lt;/h3&gt;
+&lt;p&gt;1、按下 Win 键 + R，调出运行对话框，输入 powershell 并回车，启动命令提示符窗口。接着输入以下指令执行激活：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;irm https://get.activated.win | iex
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;a href=&#34;https://imgse.com/i/pE2UTxI&#34;&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s21.ax1x.com/2025/04/10/pE2UTxI.png&#34; alt=&#34;pE2UTxI.png&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;该脚本包含四个功能：首个命令用于 Windows 系统永久激活，第二个用于 Office 永久激活，第三个将系统有效期延长至 2038 年，第四个则实现每 180 天自动循环激活。&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://imgse.com/i/pE2UHMt&#34;&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s21.ax1x.com/2025/04/10/pE2UHMt.png&#34; alt=&#34;pE2UHMt.png&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;2. 我们再次使用 Windows 徽标 + R 快捷键打开运行框，输入 slmgr.vbs/xpr 就可以看到系统已经永久激活了。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;slmgr.vbs /xpr
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;a href=&#34;https://imgse.com/i/pE2Uqqf&#34;&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s21.ax1x.com/2025/04/10/pE2Uqqf.png&#34; alt=&#34;pE2Uqqf.png&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;以上，既然看到这里了，如果觉得不错，随手点个赞、打赏一下吧，⭐～谢谢你看我的文章，我们下次再见。&lt;/p&gt;
+</content>
         <category term="默认tags" />
         <updated>2025-04-10T13:32:09.000Z</updated>
     </entry>
