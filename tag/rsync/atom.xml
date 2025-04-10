@@ -5,10 +5,10 @@
     <link href="http://xuyong.cn" />
     <updated>2025-03-30T12:45:48.000Z</updated>
     <category term="Harbor" />
-    <category term="rsync" />
     <category term="Kubernetes" />
-    <category term="Redis" />
+    <category term="rsync" />
     <category term="MySQL" />
+    <category term="Redis" />
     <entry>
         <id>http://xuyong.cn/posts/1922841233.html</id>
         <title>Rsync服务实践</title>

@@ -8,17 +8,18 @@
         <pubDate>Wed, 09 Apr 2025 22:02:40 +0800</pubDate>
         <lastBuildDate>Wed, 09 Apr 2025 22:02:40 +0800</lastBuildDate>
         <category>Harbor</category>
-        <category>rsync</category>
         <category>Kubernetes</category>
-        <category>Redis</category>
+        <category>rsync</category>
         <category>MySQL</category>
+        <category>Redis</category>
         <item>
             <guid isPermalink="true">http://xuyong.cn/posts/2628187572.html</guid>
             <title>MySQL运维DBA应用与实践</title>
             <link>http://xuyong.cn/posts/2628187572.html</link>
             <category>MySQL</category>
             <pubDate>Wed, 09 Apr 2025 22:02:40 +0800</pubDate>
-            <description><![CDATA[ &lt;h4 id=&#34;1日志&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1日志&#34;&gt;#&lt;/a&gt; 1. 日志&lt;/h4&gt;
+            <description><![CDATA[ &lt;h3 id=&#34;mysql运维dba应用与实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#mysql运维dba应用与实践&#34;&gt;#&lt;/a&gt; MySQL 运维 DBA 应用与实践&lt;/h3&gt;
+&lt;h4 id=&#34;1日志&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1日志&#34;&gt;#&lt;/a&gt; 1. 日志&lt;/h4&gt;
 &lt;p&gt;在任何一种数据库中，都会有各种各样的日志，这些日志记录了数据库运行的各个方面。可以帮助数据库管理员追踪数据库曾经发生的一些事情。&lt;/p&gt;
 &lt;p&gt;对于 MySQL 数据库，提供了四种不同的日志帮助我们追踪。&lt;/p&gt;
 &lt;ul&gt;

@@ -8,17 +8,18 @@
         <pubDate>Wed, 09 Apr 2025 19:50:06 +0800</pubDate>
         <lastBuildDate>Wed, 09 Apr 2025 19:50:06 +0800</lastBuildDate>
         <category>Harbor</category>
-        <category>rsync</category>
         <category>Kubernetes</category>
-        <category>Redis</category>
+        <category>rsync</category>
         <category>MySQL</category>
+        <category>Redis</category>
         <item>
             <guid isPermalink="true">http://xuyong.cn/posts/1414180692.html</guid>
             <title>Redis集群（主从+哨兵）模式</title>
             <link>http://xuyong.cn/posts/1414180692.html</link>
             <category>Redis</category>
             <pubDate>Wed, 09 Apr 2025 19:50:06 +0800</pubDate>
-            <description><![CDATA[ &lt;h3 id=&#34;一-什么是redis主从复制&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-什么是redis主从复制&#34;&gt;#&lt;/a&gt; 一、什么是 redis 主从复制？&lt;/h3&gt;
+            <description><![CDATA[ &lt;h3 id=&#34;redis集群主从哨兵模式&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#redis集群主从哨兵模式&#34;&gt;#&lt;/a&gt; Redis 集群（主从 + 哨兵）模式&lt;/h3&gt;
+&lt;h3 id=&#34;一-什么是redis主从复制&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-什么是redis主从复制&#34;&gt;#&lt;/a&gt; 一、什么是 redis 主从复制？&lt;/h3&gt;
 &lt;p&gt;主从复制，是指将一台 Redis 服务器的数据，复制到其他的 Redis 服务器。前者称为主节点 (master)，后者称为从节点 (slave), 数据的复制是单向的，只能由主节点到从节点。master 以写为主，slave 以读为主。&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://imgse.com/i/pEgTlKx&#34;&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s21.ax1x.com/2025/04/09/pEgTlKx.png&#34; alt=&#34;pEgTlKx.png&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id=&#34;二-主从复制的作用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#二-主从复制的作用&#34;&gt;#&lt;/a&gt; 二、主从复制的作用&lt;/h3&gt;
