@@ -8,8 +8,8 @@
     <category term="Kubernetes" />
     <category term="rsync" />
     <category term="MySQL" />
-    <category term="Windows" />
     <category term="Redis" />
+    <category term="默认tags" />
     <entry>
         <id>http://xuyong.cn/posts/2628187572.html</id>
         <title>MySQL运维DBA应用与实践</title>

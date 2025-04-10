@@ -8,8 +8,8 @@
     <category term="Kubernetes" />
     <category term="rsync" />
     <category term="MySQL" />
-    <category term="Windows" />
     <category term="Redis" />
+    <category term="默认tags" />
     <entry>
         <id>http://xuyong.cn/posts/1414180692.html</id>
         <title>Redis集群（主从+哨兵）模式</title>
