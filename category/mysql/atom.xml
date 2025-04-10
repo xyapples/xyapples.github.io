@@ -6,8 +6,8 @@
     <updated>2025-04-09T14:02:40.000Z</updated>
     <category term="Harbor" />
     <category term="Kubernetes" />
-    <category term="rsync" />
     <category term="MySQL" />
+    <category term="rsync" />
     <category term="Redis" />
     <entry>
         <id>http://xuyong.cn/posts/2628187572.html</id>
