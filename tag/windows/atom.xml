@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>http://xuyong.cn</id>
+    <title>LinuxSre云原生 • Posts by &#34;windows&#34; tag</title>
+    <link href="http://xuyong.cn" />
+    <updated>2025-04-10T13:33:42.000Z</updated>
+    <category term="Harbor" />
+    <category term="Kubernetes" />
+    <category term="rsync" />
+    <category term="MySQL" />
+    <category term="Windows" />
+    <category term="Redis" />
+    <entry>
+        <id>http://xuyong.cn/posts/1383400327.html</id>
+        <title>一键永久激活Window、office教程</title>
+        <link rel="alternate" href="http://xuyong.cn/posts/1383400327.html"/>
+        <content type="html">&lt;h3 id=&#34;一键永久激活window-office教程&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一键永久激活window-office教程&#34;&gt;#&lt;/a&gt; 一键永久激活 Window、office 教程&lt;/h3&gt;
+&lt;p&gt;1、按下 Win 键 + R，调出运行对话框，输入 powershell 并回车，启动命令提示符窗口。接着输入以下指令执行激活：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;irm https://get.activated.win | iex
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;a href=&#34;https://imgse.com/i/pE2UTxI&#34;&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s21.ax1x.com/2025/04/10/pE2UTxI.png&#34; alt=&#34;pE2UTxI.png&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;该脚本包含四个功能：首个命令用于 Windows 系统永久激活，第二个用于 Office 永久激活，第三个将系统有效期延长至 2038 年，第四个则实现每 180 天自动循环激活。&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://imgse.com/i/pE2UHMt&#34;&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s21.ax1x.com/2025/04/10/pE2UHMt.png&#34; alt=&#34;pE2UHMt.png&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;2. 我们再次使用 Windows 徽标 + R 快捷键打开运行框，输入 slmgr.vbs/xpr 就可以看到系统已经永久激活了。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;slmgr.vbs /xpr
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;a href=&#34;https://imgse.com/i/pE2Uqqf&#34;&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s21.ax1x.com/2025/04/10/pE2Uqqf.png&#34; alt=&#34;pE2Uqqf.png&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;以上，既然看到这里了，如果觉得不错，随手点击赞赏按钮、打赏一下吧，⭐～谢谢你看我的文章，我们下次再见。&lt;/p&gt;
+</content>
+        <category term="Windows" />
+        <updated>2025-04-10T13:33:42.000Z</updated>
+    </entry>
+</feed>
