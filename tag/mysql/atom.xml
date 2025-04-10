@@ -4,12 +4,12 @@
     <title>LinuxSre云原生 • Posts by &#34;mysql&#34; tag</title>
     <link href="http://xuyong.cn" />
     <updated>2025-04-09T14:02:40.000Z</updated>
-    <category term="Kubernetes" />
     <category term="Harbor" />
+    <category term="Kubernetes" />
     <category term="rsync" />
-    <category term="Windows" />
-    <category term="Redis" />
     <category term="MySQL" />
+    <category term="Redis" />
+    <category term="Windows" />
     <entry>
         <id>http://xuyong.cn/posts/2628187572.html</id>
         <title>MySQL运维DBA应用与实践</title>
@@ -469,16 +469,16 @@ CPU 瓶颈： 排序、分组、连接查询、聚合统计等 SQL 会耗费大�
 &lt;p&gt;&lt;strong&gt;分库分表的中心思想：&lt;br /&gt;
 将数据分散存储，使得单一数据库 / 表的数据量变小来缓解单一数据库的性能问题，从而达到提升数据库性能的目的。&lt;/strong&gt;&lt;/p&gt;
 &lt;h6 id=&#34;312-拆分策略&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#312-拆分策略&#34;&gt;#&lt;/a&gt; 3.1.2 拆分策略&lt;/h6&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/e1f3b20cb856474eaec049096d9fbdd9.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://imgse.com/i/pE2dAXt&#34;&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s21.ax1x.com/2025/04/10/pE2dAXt.png&#34; alt=&#34;pE2dAXt.png&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;h6 id=&#34;313-垂直拆分策略&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#313-垂直拆分策略&#34;&gt;#&lt;/a&gt; 3.1.3 垂直拆分策略&lt;/h6&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/4912fad133d84e638b3f0ba0a6827238.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://imgse.com/i/pE2dnAS&#34;&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s21.ax1x.com/2025/04/10/pE2dnAS.png&#34; alt=&#34;pE2dnAS.png&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;特点:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;每个库的表结构都不一样。&lt;/li&gt;
 &lt;li&gt;每个库的数据也不一样 。&lt;/li&gt;
 &lt;li&gt;所有，库的并集是全量数据。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/8d6d88eb551f415a9edc9dcf79352140.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://imgse.com/i/pE2dQpj&#34;&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s21.ax1x.com/2025/04/10/pE2dQpj.png&#34; alt=&#34;pE2dQpj.png&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;特点:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;每个表的结构都不一样。&lt;/li&gt;
@@ -486,7 +486,7 @@ CPU 瓶颈： 排序、分组、连接查询、聚合统计等 SQL 会耗费大�
 &lt;li&gt;所有表的并集是全量数据。&lt;/li&gt;
 &lt;/ol&gt;
 &lt;h6 id=&#34;314-水平拆分策略&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#314-水平拆分策略&#34;&gt;#&lt;/a&gt; 3.1.4 水平拆分策略&lt;/h6&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://img-blog.csdnimg.cn/d1f4ddf5d43f49538395ff16be70410f.png#pic_center&#34; alt=&#34;在这里插入图片描述&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://imgse.com/i/pE2d3Xq&#34;&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s21.ax1x.com/2025/04/10/pE2d3Xq.png&#34; alt=&#34;pE2d3Xq.png&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;水平分库：以 “字段” 为依据，改为以 “行（记录）” 为依据。讲一个库的数据拆分到多个库&lt;/p&gt;
 &lt;p&gt;特点：&lt;/p&gt;
 &lt;ol&gt;
