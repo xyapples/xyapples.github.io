@@ -5,14 +5,196 @@
         <link>http://xuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Mon, 14 Apr 2025 19:25:51 +0800</pubDate>
-        <lastBuildDate>Mon, 14 Apr 2025 19:25:51 +0800</lastBuildDate>
+        <pubDate>Mon, 14 Apr 2025 21:47:47 +0800</pubDate>
+        <lastBuildDate>Mon, 14 Apr 2025 21:47:47 +0800</lastBuildDate>
+        <category>Kubernetes</category>
         <category>Harbor</category>
         <category>rsync</category>
-        <category>Kubernetes</category>
+        <category>MySQL</category>
         <category>Redis</category>
         <category>Windows</category>
-        <category>MySQL</category>
+        <item>
+            <guid isPermalink="true">http://xuyong.cn/posts/3992668367.html</guid>
+            <title>K8s配置管理Configmap</title>
+            <link>http://xuyong.cn/posts/3992668367.html</link>
+            <category>Kubernetes</category>
+            <pubDate>Mon, 14 Apr 2025 21:47:47 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;k8s配置管理configmap&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s配置管理configmap&#34;&gt;#&lt;/a&gt; K8s 配置管理 Configmap&lt;/h3&gt;
+&lt;h4 id=&#34;1-环境变量configmap&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-环境变量configmap&#34;&gt;#&lt;/a&gt; 1. 环境变量 Configmap&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# cat env.conf 
+podname=nf-flms-system
+podip=192.168.1.100
+env=prod
+nacosaddr=nacos.svc.cluster.local
+
+#kubectl create cm cmenv --from-env-file=./env.conf 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;2创建nginx配置文件configmap&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2创建nginx配置文件configmap&#34;&gt;#&lt;/a&gt; 2. 创建 Nginx 配置文件 Configmap&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# cat s.hmallleasing.com.conf 
+server &amp;#123;
+    listen 80;
+    server_name s.hmallleasing.com;
+    client_max_body_size 1G; 
+    location / &amp;#123;
+        proxy_pass http://192.168.1.134;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        
+        proxy_connect_timeout 30;
+        proxy_send_timeout 60;
+        proxy_read_timeout 60;
+        
+        proxy_buffering on;
+        proxy_buffer_size 32k;
+        proxy_buffers 4 128k;
+        proxy_temp_file_write_size 10240k;		
+        proxy_max_temp_file_size 10240k;
+    &amp;#125;
+&amp;#125;
+
+server &amp;#123;
+    listen 80;
+    server_name s.hmallleasing.com;
+    return 302 https://$server_name$request_uri;
+&amp;#125;
+
+# kubectl create cm nginxconfig --from-file=./s.hmallleasing.com.conf
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;3deployment挂载configmap示例&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3deployment挂载configmap示例&#34;&gt;#&lt;/a&gt; 3.Deployment 挂载 configmap 示例&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 study]# cat cm-deploy.yaml 
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx-svc
+spec:
+  selector:
+    app: nginx-deploy
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-deploy
+  name: nginx-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+#      imagePullSecrets:        
+#      - name: harboradmin
+      containers:
+      - image: nginx
+        name: nginx
+        envFrom:         # 批量挂载ConfigMap生成环境变量
+        - configMapRef:
+            name: cmenv
+        env:
+        - name: MYSQL_ADDR  # 自定义环境变量
+          value: &amp;quot;192.168.40.150&amp;quot;
+        - name: MYSQL_PASSWD
+          value: Superman*2022
+        - name: NACOSADDR       # 请注意这里和 ConfigMap中的键名是不一样的     
+          valueFrom:
+            configMapKeyRef:
+              name: cmenv      # 这个值来自ConfigMap
+              key: nacosaddr   # 来自ConfigMap的键
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_ROOT_PASSWORD
+        volumeMounts:
+        - name: config
+          mountPath: &amp;quot;/etc/nginx/conf.d&amp;quot;
+          readOnly: true
+        - name: config2
+          mountPath: &amp;quot;/etc/nginx/nginx.conf&amp;quot;
+          subPath: nginx.conf    # subpath解决nginx.conf挂载覆盖问题         
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: nginxconfig      # 提供你想要挂载的 ConfigMap 的名字
+#          items:                # 重命名挂载的configmaq key的名称为nginx.conf
+#          - key: &amp;quot;s.hmallleasing.com.conf&amp;quot;  
+#            path: &amp;quot;nginx.conf&amp;quot;
+#          - key: &amp;quot;s.hmallleasing.com.conf&amp;quot;
+#            path: &amp;quot;nginx2.conf&amp;quot;
+#            mode: 0644        # 配置挂载权限，针对单个key生效
+#          defaultMode: 0666   # 配置挂载权限，针对整个key生效
+      - name: config2
+        configMap:
+          name: nginxconfig2     # 提供你想要挂载的 ConfigMap 的名字
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;4secret拉取私有仓库镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4secret拉取私有仓库镜像&#34;&gt;#&lt;/a&gt; 4.Secret 拉取私有仓库镜像&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl create secret docker-registry harboradmin \
+--docker-server=s.hmallleasing.com \
+--docker-username=admin \
+--docker-password=Superman*2023 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;5创建ssl-secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#5创建ssl-secret&#34;&gt;#&lt;/a&gt; 5. 创建 ssl secret&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl create secret tls dev.hmallleasig.com --key *.hmallleasing.com_key.key --cert *.hmallleasing.com_chain.crt -n dev
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;6-创建generic-secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#6-创建generic-secret&#34;&gt;#&lt;/a&gt; 6. 创建 generic Secret&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# cat db.conf 
+username=xuyong
+passwd=Superman*2023
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;61-配置文件创建secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#61-配置文件创建secret&#34;&gt;#&lt;/a&gt; 6.1 配置文件创建 Secret&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;kubectl create secret generic dbconf --from-env-file=./db.conf
+
+[root@k8s-master01 configmap]# kubectl get secret dbconf -oyaml
+apiVersion: v1
+data:
+  passwd: U3VwZXJtYW4qMjAyMw==
+  username: eHV5b25n
+kind: Secret
+metadata:
+  name: dbconf
+  namespace: default
+type: Opaque
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;62-secret解密&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#62-secret解密&#34;&gt;#&lt;/a&gt; 6.2 Secret 解密&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# echo &amp;quot;U3VwZXJtYW4qMjAyMw==&amp;quot; |base64 -d
+Superman*2023
+
+# echo &amp;quot;eHV5b25n&amp;quot; |base64 -d
+xuyong
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;63-命令创建secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#63-命令创建secret&#34;&gt;#&lt;/a&gt; 6.3 命令创建 Secret&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;kubectl create secret generic db-user-pass \
+    --from-literal=username=admin \
+    --from-literal=password=&#39;S!B\*d$zDsb=&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;64-yaml创建secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#64-yaml创建secret&#34;&gt;#&lt;/a&gt; 6.4 yaml 创建 Secret&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# cat mysql-secret.yaml 
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+  namespace: dev
+stringData:
+  MYSQL_ROOT_PASSWORD: Superman*2023
+type: Opaque
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;7configmapsecret热更新&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#7configmapsecret热更新&#34;&gt;#&lt;/a&gt; 7.ConfigMap&amp;amp;Secret 热更新&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl create cm nginxconfig --from-file=nginx.conf --dry-run=client -oyaml | kubectl replace -f -
+&lt;/code&gt;&lt;/pre&gt;
+ ]]></description>
+        </item>
         <item>
             <guid isPermalink="true">http://xuyong.cn/posts/858611107.html</guid>
             <title>K8s服务发布Service</title>
