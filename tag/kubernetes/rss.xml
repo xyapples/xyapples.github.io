@@ -8,8 +8,8 @@
         <pubDate>Mon, 14 Apr 2025 19:25:51 +0800</pubDate>
         <lastBuildDate>Mon, 14 Apr 2025 19:25:51 +0800</lastBuildDate>
         <category>Harbor</category>
-        <category>rsync</category>
         <category>Kubernetes</category>
+        <category>rsync</category>
         <category>MySQL</category>
         <category>Redis</category>
         <category>Windows</category>
@@ -112,6 +112,28 @@ metadata:
 spec:
   type: ExternalName
   externalName: my.database.example.com
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;15-多端口-service&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#15-多端口-service&#34;&gt;#&lt;/a&gt; 1.5 多端口 Service&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+  namespace: default
+  labels:
+    app: nginx-svc
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+    - port: 443
+      targetPort: 443
+      protocol: TCP
+      name: https
+  selector:
+    app: nginx
+  type: ClusterIP
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
  ]]></description>
