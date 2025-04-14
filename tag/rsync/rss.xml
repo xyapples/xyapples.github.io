@@ -8,11 +8,11 @@
         <pubDate>Sun, 30 Mar 2025 20:45:48 +0800</pubDate>
         <lastBuildDate>Sun, 30 Mar 2025 20:45:48 +0800</lastBuildDate>
         <category>Harbor</category>
-        <category>Kubernetes</category>
         <category>rsync</category>
-        <category>MySQL</category>
+        <category>Kubernetes</category>
         <category>Redis</category>
         <category>Windows</category>
+        <category>MySQL</category>
         <item>
             <guid isPermalink="true">http://xuyong.cn/posts/1922841233.html</guid>
             <title>Rsync服务实践</title>
