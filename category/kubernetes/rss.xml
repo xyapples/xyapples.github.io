@@ -5,14 +5,973 @@
         <link>http://xuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Thu, 10 Apr 2025 20:58:40 +0800</pubDate>
-        <lastBuildDate>Thu, 10 Apr 2025 20:58:40 +0800</lastBuildDate>
-        <category>rsync</category>
+        <pubDate>Mon, 14 Apr 2025 19:25:51 +0800</pubDate>
+        <lastBuildDate>Mon, 14 Apr 2025 19:25:51 +0800</lastBuildDate>
         <category>Harbor</category>
+        <category>rsync</category>
         <category>Kubernetes</category>
         <category>MySQL</category>
         <category>Redis</category>
         <category>Windows</category>
+        <item>
+            <guid isPermalink="true">http://xuyong.cn/posts/858611107.html</guid>
+            <title>K8s服务发布Service</title>
+            <link>http://xuyong.cn/posts/858611107.html</link>
+            <category>Kubernetes</category>
+            <pubDate>Mon, 14 Apr 2025 19:25:51 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;k8s服务发布service&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s服务发布service&#34;&gt;#&lt;/a&gt; K8s 服务发布 Service&lt;/h3&gt;
+&lt;h4 id=&#34;1-service类型&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-service类型&#34;&gt;#&lt;/a&gt; 1. Service 类型&lt;/h4&gt;
+&lt;p&gt;Kubernetes Service Type（服务类型）主要包括以下几种：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ClusterIP：在集群内部使用，默认值，只能从集群中访问。&lt;/li&gt;
+&lt;li&gt;NodePort：在所有安装了 Kube-Proxy 的节点上打开一个端口，此端口可以代理至后端 Pod，可以通过 NodePort 从集群外部访问集群内的服务，格式为 NodeIP:NodePort。&lt;/li&gt;
+&lt;li&gt;LoadBalancer：使用云提供商的负载均衡器公开服务，成本较高。&lt;/li&gt;
+&lt;li&gt;ExternalName：通过返回定义的 CNAME 别名，没有设置任何类型的代理，需要 1.7 或更高版本 kube-dns 支持。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;11-nodeport类型&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-nodeport类型&#34;&gt;#&lt;/a&gt; 1.1 NodePort 类型&lt;/h5&gt;
+&lt;p&gt;如果将 Service 的 type 字段设置为 NodePort，则 Kubernetes 将从 --service-node-port-range 参数指定的范围（默认为 30000-32767）中自动分配端口，也可以手动指定 NodePort，创建该 Service 后，集群每个节点都将暴露一个端口，通过某个宿主机的 IP + 端口即可访问到后端的应用。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+  namespace: default
+  labels:
+    app: nginx-svc
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: nginx
+  type: NodePort
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;12-clusterip类型&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#12-clusterip类型&#34;&gt;#&lt;/a&gt; 1.2 ClusterIP 类型&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+  namespace: default
+  labels:
+    app: nginx-svc
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: nginx
+  type: ClusterIP
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;13-使用service代理k8s外部服务&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#13-使用service代理k8s外部服务&#34;&gt;#&lt;/a&gt; 1.3 使用 Service 代理 K8s 外部服务&lt;/h5&gt;
+&lt;p&gt;使用场景：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;希望在生产环境中使用某个固定的名称而非 IP 地址访问外部的中间件服务；&lt;/li&gt;
+&lt;li&gt;希望 Service 指向另一个 Namespace 中或其他集群中的服务；&lt;/li&gt;
+&lt;li&gt;正在将工作负载转移到 Kubernetes 集群，但是一部分服务仍运行在 Kubernetes 集群之外的 backend。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mysql-svc-external
+  name: mysql-svc-external
+spec:
+  clusterIP: None
+  ports:
+  - name: mysql
+    port: 3306 
+    protocol: TCP
+    targetPort: 3306
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  labels:
+    app: mysql-svc-external
+  name: mysql-svc-external
+subsets:
+- addresses:
+  - ip: 192.168.40.150
+  ports:
+  - name: mysql
+    port: 3306
+    protocol: TCP
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;14-externalname-service&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#14-externalname-service&#34;&gt;#&lt;/a&gt; 1.4 ExternalName Service&lt;/h5&gt;
+&lt;p&gt;ExternalName Service 是 Service 的特例，它没有 Selector，也没有定义任何端口和 Endpoint，它通过返回该外部服务的别名来提供服务。&lt;/p&gt;
+&lt;p&gt;比如可以定义一个 Service，后端设置为一个外部域名，这样通过 Service 的名称即可访问到该域名。使用 nslookup 解析以下文件定义的 Service，集群的 DNS &lt;a href=&#34;http://xn--my-uu2cmg2cx7mswf9rko5lsx1a5n3h.database.example.com&#34;&gt;服务将返回一个值为 my.database.example.com&lt;/a&gt; 的 CNAME 记录：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;kind: Service
+apiVersion: v1
+metadata:
+  name: my-service
+  namespace: prod
+spec:
+  type: ExternalName
+  externalName: my.database.example.com
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+ ]]></description>
+        </item>
+        <item>
+            <guid isPermalink="true">http://xuyong.cn/posts/108692210.html</guid>
+            <title>K8s资源调度deployment、statefulset、daemonset</title>
+            <link>http://xuyong.cn/posts/108692210.html</link>
+            <category>Kubernetes</category>
+            <pubDate>Mon, 14 Apr 2025 19:25:00 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;k8s资源调度deployment-statefulset-daemonset&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s资源调度deployment-statefulset-daemonset&#34;&gt;#&lt;/a&gt; K8s 资源调度 deployment、statefulset、daemonset&lt;/h3&gt;
+&lt;h4 id=&#34;1-无状态应用管理-deployment&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-无状态应用管理-deployment&#34;&gt;#&lt;/a&gt; 1. 无状态应用管理 Deployment&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cat nginx-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  annotations:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      containers:
+        - name: nginx-deploy
+          image: nginx:1.21.0
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;示例解析：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;nginx-deploy：Deployment 的名称；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;replicas： 创建 Pod 的副本数；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;selector：定义 Deployment 如何找到要管理的 Pod，与 template 的 label（标签）对应，apiVersion 为 apps/v1 必须指定该字段；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;template 字段包含以下字段：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;app: nginx-deploy 使用 label（标签）标记 Pod；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;spec：表示 Pod 运行一个名字为 nginx 的容器；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;image：运行此 Pod 使用的镜像；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Port：容器用于发送和接收流量的端口。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h5 id=&#34;11-更新-deployment&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-更新-deployment&#34;&gt;#&lt;/a&gt; 1.1 更新 Deployment&lt;/h5&gt;
+&lt;p&gt;假如更新 Nginx Pod 的 image 使用 nginx:latest，并使用 --record 记录当前更改的参数，后期回滚时可以查看到对应的信息：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl set image deployment nginx-deploy nginx-deploy=nginx:latest --record
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;更新过程为新旧交替更新，首先新建一个 Pod，当 Pod 状态为 Running 时，删除一个旧的 Pod，同时再创建一个新的 Pod。当触发一个更新后，会有新的 ReplicaSet 产生，旧的 ReplicaSet 会被保存，查看此时 ReplicaSet，可以从 AGE 或 READY 看出来新旧 ReplicaSet：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl get rs
+NAME                      DESIRED   CURRENT   READY   AGE
+nginx-deploy-65bfb77869   0         0         0       50s
+nginx-deploy-85b94dddb4   3         3         3       8s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;通过 describe 查看 Deployment 的详细信息：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]#  kubectl describe deploy nginx-deploy
+Name:                   nginx-deploy
+Namespace:              default
+CreationTimestamp:      Mon, 14 Apr 2025 11:28:03 +0800
+Labels:                 app=nginx-deploy
+Annotations:            app: nginx-deploy
+                        deployment.kubernetes.io/revision: 2
+                        kubernetes.io/change-cause: kubectl set image deployment nginx-deploy nginx-deploy=nginx:latest --record=true
+Selector:               app=nginx-deploy
+Replicas:               3 desired | 3 updated | 3 total | 3 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app=nginx-deploy
+  Containers:
+   nginx-deploy:
+    Image:         nginx:latest
+    Port:          &amp;lt;none&amp;gt;
+    Host Port:     &amp;lt;none&amp;gt;
+    Environment:   &amp;lt;none&amp;gt;
+    Mounts:        &amp;lt;none&amp;gt;
+  Volumes:         &amp;lt;none&amp;gt;
+  Node-Selectors:  &amp;lt;none&amp;gt;
+  Tolerations:     &amp;lt;none&amp;gt;
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  nginx-deploy-65bfb77869 (0/0 replicas created)
+NewReplicaSet:   nginx-deploy-85b94dddb4 (3/3 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  71s   deployment-controller  Scaled up replica set nginx-deploy-65bfb77869 from 0 to 3
+  Normal  ScalingReplicaSet  29s   deployment-controller  Scaled up replica set nginx-deploy-85b94dddb4 from 0 to 1
+  Normal  ScalingReplicaSet  28s   deployment-controller  Scaled down replica set nginx-deploy-65bfb77869 from 3 to 2
+  Normal  ScalingReplicaSet  28s   deployment-controller  Scaled up replica set nginx-deploy-85b94dddb4 from 1 to 2
+  Normal  ScalingReplicaSet  27s   deployment-controller  Scaled down replica set nginx-deploy-65bfb77869 from 2 to 1
+  Normal  ScalingReplicaSet  27s   deployment-controller  Scaled up replica set nginx-deploy-85b94dddb4 from 2 to 3
+  Normal  ScalingReplicaSet  26s   deployment-controller  Scaled down replica set nginx-deploy-65bfb77869 from 1 to 0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在 describe 中可以看出，第一次创建时，它创建了一个名为 nginx-deploy-65bfb77869 的 ReplicaSet，并直接将其扩展为 3 个副本。更新部署时，它创建了一个新的 ReplicaSet，命名为 nginx-deploy-85b94dddb4，并将其副本数扩展为 1，然后将旧的 ReplicaSet 缩小为 2，这样至少可以有 2 个 Pod 可用，最多创建了 4 个 Pod。以此类推，使用相同的滚动更新策略向上和向下扩展新旧 ReplicaSet，最终新的 ReplicaSet 可以拥有 3 个副本，并将旧的 ReplicaSet 缩小为 0。&lt;/p&gt;
+&lt;h5 id=&#34;12-回滚-deployment&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#12-回滚-deployment&#34;&gt;#&lt;/a&gt; 1.2 回滚 Deployment&lt;/h5&gt;
+&lt;p&gt;当更新了版本不稳定或配置不合理时，可以对其进行回滚操作，假设我们又进行了几次更新（此处以更新镜像版本触发更新，更改配置效果类似）：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl set image deployment nginx-deploy nginx-deploy=nginx:1.21.1 --record
+# kubectl set image deployment nginx-deploy nginx-deploy=nginx:1.21.2 --record
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;使用 kubectl rollout history 查看更新历史：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl rollout history deployment nginx-deploy
+deployment.apps/nginx-deploy 
+REVISION  CHANGE-CAUSE
+1         &amp;lt;none&amp;gt;
+2         kubectl set image deployment nginx-deploy nginx-deploy=nginx:latest --record=true
+3         kubectl set image deployment nginx-deploy nginx-deploy=nginx:1.21.1 --record=true
+4         kubectl set image deployment nginx-deploy nginx-deploy=nginx:1.21.2 --record=true
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;查看 Deployment 某次更新的详细信息，使用 --revision 指定某次更新版本号：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl rollout history deployment nginx-deploy --revision=4
+deployment.apps/nginx-deploy with revision #4
+Pod Template:
+  Labels:	app=nginx-deploy
+	pod-template-hash=65b576b795
+  Annotations:	kubernetes.io/change-cause: kubectl set image deployment nginx-deploy nginx-deploy=nginx:1.21.2 --record=true
+  Containers:
+   nginx-deploy:
+    Image:	nginx:1.21.2
+    Port:	&amp;lt;none&amp;gt;
+    Host Port:	&amp;lt;none&amp;gt;
+    Environment:	&amp;lt;none&amp;gt;
+    Mounts:	&amp;lt;none&amp;gt;
+  Volumes:	&amp;lt;none&amp;gt;
+  Node-Selectors:	&amp;lt;none&amp;gt;
+  Tolerations:	&amp;lt;none&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果只需要回滚到上一个稳定版本，使用 kubectl rollout undo 即可：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl rollout undo deployment nginx-deploy
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;再次查看更新历史，发现 REVISION3 回到了 nginx:1.21.1：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl rollout history deployment nginx-deploy
+deployment.apps/nginx-deploy 
+REVISION  CHANGE-CAUSE
+1         &amp;lt;none&amp;gt;
+2         kubectl set image deployment nginx-deploy nginx-deploy=nginx:latest --record=true
+4         kubectl set image deployment nginx-deploy nginx-deploy=nginx:1.21.2 --record=true
+5         kubectl set image deployment nginx-deploy nginx-deploy=nginx:1.21.1 --record=true
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果要回滚到指定版本，使用 --to-revision 参数：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl rollout undo deployment nginx-deploy --to-revision=2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;13-扩容-deployment&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#13-扩容-deployment&#34;&gt;#&lt;/a&gt; 1.3 扩容 Deployment&lt;/h5&gt;
+&lt;p&gt;当公司访问量变大，或者有预期内的活动时，三个 Pod 可能已无法支撑业务时，可以提前对其进行扩展。&lt;/p&gt;
+&lt;p&gt;使用 kubectl scale 动态调整 Pod 的副本数，比如增加 Pod 为 5 个：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl scale deployment nginx-deploy --replicas=5
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;查看 Pod，此时 Pod 已经变成了 5 个：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl get pods
+NAME                            READY   STATUS    RESTARTS   AGE
+nginx-deploy-85b94dddb4-2qrh6   1/1     Running   0          2m9s
+nginx-deploy-85b94dddb4-gvkqj   1/1     Running   0          2m10s
+nginx-deploy-85b94dddb4-mdfjs   1/1     Running   0          22s
+nginx-deploy-85b94dddb4-rhgpr   1/1     Running   0          2m8s
+nginx-deploy-85b94dddb4-vwjhl   1/1     Running   0          22s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;14-暂停和恢复-deployment-更新&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#14-暂停和恢复-deployment-更新&#34;&gt;#&lt;/a&gt; 1.4 暂停和恢复 Deployment 更新&lt;/h5&gt;
+&lt;p&gt;上述演示的均为更改某一处的配置，更改后立即触发更新，大多数情况下可能需要针对一个资源文件更改多处地方，而并不需要多次触发更新，此时可以使用 Deployment 暂停功能，临时禁用更新操作，对 Deployment 进行多次修改后在进行更新。&lt;/p&gt;
+&lt;p&gt;使用 kubectl rollout pause 命令即可暂停 Deployment 更新：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl rollout pause deployment nginx-deploy
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后对 Deployment 进行相关更新操作，比如先更新镜像，然后对其资源进行限制（如果使用的是 kubectl edit 命令，可以直接进行多次修改，无需暂停更新，kubectlset 命令一般会集成在 CICD 流水线中）：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl set image deployment nginx-deploy nginx-deploy=nginx:1.21.3
+# kubectl set resources deployment nginx-deploy -c=nginx-deploy --limits=cpu=200m,memory=512Mi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;通过 rollout history 可以看到没有新的更新：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#  kubectl rollout history deployment nginx-deploy
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;进行完最后一处配置更改后，使用 kubectl rollout resume 恢复 Deployment 更新：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl rollout resume deployment nginx-deploy
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可以查看到恢复更新的 Deployment 创建了一个新的 RS（ReplicaSet 缩写）：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl get rs
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可以查看 Deployment 的 image（镜像）已经变为 nginx:1.21.3&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl get pods -oyaml|grep image
+    - image: nginx:1.21.3
+      imagePullPolicy: IfNotPresent
+      image: docker.io/library/nginx:1.21.3
+      imageID: docker.io/library/nginx@sha256:644a70516a26004c97d0d85c7fe1d0c3a67ea8ab7ddf4aff193d9f301670cf36
+    - image: nginx:1.21.3
+      imagePullPolicy: IfNotPresent
+      image: docker.io/library/nginx:1.21.3
+      imageID: docker.io/library/nginx@sha256:644a70516a26004c97d0d85c7fe1d0c3a67ea8ab7ddf4aff193d9f301670cf36
+    - image: nginx:1.21.3
+      imagePullPolicy: IfNotPresent
+      image: docker.io/library/nginx:1.21.3
+      imageID: docker.io/library/nginx@sha256:644a70516a26004c97d0d85c7fe1d0c3a67ea8ab7ddf4aff193d9f301670cf36
+    - image: nginx:1.21.3
+      imagePullPolicy: IfNotPresent
+      image: docker.io/library/nginx:1.21.3
+      imageID: docker.io/library/nginx@sha256:644a70516a26004c97d0d85c7fe1d0c3a67ea8ab7ddf4aff193d9f301670cf36
+    - image: nginx:1.21.3
+      imagePullPolicy: IfNotPresent
+      image: docker.io/library/nginx:1.21.3
+      imageID: docker.io/library/nginx@sha256:644a70516a26004c97d0d85c7fe1d0c3a67ea8ab7ddf4aff193d9f301670cf36
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;15-更新-deployment-的注意事项&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#15-更新-deployment-的注意事项&#34;&gt;#&lt;/a&gt; 1.5 更新 Deployment 的注意事项&lt;/h5&gt;
+&lt;p&gt;在默认情况下，revision 保留 10 个旧的 ReplicaSet，其余的将在后台进行垃圾回收，可以在.spec.revisionHistoryLimit 设置保留 ReplicaSet 的个数。当设置为 0 时，不保留历史记录。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  namespace: default
+  labels:
+    app: nginx-deploy
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      containers:
+        - name: nginx-deploy
+          image: nginx:1.21.3
+          resources:
+            limits:
+              cpu: 200m
+              memory: 512Mi
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;更新策略：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;spec.strategy.type==Recreate，表示重建，先删掉旧的 Pod 再创建新的 Pod；&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;  strategy:
+    type: Recreate
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;spec.strategy.type==RollingUpdate，表示滚动更新，可以指定 maxUnavailable 和 maxSurge 来控制滚动更新过程；&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;spec.strategy.rollingUpdate.maxUnavailable，指定在回滚更新时最大不可用的 Pod 数量，可选字段，默认为 25%，可以设置为数字或百分比，如果 maxSurge 为 0，则该值不能为 0；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;spec.strategy.rollingUpdate.maxSurge 可以超过期望值的最大 Pod 数，可选字段，默认为 25%，可以设置成数字或百分比，如果 maxUnavailable 为 0，则该值不能为 0。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;2-有状态应用管理-statefulset&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-有状态应用管理-statefulset&#34;&gt;#&lt;/a&gt; 2. 有状态应用管理 StatefulSet&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: default
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: nginx
+  type: ClusterIP
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nginx
+  namespace: default
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          resources:
+            limits:
+              cpu: &#39;1&#39;
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      restartPolicy: Always
+  serviceName: web
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;kind: Service 定义了一个名字为 web 的 Headless Service，创建的 Service 格式为 nginx-0.web.default.svc.cluster.local，其他的类似，因为没有指定 Namespace（命名空间），所以默认部署在 default；&lt;/li&gt;
+&lt;li&gt;kind: StatefulSet 定义了一个名字为 nginx 的 StatefulSet，replicas 表示部署 Pod 的副本数，本实例为 3。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;21-创建-statefulset&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-创建-statefulset&#34;&gt;#&lt;/a&gt; 2.1 创建 StatefulSet&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl get pods
+NAME      READY   STATUS    RESTARTS   AGE
+nginx-0   1/1     Running   0          8m51s
+nginx-1   1/1     Running   0          8m50s
+nginx-2   1/1     Running   0          8m48s
+[root@k8s-master01 ~]# kubectl get svc
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    &amp;lt;none&amp;gt;        443/TCP   6d1h
+web          ClusterIP   None         &amp;lt;none&amp;gt;        80/TCP    9m28s
+[root@k8s-master01 ~]# kubectl get sts
+NAME    READY   AGE
+nginx   3/3     8m58s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;22-statefulset创建pod流程&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-statefulset创建pod流程&#34;&gt;#&lt;/a&gt; 2.2 StatefulSet 创建 Pod 流程&lt;/h5&gt;
+&lt;p&gt;StatefulSet 管理的 Pod 部署和扩展规则如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对于具有 N 个副本的 StatefulSet，将按顺序从 0 到 N-1 开始创建 Pod；&lt;/li&gt;
+&lt;li&gt;当删除 Pod 时，将按照 N-1 到 0 的反顺序终止；&lt;/li&gt;
+&lt;li&gt;在缩放 Pod 之前，必须保证当前的 Pod 是 Running（运行中）或者 Ready（就绪）；&lt;/li&gt;
+&lt;li&gt;在终止 Pod 之前，它所有的继任者必须是完全关闭状态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;StatefulSet 的 pod.Spec.TerminationGracePeriodSeconds（终止 Pod 的等待时间）不应该指定为 0，设置为 0 对 StatefulSet 的 Pod 是极其不安全的做法，优雅地删除 StatefulSet 的 Pod 是非常有必要的，而且是安全的，因为它可以确保在 Kubelet 从 APIServer 删除之前，让 Pod 正常关闭。&lt;/p&gt;
+&lt;p&gt;当创建上面的 Nginx 实例时，Pod 将按 nginx-0、nginx-1、nginx-2 的顺序部署 3 个 Pod。在 nginx-0 处于 Running 或者 Ready 之前，nginx-1 不会被部署，相同的，nginx-2 在 web-1 未处于 Running 和 Ready 之前也不会被部署。如果在 nginx-1 处于 Running 和 Ready 状态时，nginx-0 变成 Failed 失败）状态，那么 nginx-2 将不会被启动，直到 nginx-0 恢复为 Running 和 Ready 状态。&lt;/p&gt;
+&lt;p&gt;如果用户将 StatefulSet 的 replicas 设置为 1，那么 nginx-2 将首先被终止，在完全关闭并删除 nginx-2 之前，不会删除 nginx-1。如果 nginx-2 终止并且完全关闭后，nginx-0 突然失败，那么在 nginx-0 未恢复成 Running 或者 Ready 时，nginx-1 不会被删除。&lt;/p&gt;
+&lt;h5 id=&#34;23-tatefulset-扩容和缩容&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#23-tatefulset-扩容和缩容&#34;&gt;#&lt;/a&gt; 2.3 tatefulSet 扩容和缩容&lt;/h5&gt;
+&lt;p&gt;和 Deployment 类似，可以通过更新 replicas 字段扩容 / 缩容 StatefulSet，也可以使用 kubectlscale、kubectl edit 和 kubectl patch 来扩容 / 缩容一个 StatefulSet。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl scale sts nginx --replicas=5
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;24-statefulset-更新策略&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#24-statefulset-更新策略&#34;&gt;#&lt;/a&gt; 2.4 StatefulSet 更新策略&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;On Delete 策略&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;OnDelete 更新策略实现了传统（1.7 版本之前）的行为，它也是默认的更新策略。当我们选择这个更新策略并修改 StatefulSet 的.spec.template 字段时，StatefulSet 控制器不会自动更新 Pod，必须手动删除 Pod 才能使控制器创建新的 Pod。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;  updateStrategy:
+    type: OnDelete
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;RollingUpdate 策略&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;RollingUpdate（滚动更新）更新策略会自动更新一个 StatefulSet 中所有的 Pod，采用与序号索引相反的顺序进行滚动更新。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;25-分段更新&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#25-分段更新&#34;&gt;#&lt;/a&gt; 2.5 分段更新&lt;/h5&gt;
+&lt;p&gt;将分区改为 2，此时会自动更新 nginx-2、nginx-3、nginx-4（因为之前更改了更新策略），但是不会更新 nginx-0 和 nginx-1：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;将 sts 镜像为 nginx:1.21.1&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl set image sts nginx nginx=nginx:1.21.1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;按照上述方式，可以实现分阶段更新，类似于灰度 / 金丝雀发布。查看最终的结果如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl get pods -oyaml|grep image
+    - image: nginx:latest
+      imagePullPolicy: IfNotPresent
+      image: docker.io/library/nginx:latest
+      imageID: docker.io/library/nginx@sha256:fad8e1cd52e24bce7b72cd7cb674a2efad671647b917055f5bd8a1f7ac9b1af8
+    - image: nginx:latest
+      imagePullPolicy: IfNotPresent
+      image: docker.io/library/nginx:latest
+      imageID: docker.io/library/nginx@sha256:fad8e1cd52e24bce7b72cd7cb674a2efad671647b917055f5bd8a1f7ac9b1af8
+    - image: nginx:1.21.1
+      imagePullPolicy: IfNotPresent
+      image: docker.io/library/nginx:1.21.1
+      imageID: docker.io/library/nginx@sha256:a05b0cdd4fc1be3b224ba9662ebdf98fe44c09c0c9215b45f84344c12867002e
+    - image: nginx:1.21.1
+      imagePullPolicy: IfNotPresent
+      image: docker.io/library/nginx:1.21.1
+      imageID: docker.io/library/nginx@sha256:a05b0cdd4fc1be3b224ba9662ebdf98fe44c09c0c9215b45f84344c12867002e
+    - image: nginx:1.21.1
+      imagePullPolicy: IfNotPresent
+      image: docker.io/library/nginx:1.21.1
+      imageID: docker.io/library/nginx@sha256:a05b0cdd4fc1be3b224ba9662ebdf98fe44c09c0c9215b45f84344c12867002e
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;3守护进程集-daemonset&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3守护进程集-daemonset&#34;&gt;#&lt;/a&gt; 3. 守护进程集 DaemonSet&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nginx-ds
+  labels:
+    app: nginx-ds
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-ds
+  template:
+    metadata:
+      labels:
+        app: nginx-ds
+    spec:
+      containers:
+        - name: nginx-ds
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 128Mi
+              cpu: 100m
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;此时会在每个节点创建一个 Pod：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl get pods -o wide
+NAME             READY   STATUS    RESTARTS   AGE   IP               NODE           NOMINATED NODE   READINESS GATES
+nginx-ds-47dxc   1/1     Running   0          56s   172.16.85.213    k8s-node01     &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-ds-4m89f   1/1     Running   0          56s   172.16.32.143    k8s-master01   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-ds-mtpc2   1/1     Running   0          56s   172.16.195.12    k8s-master03   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-ds-t5rxc   1/1     Running   0          56s   172.16.122.142   k8s-master02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-ds-x86kc   1/1     Running   0          56s   172.16.58.222    k8s-node02     &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;指定节点部署 Pod&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;      nodeSelector:
+        ingress: &#39;true&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;更新和回滚 DaemonSet&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl set image ds nginx-ds nginx-ds=1.21.0 --record=true
+# kubectl rollout undo daemonset &amp;lt;daemonset-name&amp;gt; --to-revision=&amp;lt;revision&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;DaemonSet 的更新和回滚与 Deployment 类似，此处不再演示。&lt;/p&gt;
+&lt;h4 id=&#34;4-hpa&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-hpa&#34;&gt;#&lt;/a&gt; 4. HPA&lt;/h4&gt;
+&lt;p&gt;创建 deployment、service&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-hpa-svc
+  namespace: default
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: nginx-hpa
+  type: ClusterIP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-hpa
+  labels:
+    app: nginx-hpa
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-hpa
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-hpa
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: nginx-hpa
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 128Mi
+              cpu: 100m
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;创建 HPA&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl autoscale deployment nginx-hpa --cpu-percent=10 --min=1 --max=10
+# kubectl get hpa
+NAME        REFERENCE              TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+nginx-hpa   Deployment/nginx-hpa   cpu: 0%/10%   1         10        1          16s
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;测试自动扩缩容&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;while true; do wget -q -O- http://10.96.18.221 &amp;gt; /dev/null; done
+[root@k8s-master01 ~]# kubectl get pods
+NAME                        READY   STATUS    RESTARTS   AGE
+nginx-hpa-d8bcbdf7d-4mkxp   1/1     Running   0          66s
+nginx-hpa-d8bcbdf7d-974q5   1/1     Running   0          6m36s
+nginx-hpa-d8bcbdf7d-g6p2h   1/1     Running   0          66s
+nginx-hpa-d8bcbdf7d-lvvsq   1/1     Running   0          111s
+nginx-hpa-d8bcbdf7d-tgqmr   1/1     Running   0          111s
+nginx-hpa-d8bcbdf7d-tzfbs   1/1     Running   0          21s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+ ]]></description>
+        </item>
+        <item>
+            <guid isPermalink="true">http://xuyong.cn/posts/1771242682.html</guid>
+            <title>K8s零宕机服务发布-探针</title>
+            <link>http://xuyong.cn/posts/1771242682.html</link>
+            <category>Kubernetes</category>
+            <pubDate>Mon, 14 Apr 2025 19:23:48 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;k8s零宕机服务发布-探针&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s零宕机服务发布-探针&#34;&gt;#&lt;/a&gt; K8s 零宕机服务发布 - 探针&lt;/h3&gt;
+&lt;h4 id=&#34;1-pod状态及-pod-故障排查命令&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-pod状态及-pod-故障排查命令&#34;&gt;#&lt;/a&gt; 1. Pod 状态及 Pod 故障排查命令&lt;/h4&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:left&#34;&gt;状态&lt;/th&gt;
+&lt;th style=&#34;text-align:left&#34;&gt;说明&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Pending（挂起）&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Pod 已被 Kubernetes 系统接收，但仍有一个或多个容器未被创建，可以通过 kubectl describe 查看处于 Pending 状态的原因&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Running（运行中）&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Pod 已经被绑定到一个节点上，并且所有的容器都已经被创建，而且至少有一个是运行状态，或者是正在启动或者重启，可以通过 kubectl logs 查看 Pod 的日志&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Succeeded（成功）&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;所有容器执行成功并终止，并且不会再次重启，可以通过 kubectl logs 查看 Pod 日志&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Failed（失败）&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;所有容器都已终止，并且至少有一个容器以失败的方式终止，也就是说这个容器要么以非零状态退出，要么被系统终止，可以通过 logs 和 describe 查看 Pod 日志和状态&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Unknown（未知）&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;通常是由于通信问题造成的无法获得 Pod 的状态&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;ImagePullBackOff ErrImagePull&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;镜像拉取失败，一般是由于镜像不存在、网络不通或者需要登录认证引起的，可以使用 describe 命令查看具体原因&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;CrashLoopBackOff&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;容器启动失败，可以通过 logs 命令查看具体原因，一般为启动命令不正确，健康检查不通过等&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;OOMKilled&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;容器内存溢出，一般是容器的内存 Limit 设置的过小，或者程序本身有内存溢出，可以通过 logs 查看程序启动日志&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Terminating&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Pod 正在被删除，可以通过 describe 查看状态&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;SysctlForbidden&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Pod 自定义了内核配置，但 kubelet 没有添加内核配置或配置的内核参数不支持，可以通过 describe 查看具体原因&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Completed&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;容器内部主进程退出，一般计划任务执行结束会显示该状态，此时可以通过 logs 查看容器日志&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;ContainerCreating&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;Pod 正在创建，一般为正在下载镜像，或者有配置不当的地方，可以通过 describe 查看具体原因&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;2-pod镜像拉取策略&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-pod镜像拉取策略&#34;&gt;#&lt;/a&gt; 2. Pod 镜像拉取策略&lt;/h4&gt;
+&lt;p&gt;通过 spec.containers [].imagePullPolicy 参数可以指定镜像的拉取策略，目前支持的策略如下：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;操作方式&lt;/th&gt;
+&lt;th&gt;说明&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Always&lt;/td&gt;
+&lt;td&gt;总是拉取，当镜像 tag 为 latest 时，且 imagePullPolicy 未配置，默认为 Always&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Never&lt;/td&gt;
+&lt;td&gt;不管是否存在都不会拉取&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;IfNotPresent&lt;/td&gt;
+&lt;td&gt;镜像不存在时拉取镜像，如果 tag 为非 latest，且 imagePullPolicy 未配置，默认为 IfNotPresent&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;更改镜像拉取策略为 IfNotPresent：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  annotations:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      containers:
+        - name: nginx-deploy
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;3-pod-重启策略&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-pod-重启策略&#34;&gt;#&lt;/a&gt; 3. &lt;strong&gt;Pod&lt;/strong&gt; 重启策略&lt;/h4&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;操作方式&lt;/th&gt;
+&lt;th&gt;说明&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Always&lt;/td&gt;
+&lt;td&gt;默认策略。容器失效时，自动重启该容器&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;OnFailure&lt;/td&gt;
+&lt;td&gt;容器以不为 0 的状态码终止，自动重启该容器&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Never&lt;/td&gt;
+&lt;td&gt;无论何种状态，都不会重启&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;指定重启策略为 Always ：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  annotations:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      containers:
+        - name: nginx-deploy
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;4-pod的三种探针&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-pod的三种探针&#34;&gt;#&lt;/a&gt; 4. Pod 的三种探针&lt;/h4&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;种类&lt;/th&gt;
+&lt;th&gt;说明&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;startupProbe&lt;/td&gt;
+&lt;td&gt;Kubernetes1.16 新加的探测方式，用于判断容器内的应用程序是否已经启动。如果配置了 startupProbe，就会先禁用其他探测，直到它成功为止。如果探测失败，Kubelet 会杀死容器，之后根据重启策略进行处理，如果探测成功，或没有配置 startupProbe，则状态为成功，之后就不再探测。&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;livenessProbe&lt;/td&gt;
+&lt;td&gt;用于探测容器是否在运行，如果探测失败，kubelet 会 “杀死” 容器并根据重启策略进行相应的处理。如果未指定该探针，将默认为 Success&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;readinessProbe&lt;/td&gt;
+&lt;td&gt;一般用于探测容器内的程序是否健康，即判断容器是否为就绪（Ready）状态。如果是，则可以处理请求，反之 Endpoints Controller 将从所有的 Service 的 Endpoints 中删除此容器所在 Pod 的 IP 地址。如果未指定，将默认为 Success&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;5-pod探针的实现方式&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#5-pod探针的实现方式&#34;&gt;#&lt;/a&gt; 5. Pod 探针的实现方式&lt;/h4&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;实现方式&lt;/th&gt;
+&lt;th&gt;说明&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;ExecAction&lt;/td&gt;
+&lt;td&gt;在容器内执行一个指定的命令，如果命令返回值为 0，则认为容器健康&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;TCPSocketAction&lt;/td&gt;
+&lt;td&gt;通过 TCP 连接检查容器指定的端口，如果端口开放，则认为容器健康&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;HTTPGetAction&lt;/td&gt;
+&lt;td&gt;对指定的 URL 进行 Get 请求，如果状态码在 200~400 之间，则认为容器健康&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;6-健康检查配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#6-健康检查配置&#34;&gt;#&lt;/a&gt; 6. 健康检查配置&lt;/h4&gt;
+&lt;p&gt;配置健康检查：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  annotations:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      containers:
+        - name: nginx-deploy
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          startupProbe:
+            initialDelaySeconds: 30
+            timeoutSeconds: 2
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 2
+            tcpSocket:
+              port: 80
+          livenessProbe:
+            initialDelaySeconds: 30
+            timeoutSeconds: 2
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 2
+            tcpSocket:
+              port: 80
+          readinessProbe:
+            initialDelaySeconds: 30
+            timeoutSeconds: 2
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 2
+            httpGet:
+              path: /index.html
+              port: 80
+              scheme: HTTP
+      restartPolicy: Always
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;7-prestop和-poststart配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#7-prestop和-poststart配置&#34;&gt;#&lt;/a&gt; 7. PreStop 和 PostStart 配置&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cat nginx-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  annotations:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      containers:
+        - name: nginx-deploy
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          startupProbe:
+            initialDelaySeconds: 30
+            timeoutSeconds: 2
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 2
+            tcpSocket:
+              port: 80
+          livenessProbe:
+            initialDelaySeconds: 30
+            timeoutSeconds: 2
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 2
+            tcpSocket:
+              port: 80
+          readinessProbe:
+            initialDelaySeconds: 30
+            timeoutSeconds: 2
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 2
+            httpGet:
+              path: /index.html
+              port: 80
+              scheme: HTTP
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - sh
+                  - &#39;-c&#39;
+                  - mkdir /data
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - &#39;-c&#39;
+                  - sleep 30
+      restartPolicy: Always
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+ ]]></description>
+        </item>
         <item>
             <guid isPermalink="true">http://xuyong.cn/posts/985149017.html</guid>
             <title>二进制高可用安装K8S集群</title>
