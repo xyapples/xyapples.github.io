@@ -10,9 +10,9 @@
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>rsync</category>
+        <category>Redis</category>
         <category>Windows</category>
         <category>MySQL</category>
-        <category>Redis</category>
         <item>
             <guid isPermalink="true">http://imxuyong.cn/posts/3992668367.html</guid>
             <title>K8s配置管理Configmap</title>
