@@ -2,21 +2,21 @@
 <rss version="2.0">
     <channel>
         <title>LinuxSre云原生 • Posts by &#34;kubernetes&#34; tag</title>
-        <link>http://xuyong.cn</link>
+        <link>http://imxuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
         <pubDate>Mon, 14 Apr 2025 21:47:47 +0800</pubDate>
         <lastBuildDate>Mon, 14 Apr 2025 21:47:47 +0800</lastBuildDate>
         <category>Harbor</category>
-        <category>rsync</category>
         <category>Kubernetes</category>
-        <category>Redis</category>
+        <category>rsync</category>
         <category>MySQL</category>
         <category>Windows</category>
+        <category>Redis</category>
         <item>
-            <guid isPermalink="true">http://xuyong.cn/posts/3992668367.html</guid>
+            <guid isPermalink="true">http://imxuyong.cn/posts/3992668367.html</guid>
             <title>K8s配置管理Configmap</title>
-            <link>http://xuyong.cn/posts/3992668367.html</link>
+            <link>http://imxuyong.cn/posts/3992668367.html</link>
             <category>Kubernetes</category>
             <pubDate>Mon, 14 Apr 2025 21:47:47 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;k8s配置管理configmap&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s配置管理configmap&#34;&gt;#&lt;/a&gt; K8s 配置管理 Configmap&lt;/h3&gt;
@@ -239,9 +239,9 @@ spec:
  ]]></description>
         </item>
         <item>
-            <guid isPermalink="true">http://xuyong.cn/posts/858611107.html</guid>
+            <guid isPermalink="true">http://imxuyong.cn/posts/858611107.html</guid>
             <title>K8s服务发布Service</title>
-            <link>http://xuyong.cn/posts/858611107.html</link>
+            <link>http://imxuyong.cn/posts/858611107.html</link>
             <category>Kubernetes</category>
             <pubDate>Mon, 14 Apr 2025 19:25:51 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;k8s服务发布service&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s服务发布service&#34;&gt;#&lt;/a&gt; K8s 服务发布 Service&lt;/h3&gt;
@@ -364,9 +364,9 @@ spec:
  ]]></description>
         </item>
         <item>
-            <guid isPermalink="true">http://xuyong.cn/posts/108692210.html</guid>
+            <guid isPermalink="true">http://imxuyong.cn/posts/108692210.html</guid>
             <title>K8s资源调度deployment、statefulset、daemonset</title>
-            <link>http://xuyong.cn/posts/108692210.html</link>
+            <link>http://imxuyong.cn/posts/108692210.html</link>
             <category>Kubernetes</category>
             <pubDate>Mon, 14 Apr 2025 19:25:00 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;k8s资源调度deployment-statefulset-daemonset&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s资源调度deployment-statefulset-daemonset&#34;&gt;#&lt;/a&gt; K8s 资源调度 deployment、statefulset、daemonset&lt;/h3&gt;
@@ -888,9 +888,9 @@ nginx-hpa-d8bcbdf7d-tzfbs   1/1     Running   0          21s
  ]]></description>
         </item>
         <item>
-            <guid isPermalink="true">http://xuyong.cn/posts/1771242682.html</guid>
+            <guid isPermalink="true">http://imxuyong.cn/posts/1771242682.html</guid>
             <title>K8s零宕机服务发布-探针</title>
-            <link>http://xuyong.cn/posts/1771242682.html</link>
+            <link>http://imxuyong.cn/posts/1771242682.html</link>
             <category>Kubernetes</category>
             <pubDate>Mon, 14 Apr 2025 19:23:48 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;k8s零宕机服务发布-探针&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s零宕机服务发布-探针&#34;&gt;#&lt;/a&gt; K8s 零宕机服务发布 - 探针&lt;/h3&gt;
@@ -1220,9 +1220,9 @@ spec:
  ]]></description>
         </item>
         <item>
-            <guid isPermalink="true">http://xuyong.cn/posts/985149017.html</guid>
+            <guid isPermalink="true">http://imxuyong.cn/posts/985149017.html</guid>
             <title>二进制高可用安装K8S集群</title>
-            <link>http://xuyong.cn/posts/985149017.html</link>
+            <link>http://imxuyong.cn/posts/985149017.html</link>
             <category>Kubernetes</category>
             <pubDate>Thu, 10 Apr 2025 20:58:40 +0800</pubDate>
             <description><![CDATA[ &lt;h2 id=&#34;二进制高可用安装k8s集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#二进制高可用安装k8s集群&#34;&gt;#&lt;/a&gt; 二进制高可用安装 K8s 集群&lt;/h2&gt;
@@ -2788,9 +2788,9 @@ EOF
  ]]></description>
         </item>
         <item>
-            <guid isPermalink="true">http://xuyong.cn/posts/2771271649.html</guid>
+            <guid isPermalink="true">http://imxuyong.cn/posts/2771271649.html</guid>
             <title>云原生K8s安全专家CKS认证考题详解</title>
-            <link>http://xuyong.cn/posts/2771271649.html</link>
+            <link>http://imxuyong.cn/posts/2771271649.html</link>
             <category>Kubernetes</category>
             <pubDate>Wed, 09 Apr 2025 21:38:39 +0800</pubDate>
             <description><![CDATA[ &lt;div class=&#34;hbe hbe-container&#34; id=&#34;hexo-blog-encrypt&#34; data-wpm=&#34;抱歉, 这个密码看着不太对, 请再试试。&#34; data-whm=&#34;抱歉, 这个文章不能被校验, 不过您还是能看看解密后的内容。&#34;&gt;
@@ -2811,9 +2811,9 @@ EOF
 &lt;script data-pjax src=&#34;/lib/hbe.js&#34;&gt;&lt;/script&gt;&lt;link href=&#34;/css/hbe.style.css&#34; rel=&#34;stylesheet&#34; type=&#34;text/css&#34;&gt; ]]></description>
         </item>
         <item>
-            <guid isPermalink="true">http://xuyong.cn/posts/3166738000.html</guid>
+            <guid isPermalink="true">http://imxuyong.cn/posts/3166738000.html</guid>
             <title>Kubeadm高可用安装K8s集群</title>
-            <link>http://xuyong.cn/posts/3166738000.html</link>
+            <link>http://imxuyong.cn/posts/3166738000.html</link>
             <category>Kubernetes</category>
             <pubDate>Wed, 09 Apr 2025 18:28:34 +0800</pubDate>
             <description><![CDATA[ &lt;h2 id=&#34;kubeadm高可用安装k8s集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#kubeadm高可用安装k8s集群&#34;&gt;#&lt;/a&gt; Kubeadm 高可用安装 K8s 集群&lt;/h2&gt;
