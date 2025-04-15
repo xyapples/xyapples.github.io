@@ -10,8 +10,8 @@
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>rsync</category>
-        <category>MySQL</category>
         <category>Windows</category>
+        <category>MySQL</category>
         <category>Redis</category>
         <item>
             <guid isPermalink="true">http://imxuyong.cn/posts/2628187572.html</guid>
