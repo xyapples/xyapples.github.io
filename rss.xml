@@ -10,9 +10,9 @@
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>rsync</category>
+        <category>MySQL</category>
         <category>Redis</category>
         <category>Windows</category>
-        <category>MySQL</category>
         <item>
             <guid isPermalink="true">http://imxuyong.cn/posts/3992668367.html</guid>
             <title>K8s配置管理Configmap</title>
@@ -66,22 +66,216 @@ server &amp;#123;
 # kubectl create cm nginxconfig --from-file=./s.hmallleasing.com.conf
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h5 id=&#34;14-deployment挂载configmap示例&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#14-deployment挂载configmap示例&#34;&gt;#&lt;/a&gt; 1.4 Deployment 挂载 configmap 示例&lt;/h5&gt;
-&lt;pre&gt;&lt;code&gt;[root@k8s-master01 study]# cat cm-deploy.yaml 
-kind: Service
-apiVersion: v1
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 cm]# cat deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: nginx-svc
-spec:
-  selector:
+  labels:
     app: nginx-deploy
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 80
-  type: ClusterIP
+  name: nginx-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      imagePullSecrets:        
+      - name: harboradmin
+      containers:
+      - image: nginx
+        name: nginx
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        envFrom:         # 1.批量挂载ConfigMap生成环境变量
+        - configMapRef:
+            name: cmenv
+        env:
+        - name: MYSQL_ADDR     # 2.自定义环境变量
+          value: &amp;quot;192.168.40.150&amp;quot;
+        - name: MYSQL_PASSWD
+          value: Superman*2022
+        - name: LOG_LEVEL           # 3.挂载单个ConfigMap生成环境变量，这里和ConfigMap中的键名是不一样的     
+          valueFrom:
+            configMapKeyRef:
+              name: cmliteral       # 这个值来自ConfigMap
+              key: level            # 来自ConfigMap的key
+        volumeMounts:              
+        - name: nginx-config
+          mountPath: &amp;quot;/etc/nginx/conf.d&amp;quot;
+          readOnly: true
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginxconfig      # 提供你想要挂载的 ConfigMap 的名字
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;15-重命名挂载的configmaq-key的名称&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#15-重命名挂载的configmaq-key的名称&#34;&gt;#&lt;/a&gt; 1.5 重命名挂载的 configmaq key 的名称&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 cm]# cat deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-deploy
+  name: nginx-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      imagePullSecrets:        
+      - name: harboradmin
+      containers:
+      - image: nginx
+        name: nginx
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        envFrom:         # 1.批量挂载ConfigMap生成环境变量
+        - configMapRef:
+            name: cmenv
+        env:
+        - name: MYSQL_ADDR     # 2.自定义环境变量
+          value: &amp;quot;192.168.40.150&amp;quot;
+        - name: MYSQL_PASSWD
+          value: Superman*2022
+        - name: LOG_LEVEL           # 3.挂载单个ConfigMap生成环境变量，这里和ConfigMap中的键名是不一样的     
+          valueFrom:
+            configMapKeyRef:
+              name: cmliteral       # 这个值来自ConfigMap
+              key: level            # 来自ConfigMap的key
+        volumeMounts:              
+        - name: nginx-config
+          mountPath: &amp;quot;/etc/nginx/conf.d&amp;quot;
+          readOnly: true
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginxconfig      # 提供你想要挂载的 ConfigMap 的名字
+          items:                # 重命名挂载的configmaq key的名称为nginx.conf
+          - key: s.hmallleasing.com.conf  
+            path: nginx.conf
+ 
+#查看挂载的configmaq key的名称重命名为nginx.conf
+[root@k8s-master01 cm]# kubectl get pods
+NAME                           READY   STATUS    RESTARTS   AGE
+nginx-deploy-bc476bc56-flln4   1/1     Running   0          10h
+nginx-deploy-bc476bc56-jhsh6   1/1     Running   0          10h
+nginx-deploy-bc476bc56-splv9   1/1     Running   0          10h
+[root@k8s-master01 cm]# kubectl exec -it nginx-deploy-bc476bc56-flln4 -- bash
+root@nginx-deploy-bc476bc56-flln4:/# ls /etc/nginx/conf.d/
+nginx.conf
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;16-修改挂载的configmaq-权限&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#16-修改挂载的configmaq-权限&#34;&gt;#&lt;/a&gt; 1.6 修改挂载的 configmaq 权限&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 cm]# cat deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-deploy
+  name: nginx-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      imagePullSecrets:        
+      - name: harboradmin
+      containers:
+      - image: nginx
+        name: nginx
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        envFrom:         # 1.批量挂载ConfigMap生成环境变量
+        - configMapRef:
+            name: cmenv
+        env:
+        - name: MYSQL_ADDR     # 2.自定义环境变量
+          value: &amp;quot;192.168.40.150&amp;quot;
+        - name: MYSQL_PASSWD
+          value: Superman*2022
+        - name: LOG_LEVEL           # 3.挂载单个ConfigMap生成环境变量，这里和ConfigMap中的键名是不一样的     
+          valueFrom:
+            configMapKeyRef:
+              name: cmliteral       # 这个值来自ConfigMap
+              key: level            # 来自ConfigMap的key
+        volumeMounts:              
+        - name: nginx-config
+          mountPath: &amp;quot;/etc/nginx/conf.d&amp;quot;
+          readOnly: true
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginxconfig      # 提供你想要挂载的 ConfigMap 的名字
+          items:                # 重命名挂载的configmaq key的名称为nginx.conf
+          - key: s.hmallleasing.com.conf  
+            path: nginx.conf
+            mode: 0644        # 配置挂载权限，针对单个key生效
+          defaultMode: 0666   # 配置挂载权限，针对整个key生效
+    
+#查看挂载权限
+root@nginx-deploy-7657fbffc7-k75l5:/# ls -l /etc/nginx/conf.d/nginx.conf 
+lrwxrwxrwx 1 root root 17 Apr 16 13:37 /etc/nginx/conf.d/nginx.conf -&amp;gt; ..data/nginx.conf
+root@nginx-deploy-7657fbffc7-k75l5:/# ls -l /etc/nginx/conf.d/..data/nginx.conf 
+-rw-rw-rw- 1 root root 722 Apr 16 13:37 /etc/nginx/conf.d/..data/nginx.conf
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;17-subpath解决挂载覆盖问题&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#17-subpath解决挂载覆盖问题&#34;&gt;#&lt;/a&gt; 1.7 subpath 解决挂载覆盖问题&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1.创建configmap
+[root@k8s-master01 cm]# cat nginx.conf 
 
----
+user  nginx;
+worker_processes  1;
 
+error_log  /var/log/nginx/error.log warn;
+pid        /var/run/nginx.pid;
+
+
+events &amp;#123;
+    worker_connections  512;
+&amp;#125;
+
+
+http &amp;#123;
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  &#39;$remote_addr - $remote_user [$time_local] &amp;quot;$request&amp;quot; &#39;
+                      &#39;$status $body_bytes_sent &amp;quot;$http_referer&amp;quot; &#39;
+                      &#39;&amp;quot;$http_user_agent&amp;quot; &amp;quot;$http_x_forwarded_for&amp;quot;&#39;;
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    include /etc/nginx/conf.d/*.conf;
+&amp;#125;
+
+[root@k8s-master01 cm]# kubectl create cm nginx-config --from-file=./nginx.conf
+
+#subpath解决挂载覆盖问题
+[root@k8s-master01 study]# cat cm-deploy.yaml 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -115,38 +309,19 @@ spec:
           value: &amp;quot;192.168.40.150&amp;quot;
         - name: MYSQL_PASSWD
           value: Superman*2022
-        - name: LOG_LEVEL           # ③挂载单个ConfigMap生成环境变量，这里和ConfigMap中的KEY名是不一样的     
+        - name: LOG_LEVEL           # ③挂载单个ConfigMap生成环境变量，这里和ConfigMap中的键名是不一样的     
           valueFrom:
             configMapKeyRef:
               name: cmliteral       # 这个值来自ConfigMap
               key: level            # 来自ConfigMap的key
-        - name: MYSQL_ROOT_PASSWORD   # ④挂载Secret
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret    
-              key: MYSQL_ROOT_PASSWORD
         volumeMounts:
         - name: config
-          mountPath: &amp;quot;/etc/nginx/conf.d&amp;quot;
-          readOnly: true
-        - name: config2
-          mountPath: &amp;quot;/etc/nginx/nginx.conf&amp;quot;
-          subPath: nginx.conf    # subpath解决nginx.conf挂载覆盖问题         
-          readOnly: true
+          mountPath: &amp;quot;/etc/nginx/nginx.conf&amp;quot;   #只挂在nginx.conf一个文件,不覆盖目录
+          subPath: nginx.conf      
       volumes:
       - name: config
         configMap:
-          name: nginxconfig      # 提供你想要挂载的 ConfigMap 的名字
-#          items:                # 重命名挂载的configmaq key的名称为nginx.conf
-#          - key: &amp;quot;s.hmallleasing.com.conf&amp;quot;  
-#            path: &amp;quot;nginx.conf&amp;quot;
-#          - key: &amp;quot;s.hmallleasing.com.conf&amp;quot;
-#            path: &amp;quot;nginx2.conf&amp;quot;
-#            mode: 0644        # 配置挂载权限，针对单个key生效
-#          defaultMode: 0666   # 配置挂载权限，针对整个key生效
-      - name: config2
-        configMap:
-          name: nginxconfig2     # 提供你想要挂载的 ConfigMap 的名字
+          name: nginx-config      # 提供你想要挂载的ConfigMap的名字
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;2-secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-secret&#34;&gt;#&lt;/a&gt; 2. Secret&lt;/h4&gt;
 &lt;h5 id=&#34;21-secret拉取私有仓库镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-secret拉取私有仓库镜像&#34;&gt;#&lt;/a&gt; 2.1 Secret 拉取私有仓库镜像&lt;/h5&gt;

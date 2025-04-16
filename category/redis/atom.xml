@@ -7,9 +7,9 @@
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="rsync" />
+    <category term="MySQL" />
     <category term="Redis" />
     <category term="Windows" />
-    <category term="MySQL" />
     <entry>
         <id>http://imxuyong.cn/posts/1414180692.html</id>
         <title>Redis集群（主从+哨兵）模式</title>
