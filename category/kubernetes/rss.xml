@@ -563,7 +563,7 @@ spec:
 &lt;h5 id=&#34;22-创建ssl-secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-创建ssl-secret&#34;&gt;#&lt;/a&gt; 2.2 创建 ssl Secret&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;# kubectl create secret tls dev.hmallleasig.com --key *.hmallleasing.com_key.key --cert *.hmallleasing.com_chain.crt -n dev
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;23-基于命令创建generic-secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#23-基于命令创建generic-secret&#34;&gt;#&lt;/a&gt; 2.3 基于命令创建 generic Secret&lt;/h4&gt;
+&lt;h5 id=&#34;23-基于命令创建generic-secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#23-基于命令创建generic-secret&#34;&gt;#&lt;/a&gt; 2.3 基于命令创建 generic Secret&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;#1.通过from-env-file创建
 # cat db.conf 
 username=xuyong
