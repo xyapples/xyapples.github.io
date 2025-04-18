@@ -5,14 +5,244 @@
         <link>http://imxuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Mon, 14 Apr 2025 21:47:47 +0800</pubDate>
-        <lastBuildDate>Mon, 14 Apr 2025 21:47:47 +0800</lastBuildDate>
+        <pubDate>Fri, 18 Apr 2025 22:25:17 +0800</pubDate>
+        <lastBuildDate>Fri, 18 Apr 2025 22:25:17 +0800</lastBuildDate>
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>rsync</category>
         <category>MySQL</category>
         <category>Redis</category>
         <category>Windows</category>
+        <item>
+            <guid isPermalink="true">http://imxuyong.cn/posts/169153047.html</guid>
+            <title>K8s持久化存储Volume</title>
+            <link>http://imxuyong.cn/posts/169153047.html</link>
+            <category>Kubernetes</category>
+            <pubDate>Fri, 18 Apr 2025 22:25:17 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;k8s持久化存储volume&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s持久化存储volume&#34;&gt;#&lt;/a&gt; K8s 持久化存储 Volume&lt;/h3&gt;
+&lt;p&gt;Container（容器）中的磁盘文件是短暂的，当容器崩溃时，kubelet 会重新启动容器，Container 会以最干净的状态启动，最初的文件将丢失。另外，当一个 Pod 运行多个 Container 时，各个容器可能需要共享一些文件。Kubernetes Volume 可以解决这两个问题。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;一些需要持久化数据的程序才会用到 Volumes，或者一些需要共享数据的容器需要 volumes。&lt;/li&gt;
+&lt;li&gt;日志收集的需求需要在应用程序的容器里面加一个 sidecar，这个容器是一个收集日志的容器，比如 filebeat，它通过 volumes 共享应用程序的日志文件目录。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;1-volumes-emptydir实现数据共享&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-volumes-emptydir实现数据共享&#34;&gt;#&lt;/a&gt; 1. Volumes EmptyDir 实现数据共享&lt;/h4&gt;
+&lt;p&gt;和上述 volume 不同的是，如果删除 Pod，emptyDir 卷中的数据也将被删除，一般 emptyDir 卷用于 Pod 中的不同 Container 共享数据。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat nginx-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      restartPolicy: Always
+      volumes:
+        - name: share-volume
+          emptyDir: &amp;#123;&amp;#125;
+      containers:
+        - name: nginx
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 128Mi
+              cpu: 100m
+          volumeMounts:
+            - name: share-volume
+              mountPath: /opt
+        - name: nginx2
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 128Mi
+              cpu: 100m
+          command:
+            - sh
+            - &#39;-c&#39;
+            - sleep 3600
+          volumeMounts:
+            - name: share-volume
+              mountPath: /mnt
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;2-volumes-hostpath挂载宿主机路径&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-volumes-hostpath挂载宿主机路径&#34;&gt;#&lt;/a&gt; 2. Volumes HostPath 挂载宿主机路径&lt;/h4&gt;
+&lt;p&gt;hostPath 卷可将节点上的文件或目录挂载到 Pod 上，用于 Pod 自定义日志输出或访问 Docker 内部的容器等。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cat nginx-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      restartPolicy: Always
+      volumes:
+      - name: share-volume
+        emptyDir: &amp;#123;&amp;#125;
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+      containers:
+        - name: nginx
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 128Mi
+              cpu: 100m
+          volumeMounts:
+          - name: share-volume
+            mountPath: /opt
+          - name: tz-config
+            mountPath: /usr/share/zoneinfo/Asia/Shanghai
+          - name: tz-config
+            mountPath: /etc/localtime
+          - name: timezone
+            mountPath: /etc/timezone
+        - name: nginx2
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 128Mi
+              cpu: 100m
+          command:
+            - sh
+            - &#39;-c&#39;
+            - sleep 3600
+          volumeMounts:
+          - name: share-volume
+            mountPath: /mnt
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;hostPath 卷常用的 type（类型）如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;type 为空字符串：默认选项，意味着挂载 hostPath 卷之前不会执行任何检查。&lt;/li&gt;
+&lt;li&gt;DirectoryOrCreate：如果给定的 path 不存在任何东西，那么将根据需要创建一个权限为 0755 的空目录，和 Kubelet 具有相同的组和权限。&lt;/li&gt;
+&lt;li&gt;Directory：目录必须存在于给定的路径下。&lt;/li&gt;
+&lt;li&gt;FileOrCreate：如果给定的路径不存储任何内容，则会根据需要创建一个空文件，权限设置为 0644，和 Kubelet 具有相同的组和所有权。&lt;/li&gt;
+&lt;li&gt;File：文件，必须存在于给定路径中。&lt;/li&gt;
+&lt;li&gt;Socket：UNIX 套接字，必须存在于给定路径中。&lt;/li&gt;
+&lt;li&gt;CharDevice：字符设备，必须存在于给定路径中。&lt;/li&gt;
+&lt;li&gt;BlockDevice：块设备，必须存在于给定路径中。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;3-挂载nfs至容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-挂载nfs至容器&#34;&gt;#&lt;/a&gt; 3. 挂载 NFS 至容器&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;#1.安装nfs
+# yum install nfs-utils -y       
+# mkdir /data/nfs -p
+# vim /etc/exports 
+/data 192.168.1.0/24(rw,no_root_squash)
+# exportfs -arv   
+# systemctl start nfs-server &amp;amp;&amp;amp; systemctl enable nfs-server &amp;amp;&amp;amp; systemctl status nfs-server 
+
+#2.测试客户端挂载
+# showmount -e 192.168.1.75
+# mount -t nfs 192.168.1.75:/data/nfs /mnt
+
+#3.Deploy挂载NFS
+[root@k8s-master01 ~]# cat nginx-deploy-nfs.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  annotations:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+      annotations:
+        app: nginx-deploy
+    spec:
+      restartPolicy: Always
+      volumes:
+      - name: nfs-volume
+        nfs:
+          server: 192.168.1.75
+          path: /data/nfs
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+      containers:
+        - name: nginx-deploy
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 128Mi
+              cpu: 100m
+          volumeMounts:
+          - name: nfs-volume
+            mountPath: /usr/share/nginx/html
+          - name: tz-config
+            mountPath: /usr/share/zoneinfo/Asia/Shanghai
+          - name: tz-config
+            mountPath: /etc/localtime
+          - name: timezone
+            mountPath: /etc/timezone
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;4-pv回收策略&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-pv回收策略&#34;&gt;#&lt;/a&gt; 4. PV 回收策略&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Retain：保留，该策略允许手动回收资源，当删除 PVC 时，PV 仍然存在，PV 被视为已释放，管理员可以手动回收卷。&lt;/li&gt;
+&lt;li&gt;Recycle：回收，如果 Volume 插件支持，Recycle 策略会对卷执行 rm -rf 清理该 PV，并使其可用于下一个新的 PVC，但是本策略将来会被弃用，目前只有 NFS 和 HostPath 支持该策略。&lt;/li&gt;
+&lt;li&gt;Delete：删除，如果 Volume 插件支持，删除 PVC 时会同时删除 PV，动态卷默认为 Delete，目前支持 Delete 的存储后端包括 AWS EBS, GCE PD, Azure Disk, or OpenStack Cinder 等。&lt;/li&gt;
+&lt;li&gt;可以通过 persistentVolumeReclaimPolicy: Recycle 字段配置&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+ ]]></description>
+        </item>
         <item>
             <guid isPermalink="true">http://imxuyong.cn/posts/3992668367.html</guid>
             <title>K8s配置管理Configmap</title>
@@ -333,13 +563,29 @@ spec:
 &lt;h5 id=&#34;22-创建ssl-secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-创建ssl-secret&#34;&gt;#&lt;/a&gt; 2.2 创建 ssl Secret&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;# kubectl create secret tls dev.hmallleasig.com --key *.hmallleasing.com_key.key --cert *.hmallleasing.com_chain.crt -n dev
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;23-基于文件创建generic-secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#23-基于文件创建generic-secret&#34;&gt;#&lt;/a&gt; 2.3 基于文件创建 generic Secret&lt;/h5&gt;
-&lt;pre&gt;&lt;code&gt;# cat db.conf 
+&lt;h4 id=&#34;23-基于命令创建generic-secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#23-基于命令创建generic-secret&#34;&gt;#&lt;/a&gt; 2.3 基于命令创建 generic Secret&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;#1.通过from-env-file创建
+# cat db.conf 
 username=xuyong
 passwd=Superman*2023
 
 # kubectl create secret generic dbconf --from-env-file=./db.conf
-# kubectl get secret dbconf -oyaml
+
+#2.通过from-literal创建
+kubectl create secret generic db-user-pass \
+    --from-literal=username=admin \
+    --from-literal=password=&#39;S!B\*d$zDsb=&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;24-secret加密-解密&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#24-secret加密-解密&#34;&gt;#&lt;/a&gt; 2.4 Secret 加密、解密&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;1.加密
+# echo -n &amp;quot;Superman*2023&amp;quot; | base64
+U3VwZXJtYW4qMjAyMw==
+
+2.解密
+# echo &amp;quot;U3VwZXJtYW4qMjAyMw==&amp;quot; | base64 --decode
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;25-基于文件创建非加密generic-secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#25-基于文件创建非加密generic-secret&#34;&gt;#&lt;/a&gt; 2.5 基于文件创建非加密 generic Secret&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl get secret dbconf -oyaml
 apiVersion: v1
 data:
   passwd: U3VwZXJtYW4qMjAyMw==
@@ -350,12 +596,7 @@ metadata:
   namespace: default
 type: Opaque
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;24-基于命令创建generic-secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#24-基于命令创建generic-secret&#34;&gt;#&lt;/a&gt; 2.4 基于命令创建 generic Secret&lt;/h5&gt;
-&lt;pre&gt;&lt;code&gt;kubectl create secret generic db-user-pass \
-    --from-literal=username=admin \
-    --from-literal=password=&#39;S!B\*d$zDsb=&#39;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;2-5-基于yaml创建generic-secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-5-基于yaml创建generic-secret&#34;&gt;#&lt;/a&gt; 2. 5 基于 yaml 创建 generic Secret&lt;/h5&gt;
+&lt;h5 id=&#34;2-6-基于yaml创建加密generic-secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-6-基于yaml创建加密generic-secret&#34;&gt;#&lt;/a&gt; 2. 6 基于 yaml 创建加密 generic Secret&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;# cat mysql-secret.yaml 
 apiVersion: v1
 kind: Secret
@@ -365,14 +606,6 @@ metadata:
 stringData:
   MYSQL_ROOT_PASSWORD: Superman*2023
 type: Opaque
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;26-secret加密-解密&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#26-secret加密-解密&#34;&gt;#&lt;/a&gt; 2.6 Secret 加密、解密&lt;/h5&gt;
-&lt;pre&gt;&lt;code&gt;1.加密
-# echo -n &amp;quot;Superman*2023&amp;quot; | base64
-U3VwZXJtYW4qMjAyMw==
-
-2.解密
-# echo &amp;quot;U3VwZXJtYW4qMjAyMw==&amp;quot; | base64 --decode
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h5 id=&#34;27-deployment挂载secret示例&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#27-deployment挂载secret示例&#34;&gt;#&lt;/a&gt; 2.7 Deployment 挂载 Secret 示例&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;[root@k8s-master01 study]# cat cm-deploy.yaml 
