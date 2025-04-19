@@ -3,13 +3,124 @@
     <id>http://imxuyong.cn</id>
     <title>LinuxSre云原生 • Posts by &#34;kubernetes&#34; tag</title>
     <link href="http://imxuyong.cn" />
-    <updated>2025-04-18T14:25:17.000Z</updated>
+    <updated>2025-04-19T13:00:21.000Z</updated>
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="rsync" />
-    <category term="MySQL" />
-    <category term="Windows" />
     <category term="Redis" />
+    <category term="Windows" />
+    <category term="MySQL" />
+    <entry>
+        <id>http://imxuyong.cn/posts/3833778957.html</id>
+        <title>K8s计划任务Job、Cronjob</title>
+        <link rel="alternate" href="http://imxuyong.cn/posts/3833778957.html"/>
+        <content type="html">&lt;h3 id=&#34;k8s计划任务job-cronjob&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s计划任务job-cronjob&#34;&gt;#&lt;/a&gt; K8s 计划任务 Job、Cronjob&lt;/h3&gt;
+&lt;h4 id=&#34;1-job配置参数详解&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-job配置参数详解&#34;&gt;#&lt;/a&gt; 1. Job 配置参数详解&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# cat job.yaml 
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    job-name: echo
+  name: echo
+  namespace: default
+spec:
+  #suspend: true # 1.21+
+  #ttlSecondsAfterFinished: 100
+  backoffLimit: 4
+  completions: 1
+  parallelism: 1
+  template:
+    spec:
+      containers:
+      - name: echo
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - -c
+        - echo &amp;quot;Hello Job&amp;quot;
+      restartPolicy: Never
+      
+[root@k8s-master01 ~]# kubectl get jobs
+NAME   STATUS     COMPLETIONS   DURATION   AGE
+echo   Complete   1/1           70s        2m5s
+
+[root@k8s-master01 ~]# kubectl get pods
+NAME          READY   STATUS      RESTARTS      AGE
+echo-564c8    0/1     Completed   0             2m10s
+
+[root@k8s-master01 ~]# kubectl logs echo-564c8
+Hello Job
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;backoffLimit:：如果任务执行失败，失败多少次后不再执行&lt;/li&gt;
+&lt;li&gt;completions：有多少个 Pod 执行成功，认为任务是成功的，默认为空和 parallelism 数值一样&lt;/li&gt;
+&lt;li&gt;parallelism：并行执行任务的数量，如果 parallelism 数值大于 completions 数值，只会创建 completions 的数量；如果 completions 是 4，并发是 3，第一次会创建 3 个 Pod 执行任务，第二次只会创建一个 Pod 执行任务&lt;/li&gt;
+&lt;li&gt;ttlSecondsAfterFinished：Job 在执行结束之后（状态为 completed 或 Failed）自动清理。设置为 0 表示执行结束立即删除，不设置则不会清除，需要开启 TTLAfterFinished 特性&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;2-cronjob配置参数详解&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-cronjob配置参数详解&#34;&gt;#&lt;/a&gt; 2. CronJob 配置参数详解&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# cat cronjob.yaml 
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: &amp;quot;*/1 * * * *&amp;quot;
+  concurrencyPolicy: Allow   #允许同时运行多个任务
+  failedJobsHistoryLimit: 10  #保留多少失败的任务
+  successfulJobsHistoryLimit: 10  #保留多少已完成的任务
+  #suspend: true             #如果true则取消周期性执行任务
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox
+            command:
+            - sh
+            - -c
+            - date; echo Hello from the Kubernetes cluster
+          restartPolicy: OnFailure 
+          
+[root@k8s-master01 ~]# kubectl get  cj
+NAME    SCHEDULE      TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+hello   */1 * * * *   &amp;lt;none&amp;gt;     False     0        6s              81s
+
+[root@k8s-master01 ~]# kubectl get  jobs
+NAME             STATUS     COMPLETIONS   DURATION   AGE
+hello-29084454   Complete   1/1           4s         72s
+hello-29084455   Complete   1/1           5s         12s
+
+[root@k8s-master01 ~]# kubectl get  pods
+NAME                   READY   STATUS      RESTARTS   AGE
+hello-29084454-hwv7p   0/1     Completed   0          78s
+hello-29084455-vf99w   0/1     Completed   0          18s
+
+[root@k8s-master01 ~]# kubectl logs -f hello-29084455-vf99w
+Sat Apr 19 12:55:02 UTC 2025
+Hello from the Kubernetes cluster
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;apiVersion: batch/v1beta1   #1.21+ batch/v1&lt;/li&gt;
+&lt;li&gt;schedule：调度周期，和 Linux 一致，分别是分时日月周。&lt;/li&gt;
+&lt;li&gt;restartPolicy：重启策略，和 Pod 一致。&lt;/li&gt;
+&lt;li&gt;concurrencyPolicy：并发调度策略。可选参数如下：
+&lt;ul&gt;
+&lt;li&gt;Allow：允许同时运行多个任务。&lt;/li&gt;
+&lt;li&gt;Forbid：不允许并发运行，如果之前的任务尚未完成，新的任务不会被创建。&lt;/li&gt;
+&lt;li&gt;Replace：如果之前的任务尚未完成，新的任务会替换的之前的任务。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;suspend：如果设置为 true，则暂停后续的任务，默认为 false。&lt;/li&gt;
+&lt;li&gt;successfulJobsHistoryLimit：保留多少已完成的任务，按需配置。&lt;/li&gt;
+&lt;li&gt;failedJobsHistoryLimit：保留多少失败的任务。&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+        <category term="Kubernetes" />
+        <updated>2025-04-19T13:00:21.000Z</updated>
+    </entry>
     <entry>
         <id>http://imxuyong.cn/posts/169153047.html</id>
         <title>K8s持久化存储</title>
