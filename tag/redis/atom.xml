@@ -6,10 +6,10 @@
     <updated>2025-04-09T11:50:06.000Z</updated>
     <category term="Harbor" />
     <category term="Kubernetes" />
-    <category term="MySQL" />
     <category term="rsync" />
-    <category term="Redis" />
+    <category term="MySQL" />
     <category term="Windows" />
+    <category term="Redis" />
     <entry>
         <id>http://imxuyong.cn/posts/1414180692.html</id>
         <title>Redis集群（主从+哨兵）模式</title>

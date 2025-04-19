@@ -6,10 +6,10 @@
     <updated>2025-03-30T08:17:00.000Z</updated>
     <category term="Harbor" />
     <category term="Kubernetes" />
-    <category term="MySQL" />
     <category term="rsync" />
-    <category term="Redis" />
+    <category term="MySQL" />
     <category term="Windows" />
+    <category term="Redis" />
     <entry>
         <id>http://imxuyong.cn/posts/3071070978.html</id>
         <title>企业级私有仓库Harbor搭建</title>

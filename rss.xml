@@ -9,10 +9,10 @@
         <lastBuildDate>Fri, 18 Apr 2025 22:25:17 +0800</lastBuildDate>
         <category>Harbor</category>
         <category>Kubernetes</category>
-        <category>MySQL</category>
         <category>rsync</category>
-        <category>Redis</category>
+        <category>MySQL</category>
         <category>Windows</category>
+        <category>Redis</category>
         <item>
             <guid isPermalink="true">http://imxuyong.cn/posts/169153047.html</guid>
             <title>K8s持久化存储</title>
@@ -448,6 +448,11 @@ spec:
          - name: nfs-pvc-storage
           mountPath: /usr/share/nginx/html
 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;挂载 PVC 的 Pod 一直处于 Pending：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;PVC 没有创建成功或 PVC 不存在&lt;/li&gt;
+&lt;li&gt;PVC 和 Pod 不在同一个 Namespace&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
  ]]></description>
         </item>
