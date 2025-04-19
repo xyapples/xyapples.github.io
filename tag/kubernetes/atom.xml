@@ -6,21 +6,22 @@
     <updated>2025-04-18T14:25:17.000Z</updated>
     <category term="Harbor" />
     <category term="Kubernetes" />
-    <category term="Windows" />
-    <category term="rsync" />
     <category term="MySQL" />
+    <category term="rsync" />
     <category term="Redis" />
+    <category term="Windows" />
     <entry>
         <id>http://imxuyong.cn/posts/169153047.html</id>
-        <title>K8s持久化存储Volume</title>
+        <title>K8s持久化存储</title>
         <link rel="alternate" href="http://imxuyong.cn/posts/169153047.html"/>
-        <content type="html">&lt;h3 id=&#34;k8s持久化存储volume&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s持久化存储volume&#34;&gt;#&lt;/a&gt; K8s 持久化存储 Volume&lt;/h3&gt;
+        <content type="html">&lt;h3 id=&#34;k8s持久化存储&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s持久化存储&#34;&gt;#&lt;/a&gt; K8s 持久化存储&lt;/h3&gt;
+&lt;h4 id=&#34;1-volume&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-volume&#34;&gt;#&lt;/a&gt; 1. Volume&lt;/h4&gt;
 &lt;p&gt;Container（容器）中的磁盘文件是短暂的，当容器崩溃时，kubelet 会重新启动容器，Container 会以最干净的状态启动，最初的文件将丢失。另外，当一个 Pod 运行多个 Container 时，各个容器可能需要共享一些文件。Kubernetes Volume 可以解决这两个问题。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;一些需要持久化数据的程序才会用到 Volumes，或者一些需要共享数据的容器需要 volumes。&lt;/li&gt;
 &lt;li&gt;日志收集的需求需要在应用程序的容器里面加一个 sidecar，这个容器是一个收集日志的容器，比如 filebeat，它通过 volumes 共享应用程序的日志文件目录。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4 id=&#34;1-volumes-emptydir实现数据共享&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-volumes-emptydir实现数据共享&#34;&gt;#&lt;/a&gt; 1. Volumes EmptyDir 实现数据共享&lt;/h4&gt;
+&lt;h5 id=&#34;11-emptydir实现数据共享&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-emptydir实现数据共享&#34;&gt;#&lt;/a&gt; 1.1 EmptyDir 实现数据共享&lt;/h5&gt;
 &lt;p&gt;和上述 volume 不同的是，如果删除 Pod，emptyDir 卷中的数据也将被删除，一般 emptyDir 卷用于 Pod 中的不同 Container 共享数据。&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;# cat nginx-deploy.yaml 
 apiVersion: apps/v1
@@ -76,7 +77,7 @@ spec:
             - name: share-volume
               mountPath: /mnt
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;2-volumes-hostpath挂载宿主机路径&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-volumes-hostpath挂载宿主机路径&#34;&gt;#&lt;/a&gt; 2. Volumes HostPath 挂载宿主机路径&lt;/h4&gt;
+&lt;h5 id=&#34;12-volumes-hostpath挂载宿主机路径&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#12-volumes-hostpath挂载宿主机路径&#34;&gt;#&lt;/a&gt; 1.2 Volumes HostPath 挂载宿主机路径&lt;/h5&gt;
 &lt;p&gt;hostPath 卷可将节点上的文件或目录挂载到 Pod 上，用于 Pod 自定义日志输出或访问 Docker 内部的容器等。&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cat nginx-deploy.yaml 
 apiVersion: apps/v1
@@ -157,7 +158,7 @@ spec:
 &lt;li&gt;CharDevice：字符设备，必须存在于给定路径中。&lt;/li&gt;
 &lt;li&gt;BlockDevice：块设备，必须存在于给定路径中。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4 id=&#34;3-挂载nfs至容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-挂载nfs至容器&#34;&gt;#&lt;/a&gt; 3. 挂载 NFS 至容器&lt;/h4&gt;
+&lt;h5 id=&#34;13-挂载nfs至容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#13-挂载nfs至容器&#34;&gt;#&lt;/a&gt; 1.3 挂载 NFS 至容器&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;#1.安装nfs
 # yum install nfs-utils -y       
 # mkdir /data/nfs -p
@@ -228,13 +229,220 @@ spec:
           - name: timezone
             mountPath: /etc/timezone
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;4-pv回收策略&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-pv回收策略&#34;&gt;#&lt;/a&gt; 4. PV 回收策略&lt;/h4&gt;
+&lt;h4 id=&#34;2-pv-pvc&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-pv-pvc&#34;&gt;#&lt;/a&gt; 2. PV、PVC&lt;/h4&gt;
+&lt;p&gt;PersistentVolume：简称 PV，是由 Kubernetes 管理员设置的存储，可以配置 Ceph、NFS、GlusterFS 等常用存储配置，相对于 Volume 配置，提供了更多的功能，比如生命周期的管理、大小的限制。PV 分为静态和动态。&lt;/p&gt;
+&lt;p&gt;PersistentVolumeClaim：简称 PVC，是对存储 PV 的请求，表示需要什么类型的 PV，需要存储的技术人员只需要配置 PVC 即可使用存储，或者 Volume 配置 PVC 的名称即可。&lt;/p&gt;
+&lt;h5 id=&#34;21-pv回收策略&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-pv回收策略&#34;&gt;#&lt;/a&gt; 2.1 PV 回收策略&lt;/h5&gt;
 &lt;ul&gt;
 &lt;li&gt;Retain：保留，该策略允许手动回收资源，当删除 PVC 时，PV 仍然存在，PV 被视为已释放，管理员可以手动回收卷。&lt;/li&gt;
 &lt;li&gt;Recycle：回收，如果 Volume 插件支持，Recycle 策略会对卷执行 rm -rf 清理该 PV，并使其可用于下一个新的 PVC，但是本策略将来会被弃用，目前只有 NFS 和 HostPath 支持该策略。&lt;/li&gt;
 &lt;li&gt;Delete：删除，如果 Volume 插件支持，删除 PVC 时会同时删除 PV，动态卷默认为 Delete，目前支持 Delete 的存储后端包括 AWS EBS, GCE PD, Azure Disk, or OpenStack Cinder 等。&lt;/li&gt;
 &lt;li&gt;可以通过 persistentVolumeReclaimPolicy: Recycle 字段配置&lt;/li&gt;
 &lt;/ul&gt;
+&lt;h5 id=&#34;22-pv访问策略&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-pv访问策略&#34;&gt;#&lt;/a&gt; 2.2 PV 访问策略&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;ReadWriteOnce：可以被单节点以读写模式挂载，命令行中可以被缩写为 RWO。&lt;/li&gt;
+&lt;li&gt;ReadOnlyMany：可以被多个节点以只读模式挂载，命令行中可以被缩写为 ROX。&lt;/li&gt;
+&lt;li&gt;ReadWriteMany：可以被多个节点以读写模式挂载，命令行中可以被缩写为 RWX。&lt;/li&gt;
+&lt;li&gt;ReadWriteOncePod ：只允许被单个 Pod 访问，需要 K8s 1.22 + 以上版本，并且是 CSI 创建的 PV 才可使用，缩写为 RWOP&lt;/li&gt;
+&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:left&#34;&gt;Volume Plugin&lt;/th&gt;
+&lt;th style=&#34;text-align:center&#34;&gt;ReadWriteOnce&lt;/th&gt;
+&lt;th style=&#34;text-align:center&#34;&gt;ReadOnlyMany&lt;/th&gt;
+&lt;th style=&#34;text-align:center&#34;&gt;ReadWriteMany&lt;/th&gt;
+&lt;th style=&#34;text-align:center&#34;&gt;ReadWriteOncePod&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;AzureFile&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;CephFS&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;CSI&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;depends on the driver&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;depends on the driver&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;depends on the driver&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;depends on the driver&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;FC&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;FlexVolume&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;depends on the driver&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;HostPath&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;iSCSI&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;NFS&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;RBD&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;VsphereVolume&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;- (works when Pods are collocated)&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;PortworxVolume&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;✓&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h5 id=&#34;23-存储分类&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#23-存储分类&#34;&gt;#&lt;/a&gt; 2.3 存储分类&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;文件存储：一些数据可能需要被多个节点使用，比如用户的头像、用户上传的文件等，实现方式：NFS、NAS、FTP、CephFS 等。&lt;/li&gt;
+&lt;li&gt;块存储：一些数据只能被一个节点使用，或者是需要将一块裸盘整个挂载使用，比如数据库、Redis 等，实现方式：Ceph、GlusterFS、公有云。&lt;/li&gt;
+&lt;li&gt;对象存储：由程序代码直接实现的一种存储方式，云原生应用无状态化常用的实现方式，实现方式：一般是符合 S3 协议的云存储，比如 AWS 的 S3 存储、Minio、七牛云等。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;24-pv配置示例nfs&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#24-pv配置示例nfs&#34;&gt;#&lt;/a&gt; 2.4 PV 配置示例 NFS&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv1
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-slow
+  nfs:
+    path: /data/pv1
+    server: 192.168.1.75
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;capacity：容量配置&lt;/p&gt;
+&lt;p&gt;volumeMode：卷的模式，目前支持 Filesystem（文件系统） 和 Block（块），其中 Block 类型需要后端存储支持，默认为文件系统&lt;/p&gt;
+&lt;p&gt;accessModes：该 PV 的访问模式&lt;/p&gt;
+&lt;p&gt;storageClassName：PV 的类，一个特定类型的 PV 只能绑定到特定类别的 PVC；&lt;/p&gt;
+&lt;p&gt;persistentVolumeReclaimPolicy：回收策略&lt;/p&gt;
+&lt;p&gt;mountOptions：非必须，新版本中已弃用&lt;/p&gt;
+&lt;p&gt;nfs：NFS 服务配置，包括以下两个选项&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;path：NFS 上的共享目录&lt;/li&gt;
+&lt;li&gt;server：NFS 的 IP 地址&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;25-pv配置示例hostpath&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#25-pv配置示例hostpath&#34;&gt;#&lt;/a&gt; 2.5 PV 配置示例 HostPath&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: hostpath
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: hostpath
+  hostPath:
+    path: &amp;quot;/mnt/data&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;hostPath：hostPath 服务配置&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;path：宿主机路径&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;26-pv的状态&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#26-pv的状态&#34;&gt;#&lt;/a&gt; 2.6 PV 的状态&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;Available：可用，没有被 PVC 绑定的空闲资源。&lt;/li&gt;
+&lt;li&gt;Bound：已绑定，已经被 PVC 绑定。&lt;/li&gt;
+&lt;li&gt;Released：已释放，PVC 被删除，但是资源还未被重新使用。&lt;/li&gt;
+&lt;li&gt;Failed：失败，自动回收失败。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;27-pvc绑定pv&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#27-pvc绑定pv&#34;&gt;#&lt;/a&gt; 2.7 PVC 绑定 PV&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-pvc
+spec:
+  storageClassName: nfs-slow
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi      
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;PVC 的空间申请大小≤PV 的大小&lt;/li&gt;
+&lt;li&gt;PVC 的 StorageClassName 和 PV 的一致&lt;/li&gt;
+&lt;li&gt;PVC 的 accessModes 和 PV 的一致&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;28-depoyment挂载pvc&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#28-depoyment挂载pvc&#34;&gt;#&lt;/a&gt; 2.8 Depoyment 挂载 PVC&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-deploy
+  name: nginx-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      volumes:
+      - name: nfs-pvc-storage  #volume名称
+        persistentVolumeClaim:
+          claimName: nfs-pvc   #PVC名称
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+         - name: nfs-pvc-storage
+          mountPath: /usr/share/nginx/html
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 </content>
         <category term="Kubernetes" />
