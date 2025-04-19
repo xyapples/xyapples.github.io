@@ -3,13 +3,108 @@
     <id>http://imxuyong.cn</id>
     <title>LinuxSre云原生</title>
     <link href="http://imxuyong.cn" />
-    <updated>2025-04-19T13:00:21.000Z</updated>
+    <updated>2025-04-19T13:07:20.000Z</updated>
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="rsync" />
-    <category term="Redis" />
-    <category term="Windows" />
     <category term="MySQL" />
+    <category term="Windows" />
+    <category term="Redis" />
+    <entry>
+        <id>http://imxuyong.cn/posts/3142072607.html</id>
+        <title>K8s初始化容器、临时容器</title>
+        <link rel="alternate" href="http://imxuyong.cn/posts/3142072607.html"/>
+        <content type="html">&lt;h3 id=&#34;k8s初始化容器-临时容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s初始化容器-临时容器&#34;&gt;#&lt;/a&gt; K8s 初始化容器、临时容器&lt;/h3&gt;
+&lt;h4 id=&#34;1-初始化容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-初始化容器&#34;&gt;#&lt;/a&gt; 1. 初始化容器&lt;/h4&gt;
+&lt;h5 id=&#34;1-1-初始化容器的用途&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-1-初始化容器的用途&#34;&gt;#&lt;/a&gt; 1. 1 初始化容器的用途&lt;/h5&gt;
+&lt;p&gt;初始化容器主要是在主应用启动之前，做一些初始化的操作，比如创建文件、修改内核参数、等待依赖程序启动或其他需要在主程序启动之前需要做的工作。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Init 容器可以包含一些安装过程中应用容器中不存在的实用工具或个性化代码；&lt;/li&gt;
+&lt;li&gt;Init 容器可以安全地运行这些工具，避免这些工具导致应用镜像的安全性降低；&lt;/li&gt;
+&lt;li&gt;Init 容器可以以 root 身份运行，执行一些高权限命令；&lt;/li&gt;
+&lt;li&gt;Init 容器相关操作执行完成以后即退出，不会给业务容器带来安全隐患。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;12-初始化容器和poststart区别&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#12-初始化容器和poststart区别&#34;&gt;#&lt;/a&gt; 1.2 初始化容器和 PostStart 区别&lt;/h5&gt;
+&lt;p&gt;PostStart：依赖主应用的环境，而且并不一定先于 Command 运行。&lt;/p&gt;
+&lt;p&gt;InitContainer：不依赖主应用的环境，可以有更高的权限和更多的工具，一定会在主应用启动之前完成&lt;/p&gt;
+&lt;h5 id=&#34;13-初始化容器和普通容器的区别&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#13-初始化容器和普通容器的区别&#34;&gt;#&lt;/a&gt; 1.3 初始化容器和普通容器的区别&lt;/h5&gt;
+&lt;p&gt;Init 容器与普通的容器非常像，除了如下几点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;第一个 Init 容器运行成功后才会运行下一个 Init 容器；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;所有的 Init 容器运行成功后才会运行主容器；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;如果 Pod 的 Init 容器失败，Kubernetes 会不断地重启该 Pod，直到 Init 容器成功为止，但是 Pod 对应的 restartPolicy 值为 Never，Kubernetes 不会重新启动 Pod。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Init 容器不支持 lifecycle、livenessProbe、readinessProbe 和 startupProbe&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;14-初始化容器示例&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#14-初始化容器示例&#34;&gt;#&lt;/a&gt; 1.4 初始化容器示例&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cat init.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-deploy
+  name: nginx-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      initContainers:           # 初始化容器设定
+      - name: fix-permissions
+        image: busybox
+        command: [&amp;quot;sh&amp;quot;,&amp;quot;-c&amp;quot;,&amp;quot;echo hello kubernetes&amp;gt;/usr/share/nginx/html/index.html&amp;quot;]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: share-volume
+          mountPath: /usr/share/nginx/html
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+        - name: timezone
+          mountPath: /etc/timezone
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: share-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: share-volume
+        emptyDir: &amp;#123;&amp;#125;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: File
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: File
+
+[root@k8s-master01 ~]# kubectl create -f init.yaml
+
+[root@k8s-master01 ~]# curl 172.16.32.145
+hello kubernetes
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;2-临时容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-临时容器&#34;&gt;#&lt;/a&gt; 2. 临时容器&lt;/h4&gt;
+&lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+</content>
+        <category term="Kubernetes" />
+        <updated>2025-04-19T13:07:20.000Z</updated>
+    </entry>
     <entry>
         <id>http://imxuyong.cn/posts/3833778957.html</id>
         <title>K8s计划任务Job、Cronjob</title>

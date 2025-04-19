@@ -7,9 +7,9 @@
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="rsync" />
-    <category term="Redis" />
-    <category term="Windows" />
     <category term="MySQL" />
+    <category term="Windows" />
+    <category term="Redis" />
     <entry>
         <id>http://imxuyong.cn/posts/2628187572.html</id>
         <title>MySQL运维DBA应用与实践</title>

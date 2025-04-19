@@ -10,9 +10,9 @@
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>rsync</category>
-        <category>Redis</category>
-        <category>Windows</category>
         <category>MySQL</category>
+        <category>Windows</category>
+        <category>Redis</category>
         <item>
             <guid isPermalink="true">http://imxuyong.cn/posts/1922841233.html</guid>
             <title>Rsync服务实践</title>
