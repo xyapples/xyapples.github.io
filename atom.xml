@@ -5,8 +5,8 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-04-20T09:59:58.000Z</updated>
     <category term="Harbor" />
-    <category term="Kubernetes" />
     <category term="rsync" />
+    <category term="Kubernetes" />
     <category term="MySQL" />
     <category term="Redis" />
     <category term="Windows" />
@@ -15,6 +15,8 @@
         <title>K8s亲和力Affinity</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/312010518.html"/>
         <content type="html">&lt;h3 id=&#34;k8s亲和力affinity&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s亲和力affinity&#34;&gt;#&lt;/a&gt; K8s 亲和力 Affinity&lt;/h3&gt;
+&lt;h4 id=&#34;1-affinity分类&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-affinity分类&#34;&gt;#&lt;/a&gt; 1. Affinity 分类&lt;/h4&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/hTd0wmD.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
 </content>
         <category term="Kubernetes" />
         <updated>2025-04-20T09:59:58.000Z</updated>

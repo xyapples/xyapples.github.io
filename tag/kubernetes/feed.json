@@ -9,7 +9,7 @@
             "url": "http://ixuyong.cn/posts/312010518.html",
             "title": "K8s亲和力Affinity",
             "date_published": "2025-04-20T09:59:58.000Z",
-            "content_html": "<h3 id=\"k8s亲和力affinity\"><a class=\"anchor\" href=\"#k8s亲和力affinity\">#</a> K8s 亲和力 Affinity</h3>\n",
+            "content_html": "<h3 id=\"k8s亲和力affinity\"><a class=\"anchor\" href=\"#k8s亲和力affinity\">#</a> K8s 亲和力 Affinity</h3>\n<h4 id=\"1-affinity分类\"><a class=\"anchor\" href=\"#1-affinity分类\">#</a> 1. Affinity 分类</h4>\n<p><img loading=\"lazy\" data-src=\"https://wp-cdn.4ce.cn/v2/hTd0wmD.png\" alt=\"1.png\" /></p>\n",
             "tags": [
                 "Kubernetes"
             ]

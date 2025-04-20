@@ -8,8 +8,8 @@
         <pubDate>Sun, 20 Apr 2025 17:59:58 +0800</pubDate>
         <lastBuildDate>Sun, 20 Apr 2025 17:59:58 +0800</lastBuildDate>
         <category>Harbor</category>
-        <category>Kubernetes</category>
         <category>rsync</category>
+        <category>Kubernetes</category>
         <category>MySQL</category>
         <category>Redis</category>
         <category>Windows</category>
@@ -20,6 +20,8 @@
             <category>Kubernetes</category>
             <pubDate>Sun, 20 Apr 2025 17:59:58 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;k8s亲和力affinity&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s亲和力affinity&#34;&gt;#&lt;/a&gt; K8s 亲和力 Affinity&lt;/h3&gt;
+&lt;h4 id=&#34;1-affinity分类&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-affinity分类&#34;&gt;#&lt;/a&gt; 1. Affinity 分类&lt;/h4&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/hTd0wmD.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
  ]]></description>
         </item>
         <item>
