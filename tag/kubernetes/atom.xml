@@ -5,11 +5,11 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-04-20T09:59:58.000Z</updated>
     <category term="Harbor" />
-    <category term="rsync" />
     <category term="Kubernetes" />
+    <category term="rsync" />
     <category term="MySQL" />
-    <category term="Redis" />
     <category term="Windows" />
+    <category term="Redis" />
     <entry>
         <id>http://ixuyong.cn/posts/312010518.html</id>
         <title>K8s亲和力Affinity</title>
