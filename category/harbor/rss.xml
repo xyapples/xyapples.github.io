@@ -2,21 +2,21 @@
 <rss version="2.0">
     <channel>
         <title>LinuxSre云原生 • Posts by &#34;harbor&#34; category</title>
-        <link>http://imxuyong.cn</link>
+        <link>http://ixuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
         <pubDate>Sun, 30 Mar 2025 16:17:00 +0800</pubDate>
         <lastBuildDate>Sun, 30 Mar 2025 16:17:00 +0800</lastBuildDate>
+        <category>Kubernetes</category>
         <category>Harbor</category>
         <category>rsync</category>
-        <category>Kubernetes</category>
         <category>MySQL</category>
-        <category>Redis</category>
         <category>Windows</category>
+        <category>Redis</category>
         <item>
-            <guid isPermalink="true">http://imxuyong.cn/posts/3071070978.html</guid>
+            <guid isPermalink="true">http://ixuyong.cn/posts/3071070978.html</guid>
             <title>企业级私有仓库Harbor搭建</title>
-            <link>http://imxuyong.cn/posts/3071070978.html</link>
+            <link>http://ixuyong.cn/posts/3071070978.html</link>
             <category>Harbor</category>
             <pubDate>Sun, 30 Mar 2025 16:17:00 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;企业级私有仓库harbor&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#企业级私有仓库harbor&#34;&gt;#&lt;/a&gt; 企业级私有仓库 Harbor&lt;/h3&gt;

@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>http://imxuyong.cn</id>
+    <id>http://ixuyong.cn</id>
     <title>LinuxSre云原生 • Posts by &#34;harbor&#34; tag</title>
-    <link href="http://imxuyong.cn" />
+    <link href="http://ixuyong.cn" />
     <updated>2025-03-30T08:17:00.000Z</updated>
+    <category term="Kubernetes" />
     <category term="Harbor" />
     <category term="rsync" />
-    <category term="Kubernetes" />
     <category term="MySQL" />
-    <category term="Redis" />
     <category term="Windows" />
+    <category term="Redis" />
     <entry>
-        <id>http://imxuyong.cn/posts/3071070978.html</id>
+        <id>http://ixuyong.cn/posts/3071070978.html</id>
         <title>企业级私有仓库Harbor搭建</title>
-        <link rel="alternate" href="http://imxuyong.cn/posts/3071070978.html"/>
+        <link rel="alternate" href="http://ixuyong.cn/posts/3071070978.html"/>
         <content type="html">&lt;h3 id=&#34;企业级私有仓库harbor&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#企业级私有仓库harbor&#34;&gt;#&lt;/a&gt; 企业级私有仓库 Harbor&lt;/h3&gt;
 &lt;p&gt;企业部署 Kuberetes 集群环境之后，我们就可以将原来在传统虚拟机上运行的业务，迁移到 kubernetes 上，让 Kubernetes 通过容器的方式来管理。而一旦我们需要将传统业务使用容器的方式运行起来，就需要构建很多镜像，那么这些镜像就需要有一个专门的位置存储起来，为我们提供镜像上传和镜像下载等功能。但我们不能使用阿里云或者 Dockerhub 等仓库，首先拉取速度比较慢，其次镜像的安全性无法保证，所以就需要部署一个私有的镜像仓库来管理这些容器镜像。同时该仓库还需要提供高可用功能，确保随时都能上传和下载可用的容器镜像。&lt;/p&gt;
 &lt;h4 id=&#34;1-关闭防火墙-selinux-环境配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-关闭防火墙-selinux-环境配置&#34;&gt;#&lt;/a&gt; 1、关闭防火墙、Selinux、环境配置&lt;/h4&gt;
