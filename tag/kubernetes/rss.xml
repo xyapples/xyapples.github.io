@@ -5,14 +5,23 @@
         <link>http://ixuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Sun, 20 Apr 2025 15:51:58 +0800</pubDate>
-        <lastBuildDate>Sun, 20 Apr 2025 15:51:58 +0800</lastBuildDate>
+        <pubDate>Sun, 20 Apr 2025 17:59:58 +0800</pubDate>
+        <lastBuildDate>Sun, 20 Apr 2025 17:59:58 +0800</lastBuildDate>
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>rsync</category>
         <category>MySQL</category>
         <category>Redis</category>
         <category>Windows</category>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/312010518.html</guid>
+            <title>K8s亲和力Affinity</title>
+            <link>http://ixuyong.cn/posts/312010518.html</link>
+            <category>Kubernetes</category>
+            <pubDate>Sun, 20 Apr 2025 17:59:58 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;k8s亲和力affinity&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s亲和力affinity&#34;&gt;#&lt;/a&gt; K8s 亲和力 Affinity&lt;/h3&gt;
+ ]]></description>
+        </item>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/3254599477.html</guid>
             <title>K8s容忍和污点</title>

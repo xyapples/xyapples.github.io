@@ -5,6 +5,16 @@
     "home_page_url": "http://ixuyong.cn",
     "items": [
         {
+            "id": "http://ixuyong.cn/posts/312010518.html",
+            "url": "http://ixuyong.cn/posts/312010518.html",
+            "title": "K8s亲和力Affinity",
+            "date_published": "2025-04-20T09:59:58.000Z",
+            "content_html": "<h3 id=\"k8s亲和力affinity\"><a class=\"anchor\" href=\"#k8s亲和力affinity\">#</a> K8s 亲和力 Affinity</h3>\n",
+            "tags": [
+                "Kubernetes"
+            ]
+        },
+        {
             "id": "http://ixuyong.cn/posts/3254599477.html",
             "url": "http://ixuyong.cn/posts/3254599477.html",
             "title": "K8s容忍和污点",
