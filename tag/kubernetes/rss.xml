@@ -7,12 +7,12 @@
         <language>zh-CN</language>
         <pubDate>Sun, 20 Apr 2025 17:59:58 +0800</pubDate>
         <lastBuildDate>Sun, 20 Apr 2025 17:59:58 +0800</lastBuildDate>
-        <category>rsync</category>
-        <category>Kubernetes</category>
-        <category>Windows</category>
-        <category>MySQL</category>
         <category>Harbor</category>
+        <category>Kubernetes</category>
+        <category>rsync</category>
+        <category>MySQL</category>
         <category>Redis</category>
+        <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/312010518.html</guid>
             <title>K8s亲和力Affinity</title>

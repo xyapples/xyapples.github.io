@@ -4,12 +4,12 @@
     <title>LinuxSre云原生 • Posts by &#34;kubernetes&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-04-20T09:59:58.000Z</updated>
-    <category term="rsync" />
-    <category term="Kubernetes" />
-    <category term="Windows" />
-    <category term="MySQL" />
     <category term="Harbor" />
+    <category term="Kubernetes" />
+    <category term="rsync" />
+    <category term="MySQL" />
     <category term="Redis" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/312010518.html</id>
         <title>K8s亲和力Affinity</title>
