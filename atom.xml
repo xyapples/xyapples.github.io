@@ -3,13 +3,22 @@
     <id>http://ixuyong.cn</id>
     <title>LinuxSre云原生</title>
     <link href="http://ixuyong.cn" />
-    <updated>2025-04-19T13:07:20.000Z</updated>
-    <category term="Kubernetes" />
+    <updated>2025-04-20T07:51:58.000Z</updated>
     <category term="Harbor" />
+    <category term="Kubernetes" />
     <category term="rsync" />
     <category term="MySQL" />
-    <category term="Windows" />
     <category term="Redis" />
+    <category term="Windows" />
+    <entry>
+        <id>http://ixuyong.cn/posts/3254599477.html</id>
+        <title>K8s容忍和污点</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/3254599477.html"/>
+        <content type="html">&lt;h3 id=&#34;k8s容忍和污点&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s容忍和污点&#34;&gt;#&lt;/a&gt; K8s 容忍和污点&lt;/h3&gt;
+</content>
+        <category term="Kubernetes" />
+        <updated>2025-04-20T07:51:58.000Z</updated>
+    </entry>
     <entry>
         <id>http://ixuyong.cn/posts/3142072607.html</id>
         <title>K8s初始化容器、临时容器</title>
