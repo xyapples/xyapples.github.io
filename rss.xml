@@ -8,11 +8,11 @@
         <pubDate>Sat, 19 Apr 2025 21:07:20 +0800</pubDate>
         <lastBuildDate>Sat, 19 Apr 2025 21:07:20 +0800</lastBuildDate>
         <category>Harbor</category>
-        <category>Kubernetes</category>
         <category>rsync</category>
+        <category>Kubernetes</category>
         <category>MySQL</category>
-        <category>Windows</category>
         <category>Redis</category>
+        <category>Windows</category>
         <item>
             <guid isPermalink="true">http://imxuyong.cn/posts/3142072607.html</guid>
             <title>K8s初始化容器、临时容器</title>
