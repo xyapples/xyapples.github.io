@@ -9,10 +9,10 @@
         <lastBuildDate>Sun, 20 Apr 2025 17:59:58 +0800</lastBuildDate>
         <category>Harbor</category>
         <category>rsync</category>
-        <category>Kubernetes</category>
-        <category>MySQL</category>
         <category>Redis</category>
         <category>Windows</category>
+        <category>Kubernetes</category>
+        <category>MySQL</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/312010518.html</guid>
             <title>K8s亲和力Affinity</title>
@@ -20,8 +20,210 @@
             <category>Kubernetes</category>
             <pubDate>Sun, 20 Apr 2025 17:59:58 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;k8s亲和力affinity&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s亲和力affinity&#34;&gt;#&lt;/a&gt; K8s 亲和力 Affinity&lt;/h3&gt;
+&lt;p&gt;Pod 和节点之间的关系：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;某些 Pod 优先选择有 ssd=true 标签的节点，如果没有在考虑部署到其它节点；&lt;/li&gt;
+&lt;li&gt;某些 Pod 需要部署在 ssd=true 和 type=physical 的节点上，但是优先部署在 ssd=true 的节点上。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Pod 和 Pod 之间的关系：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;同一个应用的 Pod 不同的副本或者同一个项目的应用尽量或必须不部署在同一个节点或者符合某个标签的一类节点上或者不同的区域；&lt;/li&gt;
+&lt;li&gt;相互依赖的两个 Pod 尽量或必须部署在同一个节点上或者同一个域内。&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h4 id=&#34;1-affinity分类&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-affinity分类&#34;&gt;#&lt;/a&gt; 1. Affinity 分类&lt;/h4&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/hTd0wmD.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;2-节点亲和力配置详解&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-节点亲和力配置详解&#34;&gt;#&lt;/a&gt; 2. 节点亲和力配置详解&lt;/h4&gt;
+&lt;h5 id=&#34;21-硬亲和力required&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-硬亲和力required&#34;&gt;#&lt;/a&gt; 2.1 硬亲和力 required&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# cat nginx-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  annotations:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - k8s-node01
+                      - k8s-node02
+      restartPolicy: Always
+      containers:
+        - name: nginx-deploy
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 128Mi
+              cpu: 100m
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;requiredDuringSchedulingIgnoredDuringExecution：硬亲和力配置&lt;/li&gt;
+&lt;li&gt;nodeSelectorTerms：节点选择器配置，可以配置多个 matchExpressions（满足其一即可）&lt;/li&gt;
+&lt;li&gt;matchExpressions：matchExpressions 下可以配置多个 key、values（都需要满足），其中 values 可以配置多个（满足其一即可）&lt;/li&gt;
+&lt;li&gt;operator：
+&lt;ul&gt;
+&lt;li&gt;IN 相当于 key = value 的形式，&lt;strong&gt;NotIn 相当于 key!=value 的形式 (反亲和力)&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Exists: 节点存在 label 的 key 为指定的值即可，不能配置 values 字段&lt;/li&gt;
+&lt;li&gt;DoesNotExist: 节点不存在 label 的 key 为指定的值即可，不能配置 values 字段&lt;/li&gt;
+&lt;li&gt;Gt：大于 value 指定的值&lt;/li&gt;
+&lt;li&gt;Lt：小于 value 指定的值&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;22-软亲和力preferred&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-软亲和力preferred&#34;&gt;#&lt;/a&gt; 2.2 软亲和力 preferred&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# cat nginx-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 6
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: ssd
+                    operator: In
+                    values:
+                      - &#39;true&#39;
+            - weight: 50
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - k8s-master01
+      restartPolicy: Always
+      containers:
+        - name: nginx-deploy
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 128Mi
+              cpu: 100m
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;preferredDuringSchedulingIgnoredDuringExecution：软亲和力配置&lt;/li&gt;
+&lt;li&gt;weight：软亲和力的权重，权重越高优先级越大，范围 1-100&lt;/li&gt;
+&lt;li&gt;matchExpressions：matchExpressions 下可以配置多个 key、values（都需要满足），其中 values 可以配置多个（满足其一即可）&lt;/li&gt;
+&lt;li&gt;operator：
+&lt;ul&gt;
+&lt;li&gt;IN 相当于 key = value 的形式，&lt;strong&gt;NotIn 相当于 key!=value 的形式 (反亲和力)&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Exists: 节点存在 label 的 key 为指定的值即可，不能配置 values 字段&lt;/li&gt;
+&lt;li&gt;DoesNotExist: 节点不存在 label 的 key 为指定的值即可，不能配置 values 字段&lt;/li&gt;
+&lt;li&gt;Gt：大于 value 指定的值&lt;/li&gt;
+&lt;li&gt;Lt：小于 value 指定的值&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;3-pod亲和力和反亲和力详解&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-pod亲和力和反亲和力详解&#34;&gt;#&lt;/a&gt; 3. Pod 亲和力和反亲和力详解&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cat nginx-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-deploy
+  name: nginx-deploy
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      affinity:              
+        podAntiAffinity:   #pod硬反亲和力
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - nginx-deploy
+            topologyKey: kubernetes.io/hostname
+        podAntiAffinity:       #pod软反亲和力
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - nginx-deploy
+              namespaces:     #和哪个命名空间的Pod进行匹配，为空为当前命名空间
+              - default
+              topologyKey: kubernetes.io/hostname
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;labelSelector：Pod 选择器配置，可以配置多个&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;matchExpressions：matchExpressions 下可以配置多个 key、values（都需要满足），其中 values 可以配置多个（满足其一即可）&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;topologyKey：匹配的拓扑域的 key，也就是节点上 label 的 key，key 和 value 相同的为同一个域，可以用于标注不同的机房和地区&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Namespaces: 和哪个命名空间的 Pod 进行匹配，为空为当前命名空间&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;operator：配置和节点亲和力一致，但是没有 Gt 和 Lt&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;IN 相当于 key = value 的形式；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Exists: 节点存在 label 的 key 为指定的值即可，不能配置 values 字段；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;DoesNotExist: 节点不存在 label 的 key 为指定的值即可，不能配置 values 字段&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
  ]]></description>
         </item>
         <item>
