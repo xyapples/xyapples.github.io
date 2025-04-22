@@ -4,12 +4,12 @@
     <title>LinuxSre云原生</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-04-20T09:59:58.000Z</updated>
+    <category term="Kubernetes" />
     <category term="Harbor" />
     <category term="rsync" />
+    <category term="MySQL" />
     <category term="Redis" />
     <category term="Windows" />
-    <category term="Kubernetes" />
-    <category term="MySQL" />
     <entry>
         <id>http://ixuyong.cn/posts/312010518.html</id>
         <title>K8s亲和力Affinity</title>
@@ -149,7 +149,7 @@ spec:
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4 id=&#34;3-pod亲和力和反亲和力详解&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-pod亲和力和反亲和力详解&#34;&gt;#&lt;/a&gt; 3. Pod 亲和力和反亲和力详解&lt;/h4&gt;
+&lt;h4 id=&#34;3-pod亲和力详解&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-pod亲和力详解&#34;&gt;#&lt;/a&gt; 3. Pod 亲和力详解&lt;/h4&gt;
 &lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cat nginx-deploy.yaml 
 apiVersion: apps/v1
 kind: Deployment
@@ -219,6 +219,389 @@ spec:
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
+&lt;h4 id=&#34;4-节点亲和力配置示例&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-节点亲和力配置示例&#34;&gt;#&lt;/a&gt; 4. 节点亲和力配置示例&lt;/h4&gt;
+&lt;p&gt;Pod 尽量部署在 ssd=true 和 type=physical 的节点上，但是优先部署在 ssd=true 的节点上，不能部署 label 为 gpu=true 的节点。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl label nodes k8s-node01 ssd=true
+[root@k8s-master01 ~]# kubectl label nodes k8s-master01 ssd=true
+[root@k8s-master01 ~]# kubectl label nodes k8s-master01 gpu=true
+[root@k8s-master01 ~]# kubectl label nodes k8s-node02 type=physical
+
+[root@k8s-master01 ~]# cat nginx-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  annotations:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+      annotations:
+        app: nginx-deploy
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: ssd
+                    operator: In
+                    values:
+                      - &#39;true&#39;
+                  - key: gpu
+                    operator: NotIn
+                    values:
+                      - &#39;true&#39;
+            - weight: 50
+              preference:
+                matchExpressions:
+                  - key: type
+                    operator: In
+                    values:
+                      - physical
+      restartPolicy: Always
+      containers:
+        - name: nginx-deploy
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 128Mi
+              cpu: 100m
+          volumeMounts:
+          - name: tz-config
+            mountPath: /usr/share/zoneinfo/Asia/Shanghai
+          - name: tz-config
+            mountPath: /etc/localtime
+          - name: timezone
+            mountPath: /etc/timezone
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+
+
+[root@k8s-master01 ~]# kubectl apply -f nginx-deploy.yaml 
+[root@k8s-master01 ~]# kubectl get pods -o wide
+NAME                          READY   STATUS    RESTARTS   AGE   IP              NODE         NOMINATED NODE   READINESS GATES
+nginx-deploy-7d65fbdf-2b4jr   1/1     Running   0          5s    172.16.85.236   k8s-node01   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-7d65fbdf-jjzwr   1/1     Running   0          5s    172.16.58.251   k8s-node02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-7d65fbdf-kx5lm   1/1     Running   0          5s    172.16.85.237   k8s-node01   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-7d65fbdf-lrmcg   1/1     Running   0          5s    172.16.85.238   k8s-node01   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-7d65fbdf-n6mlp   1/1     Running   0          5s    172.16.58.250   k8s-node02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;5-pod亲和力-反亲和力配置示例&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#5-pod亲和力-反亲和力配置示例&#34;&gt;#&lt;/a&gt; 5. Pod 亲和力、反亲和力配置示例&lt;/h4&gt;
+&lt;h5 id=&#34;51-pod反亲和力required&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#51-pod反亲和力required&#34;&gt;#&lt;/a&gt; 5.1 Pod 反亲和力 required&lt;/h5&gt;
+&lt;p&gt;同一个应用部署在不同的宿主机&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#1.节点存在污点pod无法调度至该节点
+# kubectl describe nodes|grep -i taint
+Taints:             &amp;lt;none&amp;gt;
+Taints:             &amp;lt;none&amp;gt;
+Taints:             &amp;lt;none&amp;gt;
+Taints:             &amp;lt;none&amp;gt;
+Taints:             &amp;lt;none&amp;gt;
+
+#2.pod反亲和力required
+# cat nginx-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - nginx-deploy
+              topologyKey: kubernetes.io/hostname
+      restartPolicy: Always
+      containers:
+        - name: nginx-deploy
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 128Mi
+              cpu: 100m
+          volumeMounts:
+          - name: tz-config
+            mountPath: /usr/share/zoneinfo/Asia/Shanghai
+          - name: tz-config
+            mountPath: /etc/localtime
+          - name: timezone
+            mountPath: /etc/timezone
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+
+#3.部署deployment
+[root@k8s-master01 ~]# kubectl apply -f nginx-deploy.yaml 
+[root@k8s-master01 ~]# kubectl get pods -o wide
+NAME                            READY   STATUS    RESTARTS   AGE   IP               NODE           NOMINATED NODE   READINESS GATES
+nginx-deploy-5787887b6f-4654b   1/1     Running   0          4s    172.16.85.234    k8s-node01     &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-5787887b6f-8mq7s   1/1     Running   0          4s    172.16.122.152   k8s-master02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-5787887b6f-fdkft   1/1     Running   0          4s    172.16.58.247    k8s-node02     &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-5787887b6f-jzcmd   1/1     Running   0          4s    172.16.32.152    k8s-master01   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-5787887b6f-qdq9g   1/1     Running   0          4s    172.16.195.14    k8s-master03   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+
+#4.将副本扩成6个，由于K8s集群只有5个节点，即5个topologyKey（拓扑域），每个域只能有一个副本，所以有一个pod会pending
+[root@k8s-master01 ~]# kubectl scale deploy nginx-deploy --replicas=6 
+[root@k8s-master01 ~]# kubectl get pods -o wide
+NAME                            READY   STATUS    RESTARTS   AGE     IP               NODE           NOMINATED NODE   READINESS GATES
+nginx-deploy-5787887b6f-4654b   1/1     Running   0          4m44s   172.16.85.234    k8s-node01     &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-5787887b6f-8mq7s   1/1     Running   0          4m44s   172.16.122.152   k8s-master02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-5787887b6f-fdkft   1/1     Running   0          4m44s   172.16.58.247    k8s-node02     &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-5787887b6f-jzcmd   1/1     Running   0          4m44s   172.16.32.152    k8s-master01   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-5787887b6f-qdq9g   1/1     Running   0          4m44s   172.16.195.14    k8s-master03   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-5787887b6f-sztm7   0/1     Pending   0          9s      &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;         &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+
+[root@k8s-master01 ~]# kubectl describe pods nginx-deploy-5787887b6f-sztm7
+...
+Events:
+  Type     Reason            Age   From               Message
+  ----     ------            ----  ----               -------
+  Warning  FailedScheduling  102s  default-scheduler  0/5 nodes are available: 5 node(s) didn&#39;t match pod anti-affinity rules. preemption: 0/5 nodes are available: 5 No preemption victims found for incoming pod.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;将副本扩成 6 个，有一个会 pending 状态，原因 K8s 集群只有 5 个节点，即 5 个 topologyKey（拓扑域），每个拓扑域只能有一个副本，所以有一个 pod 会 pending。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;topologyKey：匹配的拓扑域的 key，也就是节点上 label 的 key，key 和 value 相同的为同一个域，可以用于标注不同的机房和地区&lt;/strong&gt;。&lt;/p&gt;
+&lt;h5 id=&#34;52-pod反亲和力preferred&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#52-pod反亲和力preferred&#34;&gt;#&lt;/a&gt; 5.2 Pod 反亲和力 preferred&lt;/h5&gt;
+&lt;p&gt;同一个应用尽量部署在不同的宿主机&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#1.节点存在污点pod无法调度至该节点
+# kubectl describe nodes|grep -i taint
+Taints:             &amp;lt;none&amp;gt;
+Taints:             &amp;lt;none&amp;gt;
+Taints:             &amp;lt;none&amp;gt;
+Taints:             &amp;lt;none&amp;gt;
+Taints:             &amp;lt;none&amp;gt;
+
+#2.pod反亲和力preferred
+# cat nginx-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 6
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - nginx-deploy
+                topologyKey: kubernetes.io/hostname
+              weight: 100
+      restartPolicy: Always
+      containers:
+        - name: nginx-deploy
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 128Mi
+              cpu: 100m
+          volumeMounts:
+          - name: tz-config
+            mountPath: /usr/share/zoneinfo/Asia/Shanghai
+          - name: tz-config
+            mountPath: /etc/localtime
+          - name: timezone
+            mountPath: /etc/timezone
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+
+#3.部署deployment
+[root@k8s-master01 ~]# kubectl apply -f nginx-deploy.yaml 
+[root@k8s-master01 ~]# kubectl get pods -o wide
+NAME                            READY   STATUS    RESTARTS   AGE   IP               NODE           NOMINATED NODE   READINESS GATES
+nginx-deploy-7c47567b79-97qs5   1/1     Running   0          6s    172.16.122.153   k8s-master02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-7c47567b79-g49h4   1/1     Running   0          6s    172.16.85.235    k8s-node01     &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-7c47567b79-g5n2s   1/1     Running   0          6s    172.16.58.248    k8s-node02     &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-7c47567b79-g5v5b   1/1     Running   0          6s    172.16.195.15    k8s-master03   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-7c47567b79-pjwws   1/1     Running   0          6s    172.16.58.249    k8s-node02     &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-7c47567b79-q2hn5   1/1     Running   0          6s    172.16.32.153    k8s-master01   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;53-pod亲和力required&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#53-pod亲和力required&#34;&gt;#&lt;/a&gt; 5.3 Pod 亲和力 required&lt;/h5&gt;
+&lt;p&gt;同一个应用必须部署在同一个宿主机&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cat nginx-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-deploy
+  name: nginx-deploy
+spec:
+  replicas: 8
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      affinity:              
+        podAffinity:   #pod硬亲和力
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - nginx-deploy
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+        - name: timezone
+          mountPath: /etc/timezone
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+      volumes:
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: File
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: File
+
+[root@k8s-master01 ~]# kubectl apply -f nginx-deploy.yaml 
+[root@k8s-master01 ~]# kubectl get pods -o wide
+NAME                           READY   STATUS    RESTARTS   AGE   IP              NODE         NOMINATED NODE   READINESS GATES
+nginx-deploy-dbcc4d65c-2sthn   1/1     Running   0          12s   172.16.58.255   k8s-node02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-dbcc4d65c-78nxf   1/1     Running   0          12s   172.16.58.197   k8s-node02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-dbcc4d65c-82ssq   1/1     Running   0          12s   172.16.58.194   k8s-node02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-dbcc4d65c-986cb   1/1     Running   0          12s   172.16.58.254   k8s-node02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-dbcc4d65c-9rnt7   1/1     Running   0          12s   172.16.58.252   k8s-node02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-dbcc4d65c-knm8q   1/1     Running   0          12s   172.16.58.195   k8s-node02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-dbcc4d65c-kx56f   1/1     Running   0          12s   172.16.58.253   k8s-node02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+nginx-deploy-dbcc4d65c-sqlhf   1/1     Running   0          12s   172.16.58.198   k8s-node02   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;54-pod亲和力preferre&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#54-pod亲和力preferre&#34;&gt;#&lt;/a&gt; 5.4 Pod 亲和力 preferre&lt;/h5&gt;
+&lt;p&gt;同一个应用尽量部署在同一个宿主机&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat nginx-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-deploy
+  name: nginx-deploy
+spec:
+  replicas: 20
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      affinity:              
+        podAffinity:       #pod软亲和力
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - nginx-deploy
+              namespaces:     #和哪个命名空间的Pod进行匹配，为空为当前命名空间
+              - default
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+        - name: timezone
+          mountPath: /etc/timezone
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+      volumes:
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: File
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: File
+&lt;/code&gt;&lt;/pre&gt;
 </content>
         <category term="Kubernetes" />
         <updated>2025-04-20T09:59:58.000Z</updated>
@@ -1979,6 +2362,55 @@ nginx   3/3     8m58s
       imagePullPolicy: IfNotPresent
       image: docker.io/library/nginx:1.21.1
       imageID: docker.io/library/nginx@sha256:a05b0cdd4fc1be3b224ba9662ebdf98fe44c09c0c9215b45f84344c12867002e
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;26-statefulset-挂载动态存储&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#26-statefulset-挂载动态存储&#34;&gt;#&lt;/a&gt; 2.6 StatefulSet 挂载动态存储&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: nginx 
+  serviceName: &amp;quot;nginx&amp;quot;
+  replicas: 3 1
+  template:
+    metadata:
+      labels:
+        app: nginx 
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.20
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      accessModes: [ &amp;quot;ReadWriteOnce&amp;quot; ]
+      storageClassName: &amp;quot;rook-ceph-block&amp;quot;
+      resources:
+        requests:
+          storage: 10Gi
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;3守护进程集-daemonset&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3守护进程集-daemonset&#34;&gt;#&lt;/a&gt; 3. 守护进程集 DaemonSet&lt;/h4&gt;
 &lt;pre&gt;&lt;code&gt;apiVersion: apps/v1
