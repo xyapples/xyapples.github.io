@@ -4,12 +4,12 @@
     <title>LinuxSre云原生 • Posts by &#34;rsync&#34; tag</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-03-30T12:45:48.000Z</updated>
-    <category term="Harbor" />
     <category term="Kubernetes" />
-    <category term="Windows" />
+    <category term="Harbor" />
     <category term="rsync" />
     <category term="MySQL" />
     <category term="Redis" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/1922841233.html</id>
         <title>Rsync服务实践</title>
