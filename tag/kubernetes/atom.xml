@@ -3,13 +3,470 @@
     <id>http://ixuyong.cn</id>
     <title>LinuxSre云原生 • Posts by &#34;kubernetes&#34; tag</title>
     <link href="http://ixuyong.cn" />
-    <updated>2025-04-20T09:59:58.000Z</updated>
-    <category term="Kubernetes" />
+    <updated>2025-04-23T11:55:19.000Z</updated>
     <category term="Harbor" />
+    <category term="Kubernetes" />
     <category term="rsync" />
     <category term="MySQL" />
     <category term="Redis" />
     <category term="Windows" />
+    <entry>
+        <id>http://ixuyong.cn/posts/176412055.html</id>
+        <title>K8s准入控制ResourceQuota、LimitRange、QoS服务质量</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/176412055.html"/>
+        <content type="html">&lt;h3 id=&#34;k8s准入控制resourcequota-limitrange-qos服务质量&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s准入控制resourcequota-limitrange-qos服务质量&#34;&gt;#&lt;/a&gt; K8s 准入控制 ResourceQuota、LimitRange、QoS 服务质量&lt;/h3&gt;
+&lt;h4 id=&#34;1-resourcequota配置解析&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-resourcequota配置解析&#34;&gt;#&lt;/a&gt; 1. ResourceQuota 配置解析&lt;/h4&gt;
+&lt;p&gt;ResourceQuotas 实现资源配额，避免过度创建资源，针对 namespace 进行限制。cpu 内存则是根据 pod 配置的 resources 总额进行限制，如果没有配置 resources 参数则无法限制。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: resourcequota-test
+  namespace: test
+  labels:
+    app: resourcequota
+spec:
+  hard:
+    pods: 3
+    requests.cpu: 3
+    requests.memory: 512Mi
+    limits.cpu: 8
+    limits.memory: 16Gi
+    configmaps: 201
+    requests.storage: 40Gi
+    persistentvolumeclaims: 20
+    replicationcontrollers: 20
+    secrets: 20
+    services: 50
+    services.loadbalancers: &amp;quot;2&amp;quot;
+    services.nodeports: &amp;quot;10&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;pods：限制最多启动 Pod 的个数&lt;/li&gt;
+&lt;li&gt;requests.cpu：限制最高 CPU 请求数&lt;/li&gt;
+&lt;li&gt;requests.memory：限制最高内存的请求数&lt;/li&gt;
+&lt;li&gt;limits.cpu：限制最高 CPU 的 limit 上限&lt;/li&gt;
+&lt;li&gt;limits.memory：限制最高内存的 limit 上限&lt;/li&gt;
+&lt;li&gt;services：限制 services 数量&lt;/li&gt;
+&lt;li&gt;services.nodeports：限制 services 中 nodeport 类型 service 数量&lt;/li&gt;
+&lt;li&gt;services.loadbalancers：限制 services 中 loadbalancers 类型 service 数量&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;11-resourcequota配置示例&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-resourcequota配置示例&#34;&gt;#&lt;/a&gt; 1.1 ResourceQuota 配置示例&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1.限制test命名空间pods数量量为3、configmap数量为2
+[root@k8s-master01 resourcequota]# cat rq-test.yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: resourcequota-test
+  namespace: test
+  labels:
+    app: resourcequota
+spec:
+  hard:
+    pods: 3
+#    requests.cpu: 3
+#    requests.memory: 512Mi
+#    limits.cpu: 8
+#    limits.memory: 16Gi
+    configmaps: 2
+#    requests.storage: 40Gi
+#    persistentvolumeclaims: 20
+#    replicationcontrollers: 20
+#    secrets: 20
+#    services: 50
+#    services.loadbalancers: &amp;quot;2&amp;quot;
+#    services.nodeports: &amp;quot;10&amp;quot;
+
+#2.test命名空间已创建configmap数量为1,限制数量为2
+[root@k8s-master01 resourcequota]# kubectl get resourcequota -n test
+NAME                 AGE   REQUEST                      LIMIT
+resourcequota-test   61s   configmaps: 1/2, pods: 0/3  
+
+#3.test命名空间创建第2个configmap时正常，创建第3个configmap时报错
+[root@k8s-master01 resourcequota]# kubectl create cm rq-cm1 -n test --from-literal=key1=value1
+[root@k8s-master01 resourcequota]# kubectl create cm rq-cm2 -n test --from-literal=key2=value2
+error: failed to create configmap: configmaps &amp;quot;rq-cm2&amp;quot; is forbidden: exceeded quota: resourcequota-test, requested: configmaps=1, used: configmaps=2, limited: configmaps=2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;2-limitrange配置解析&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-limitrange配置解析&#34;&gt;#&lt;/a&gt; 2. LimitRange 配置解析&lt;/h4&gt;
+&lt;p&gt;虽然 ResourceQuota 可以实现资源配额，可以限制某个命名空间内存和 CPU，但是如果创建的 Pod 都没有配置 resources 参数则无法限制。如果配置 LimitRange，Pod 没有配置 resources 情况下，创建的 Pod 会根据 LimitRange 配置自动添加 CPU 内存配置，并且可以限制 resources 参数最大配置和最小配置，LimitRange 针对 Pod 进行限制。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-mem-limit-range
+  namespace: test
+spec:
+  limits:
+  - default:         #限制CPU内存默认limits配置
+      cpu: 1
+      memory: 512Mi
+    defaultRequest:  #限制CPU内存默认request配置
+      cpu: 0.5
+      memory: 256Mi
+    max:                #限制CPU内存最大配置 
+      cpu: &amp;quot;4000m&amp;quot;
+      memory: 4Gi
+    min:                #限制CPU内存最小配置
+      cpu: &amp;quot;100m&amp;quot;
+      memory: 100Mi
+    type: Container
+  - type: PersistentVolumeClaim    #限制pvc大小
+    max:
+      storage: 2Gi
+    min:
+      storage: 1Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;default：默认 limits 配置&lt;/li&gt;
+&lt;li&gt;defaultRequest：默认 requests 配置&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;21-配置默认的requests和limits&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-配置默认的requests和limits&#34;&gt;#&lt;/a&gt; 2.1 配置默认的 requests 和 limits&lt;/h5&gt;
+&lt;p&gt;Pod 没有配置 resources 情况下，创建的 Pod 会根据 LimitRange 配置自动添加 CPU 内存配置。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#1.创建LimitRange
+[root@k8s-master01 resourcequota]# cat limitrange.yaml 
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-mem-limit-range
+  namespace: test
+spec:
+  limits:
+  - default:         #限制CPU内存默认limits配置
+      cpu: 1
+      memory: 512Mi
+    defaultRequest:  #限制CPU内存默认request配置
+      cpu: 0.5
+      memory: 256Mi
+    max:                #限制CPU内存最大配置 
+      cpu: &amp;quot;4000m&amp;quot;
+      memory: 4Gi
+    min:                #限制CPU内存最小配置
+      cpu: &amp;quot;100m&amp;quot;
+      memory: 100Mi
+    type: Container
+  - type: PersistentVolumeClaim    #限制pvc大小
+    max:
+      storage: 2Gi
+    min:
+      storage: 1Gi  
+      
+[root@k8s-master01 resourcequota]# kubectl apply -f limitrange.yaml
+[root@k8s-master01 resourcequota]# kubectl get limitrange -n test
+NAME                  CREATED AT
+cpu-mem-limit-range   2025-04-23T07:55:03Z
+
+#2.创建deployment, 查看是否会根据LimitRange自动添加CPU内存配置
+[root@k8s-master01 resourcequota]# cat deploy-limitrange.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-limirange
+  labels:
+    app: deploy-limirange
+  namespace: test
+spec:
+  selector:
+    matchLabels:
+      app: deploy-limirange
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: deploy-limirange
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: deploy-limirange
+          image: nginx
+          imagePullPolicy: IfNotPresent
+
+[root@k8s-master01 resourcequota]# kubectl get pod -n test
+NAME                                READY   STATUS    RESTARTS   AGE
+deploy-limirange-854c9545ff-grpxr   1/1     Running   0          39s
+[root@k8s-master01 resourcequota]# kubectl get pod -n test -oyaml
+...
+  spec:
+    containers:
+    - image: nginx
+      imagePullPolicy: IfNotPresent
+      name: deploy-limirange
+      resources:
+        limits:
+          cpu: &amp;quot;1&amp;quot;
+          memory: 512Mi
+        requests:
+          cpu: 500m
+          memory: 256Mi
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;22-限制requests和limits范围&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-限制requests和limits范围&#34;&gt;#&lt;/a&gt; 2.2 限制 requests 和 limits 范围&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1.创建LimitRange
+[root@k8s-master01 resourcequota]# cat limitrange.yaml 
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-mem-limit-range
+  namespace: test
+spec:
+  limits:
+  - default:         #限制CPU内存默认limits配置
+      cpu: 1
+      memory: 512Mi
+    defaultRequest:  #限制CPU内存默认request配置
+      cpu: 0.5
+      memory: 256Mi
+    max:                #限制CPU内存最大配置 
+      cpu: &amp;quot;4000m&amp;quot;
+      memory: 4Gi
+    min:                #限制CPU内存最小配置
+      cpu: &amp;quot;100m&amp;quot;
+      memory: 100Mi
+    type: Container
+  - type: PersistentVolumeClaim    #限制pvc大小
+    max:
+      storage: 2Gi
+    min:
+      storage: 1Gi  
+
+#2.创建deployment, CPU内存limits和requests高于/低于LimitRangeCPU内存max、min配置
+[root@k8s-master01 resourcequota]# cat deploy-limitrange.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-limirange
+  labels:
+    app: deploy-limirange
+  namespace: test
+spec:
+  selector:
+    matchLabels:
+      app: deploy-limirange
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: deploy-limirange
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: deploy-limirange
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 8096Mi
+              cpu: 5
+            requests:
+              memory: 64Mi
+              cpu: 10m
+
+#3.由于创建deployment, CPU内存limits和requests高于/低于LimitRangeCPU内存max、min配置，pod没有创建
+[root@k8s-master01 resourcequota]# kubectl create -f deploy-limitrange.yaml 
+
+[root@k8s-master01 resourcequota]# kubectl get deploy deploy-limirange -n test
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+deploy-limirange   0/1     0            0           2m7s
+[root@k8s-master01 resourcequota]# kubectl get pods -n test
+
+[root@k8s-master01 resourcequota]# kubectl describe rs deploy-limirange-54c5d69b4b -n test
+Name:           deploy-limirange-54c5d69b4b
+Namespace:      test
+Selector:       app=deploy-limirange,pod-template-hash=54c5d69b4b
+Labels:         app=deploy-limirange
+                pod-template-hash=54c5d69b4b
+Annotations:    deployment.kubernetes.io/desired-replicas: 1
+                deployment.kubernetes.io/max-replicas: 2
+                deployment.kubernetes.io/revision: 1
+Controlled By:  Deployment/deploy-limirange
+Replicas:       0 current / 1 desired
+Pods Status:    0 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:  app=deploy-limirange
+           pod-template-hash=54c5d69b4b
+  Containers:
+   deploy-limirange:
+    Image:      nginx
+    Port:       &amp;lt;none&amp;gt;
+    Host Port:  &amp;lt;none&amp;gt;
+    Limits:
+      cpu:     5
+      memory:  8096Mi
+    Requests:
+      cpu:         10m
+      memory:      64Mi
+    Environment:   &amp;lt;none&amp;gt;
+    Mounts:        &amp;lt;none&amp;gt;
+  Volumes:         &amp;lt;none&amp;gt;
+  Node-Selectors:  &amp;lt;none&amp;gt;
+  Tolerations:     &amp;lt;none&amp;gt;
+Conditions:
+  Type             Status  Reason
+  ----             ------  ------
+  ReplicaFailure   True    FailedCreate
+Events:
+  Type     Reason        Age                 From                   Message
+  ----     ------        ----                ----                   -------
+  Warning  FailedCreate  3m8s                replicaset-controller  Error creating: pods &amp;quot;deploy-limirange-54c5d69b4b-zxhzk&amp;quot; is forbidden: [minimum cpu usage per Container is 100m, but request is 10m, minimum memory usage per Container is 100Mi, but request is 64Mi, maximum cpu usage per Container is 4, but limit is 5, maximum memory usage per Container is 4Gi, but limit is 8096Mi]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;23-限制存储空间大小&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#23-限制存储空间大小&#34;&gt;#&lt;/a&gt; 2.3 限制存储空间大小&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1.创建LimitRange
+[root@k8s-master01 resourcequota]# cat limitrange.yaml 
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-mem-limit-range
+  namespace: test
+spec:
+  limits:
+  - default:         #限制CPU内存默认limits配置
+      cpu: 1
+      memory: 512Mi
+    defaultRequest:  #限制CPU内存默认request配置
+      cpu: 0.5
+      memory: 256Mi
+    max:                #限制CPU内存最大配置 
+      cpu: &amp;quot;4000m&amp;quot;
+      memory: 4Gi
+    min:                #限制CPU内存最小配置
+      cpu: &amp;quot;100m&amp;quot;
+      memory: 100Mi
+    type: Container
+  - type: PersistentVolumeClaim    #限制pvc大小
+    max:
+      storage: 2Gi
+    min:
+      storage: 1Gi  
+  
+#2.由于创建的pvc大于2G，所以报错  
+[root@k8s-master01 ~]# cat pvc.yaml 
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sc-pvc-001
+spec:
+  storageClassName: &amp;quot;nfs-storage&amp;quot;     # 明确指定使用哪个sc的供应商来创建pv
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 3Gi                      # 根据业务实际大小进行资源申请  
+[root@k8s-master01 ~]# kubectl create -f pvc.yaml -n test
+Error from server (Forbidden): error when creating &amp;quot;pvc.yaml&amp;quot;: persistentvolumeclaims &amp;quot;sc-pvc-001&amp;quot; is forbidden: maximum storage usage per PersistentVolumeClaim is 2Gi, but request is 3Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;3-服务质量-qos&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-服务质量-qos&#34;&gt;#&lt;/a&gt; 3. 服务质量 QoS&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Guaranteed：最高服务质量，当宿主机内存不够时，会先 kill 掉 QoS 为 BestEffort 和 Burstable 的 Pod，如果内存还是不够，才会 kill 掉 QoS 为 Guaranteed，该级别 Pod 的资源占用量一般比较明确，即 requests 的 cpu 和 memory 和 limits 的 cpu 和 memory 配置的一致。&lt;/li&gt;
+&lt;li&gt;Burstable： 服务质量低于 Guaranteed，当宿主机内存不够时，会先 kill 掉 QoS 为 BestEffort 的 Pod，如果内存还是不够之后就会 kill 掉 QoS 级别为 Burstable 的 Pod，用来保证 QoS 质量为 Guaranteed 的 Pod，该级别 Pod 一般知道最小资源使用量，但是当机器资源充足时，还是想尽可能的使用更多的资源，即 limits 字段的 cpu 和 memory 大于 requests 的 cpu 和 memory 的配置。&lt;/li&gt;
+&lt;li&gt;BestEffort：尽力而为，当宿主机内存不够时，首先 kill 的就是该 QoS 的 Pod，用以保证 Burstable 和 Guaranteed 级别的 Pod 正常运行。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;31-实现qos为guaranteed的pod&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#31-实现qos为guaranteed的pod&#34;&gt;#&lt;/a&gt; 3.1 实现 QoS 为 Guaranteed 的 Pod&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Pod 中的每个容器必须指定 limits.memory 和 requests.memory，并且两者需要相等；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Pod 中的每个容器必须指定 limits.cpu 和 limits.memory，并且两者需要相等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: nginx-deploy
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 1024Mi
+              cpu: 1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;32-实现qos为burstable的pod&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#32-实现qos为burstable的pod&#34;&gt;#&lt;/a&gt; 3.2 实现 QoS 为 Burstable 的 Pod&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Pod 不符合 Guaranteed 的配置要求；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Pod 中至少有一个容器配置了 requests.cpu 或 requests.memory。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: nginx-deploy
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 1024Mi
+              cpu: 1
+            requests:
+              memory: 128Mi
+              cpu: 100m
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;33-实现qos为besteffort的pod&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#33-实现qos为besteffort的pod&#34;&gt;#&lt;/a&gt; 3.3 实现 QoS 为 BestEffort 的 Pod&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;不设置 resources 参数&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-deploy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: nginx-deploy
+          image: nginx
+          imagePullPolicy: IfNotPresent
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+</content>
+        <category term="Kubernetes" />
+        <updated>2025-04-23T11:55:19.000Z</updated>
+    </entry>
     <entry>
         <id>http://ixuyong.cn/posts/312010518.html</id>
         <title>K8s亲和力Affinity</title>
@@ -602,6 +1059,7 @@ spec:
           path: /usr/share/zoneinfo/Asia/Shanghai
           type: File
 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 </content>
         <category term="Kubernetes" />
         <updated>2025-04-20T09:59:58.000Z</updated>
@@ -759,6 +1217,7 @@ spec:
           effect: NoExecute
           tolerationSeconds: 180
 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 </content>
         <category term="Kubernetes" />
         <updated>2025-04-20T07:51:58.000Z</updated>
@@ -983,6 +1442,7 @@ Hello from the Kubernetes cluster
 &lt;li&gt;successfulJobsHistoryLimit：保留多少已完成的任务，按需配置。&lt;/li&gt;
 &lt;li&gt;failedJobsHistoryLimit：保留多少失败的任务。&lt;/li&gt;
 &lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 </content>
         <category term="Kubernetes" />
         <updated>2025-04-19T13:00:21.000Z</updated>
