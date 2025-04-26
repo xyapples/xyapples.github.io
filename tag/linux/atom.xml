@@ -5,12 +5,12 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-04-26T08:20:14.000Z</updated>
     <category term="Harbor" />
-    <category term="Kubernetes" />
-    <category term="rsync" />
     <category term="Linux" />
+    <category term="rsync" />
+    <category term="MySQL" />
+    <category term="Kubernetes" />
     <category term="Redis" />
     <category term="Windows" />
-    <category term="MySQL" />
     <entry>
         <id>http://ixuyong.cn/posts/3364424907.html</id>
         <title>阿里云+Github构建镜像仓库</title>
