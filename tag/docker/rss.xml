@@ -1,21 +1,26 @@
 <?xml version="1.0"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-    <id>http://ixuyong.cn</id>
-    <title>LinuxSre云原生 • Posts by &#34;linux&#34; tag</title>
-    <link href="http://ixuyong.cn" />
-    <updated>2025-04-26T08:20:14.000Z</updated>
-    <category term="Harbor" />
-    <category term="Kubernetes" />
-    <category term="rsync" />
-    <category term="Linux" />
-    <category term="MySQL" />
-    <category term="Redis" />
-    <category term="Windows" />
-    <entry>
-        <id>http://ixuyong.cn/posts/3364424907.html</id>
-        <title>阿里云+Github构建镜像仓库</title>
-        <link rel="alternate" href="http://ixuyong.cn/posts/3364424907.html"/>
-        <content type="html">&lt;h3 id=&#34;阿里云github构建镜像仓库解决-k8sgcrio访问&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#阿里云github构建镜像仓库解决-k8sgcrio访问&#34;&gt;#&lt;/a&gt; 阿里云 + github 构建镜像仓库解决 k8s.gcr.io 访问&lt;/h3&gt;
+<rss version="2.0">
+    <channel>
+        <title>LinuxSre云原生 • Posts by &#34;docker&#34; tag</title>
+        <link>http://ixuyong.cn</link>
+        <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
+        <language>zh-CN</language>
+        <pubDate>Sat, 26 Apr 2025 16:20:14 +0800</pubDate>
+        <lastBuildDate>Sat, 26 Apr 2025 16:20:14 +0800</lastBuildDate>
+        <category>Docker</category>
+        <category>Harbor</category>
+        <category>Kubernetes</category>
+        <category>rsync</category>
+        <category>Windows</category>
+        <category>Redis</category>
+        <category>MySQL</category>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/3364424907.html</guid>
+            <title>阿里云+Github构建镜像仓库</title>
+            <link>http://ixuyong.cn/posts/3364424907.html</link>
+            <category>Docker</category>
+            <pubDate>Sat, 26 Apr 2025 16:20:14 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;阿里云github构建镜像仓库解决-k8sgcrio访问&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#阿里云github构建镜像仓库解决-k8sgcrio访问&#34;&gt;#&lt;/a&gt; 阿里云 + github 构建镜像仓库解决 k8s.gcr.io 访问&lt;/h3&gt;
 &lt;p&gt;&lt;a href=&#34;http://xn--k8s-xi9d897o.gcr.io/&#34;&gt;由于 k8s.gcr.io/&lt;/a&gt; 镜像仓库位于国外，国内使用 kubeadm 构建 docker 集群时无法访问相应的 docker 镜像。&lt;/p&gt;
 &lt;h4 id=&#34;1-登录github创建仓库&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-登录github创建仓库&#34;&gt;#&lt;/a&gt; &lt;strong&gt;1.&lt;/strong&gt; 登录 Github 创建仓库&lt;/h4&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/vgZkKBC.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
@@ -60,8 +65,7 @@ FROM registry.k8s.io/ingress-nginx/controller:v1.12.1
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/155pUrE.png&#34; alt=&#34;7.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/155pUrE.png&#34; alt=&#34;7.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/AU1371X.png&#34; alt=&#34;8.png&#34; /&gt;&lt;/p&gt;
-</content>
-        <category term="Linux" />
-        <updated>2025-04-26T08:20:14.000Z</updated>
-    </entry>
-</feed>
+ ]]></description>
+        </item>
+    </channel>
+</rss>

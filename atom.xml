@@ -4,13 +4,13 @@
     <title>LinuxSre云原生</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-04-26T08:20:14.000Z</updated>
+    <category term="Docker" />
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="rsync" />
-    <category term="Linux" />
-    <category term="MySQL" />
-    <category term="Redis" />
     <category term="Windows" />
+    <category term="Redis" />
+    <category term="MySQL" />
     <entry>
         <id>http://ixuyong.cn/posts/3364424907.html</id>
         <title>阿里云+Github构建镜像仓库</title>
@@ -61,7 +61,7 @@ FROM registry.k8s.io/ingress-nginx/controller:v1.12.1
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/155pUrE.png&#34; alt=&#34;7.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/AU1371X.png&#34; alt=&#34;8.png&#34; /&gt;&lt;/p&gt;
 </content>
-        <category term="Linux" />
+        <category term="Docker" />
         <updated>2025-04-26T08:20:14.000Z</updated>
     </entry>
     <entry>

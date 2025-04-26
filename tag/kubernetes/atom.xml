@@ -4,13 +4,13 @@
     <title>LinuxSre云原生 • Posts by &#34;kubernetes&#34; tag</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-04-24T13:43:19.000Z</updated>
+    <category term="Docker" />
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="rsync" />
-    <category term="Linux" />
-    <category term="MySQL" />
-    <category term="Redis" />
     <category term="Windows" />
+    <category term="Redis" />
+    <category term="MySQL" />
     <entry>
         <id>http://ixuyong.cn/posts/3030097036.html</id>
         <title>K8S云原生存储Rook-Ceph</title>

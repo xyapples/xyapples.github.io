@@ -7,13 +7,13 @@
         <language>zh-CN</language>
         <pubDate>Thu, 24 Apr 2025 21:43:19 +0800</pubDate>
         <lastBuildDate>Thu, 24 Apr 2025 21:43:19 +0800</lastBuildDate>
+        <category>Docker</category>
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>rsync</category>
-        <category>Linux</category>
-        <category>MySQL</category>
-        <category>Redis</category>
         <category>Windows</category>
+        <category>Redis</category>
+        <category>MySQL</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/3030097036.html</guid>
             <title>K8S云原生存储Rook-Ceph</title>

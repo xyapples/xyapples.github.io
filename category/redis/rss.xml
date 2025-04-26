@@ -7,13 +7,13 @@
         <language>zh-CN</language>
         <pubDate>Wed, 09 Apr 2025 19:50:06 +0800</pubDate>
         <lastBuildDate>Wed, 09 Apr 2025 19:50:06 +0800</lastBuildDate>
+        <category>Docker</category>
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>rsync</category>
-        <category>Linux</category>
-        <category>MySQL</category>
-        <category>Redis</category>
         <category>Windows</category>
+        <category>Redis</category>
+        <category>MySQL</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1414180692.html</guid>
             <title>Redis集群（主从+哨兵）模式</title>
