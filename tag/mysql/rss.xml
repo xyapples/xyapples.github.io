@@ -7,13 +7,13 @@
         <language>zh-CN</language>
         <pubDate>Wed, 09 Apr 2025 22:02:40 +0800</pubDate>
         <lastBuildDate>Wed, 09 Apr 2025 22:02:40 +0800</lastBuildDate>
+        <category>Harbor</category>
         <category>Kubernetes</category>
         <category>rsync</category>
         <category>Linux</category>
-        <category>Harbor</category>
-        <category>MySQL</category>
         <category>Redis</category>
         <category>Windows</category>
+        <category>MySQL</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2628187572.html</guid>
             <title>MySQL运维DBA应用与实践</title>
