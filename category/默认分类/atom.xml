@@ -4,12 +4,12 @@
     <title>LinuxSre云原生 • Posts by &#34;默认分类&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-04-26T08:52:06.000Z</updated>
-    <category term="Docker" />
     <category term="Harbor" />
+    <category term="Docker" />
     <category term="Kubernetes" />
     <category term="默认tags" />
-    <category term="rsync" />
     <category term="MySQL" />
+    <category term="rsync" />
     <category term="Redis" />
     <category term="Windows" />
     <entry>
@@ -1475,6 +1475,25 @@ server &amp;#123;
 &amp;#125;
 
 [root@lb ~]# mkdir /etc/nginx/sslkey -p
+
+
+[root@lb ~]# cat proxy_params 
+proxy_http_version 1.1;
+proxy_set_header Connectin &amp;quot;&amp;quot;;
+
+proxy_set_header Host $http_host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+proxy_connect_timeout 60;
+proxy_send_timeout 120;
+proxy_read_timeout 120;
+
+proxy_buffering on;
+proxy_buffer_size 32k;
+proxy_buffers 4 128k;
+proxy_temp_file_write_size 10240k;
+proxy_max_temp_file_size 10240k;
 &lt;/code&gt;&lt;/pre&gt;
 </content>
         <category term="默认tags" />
