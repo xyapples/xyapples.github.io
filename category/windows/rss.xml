@@ -7,9 +7,10 @@
         <language>zh-CN</language>
         <pubDate>Thu, 10 Apr 2025 21:32:09 +0800</pubDate>
         <lastBuildDate>Thu, 10 Apr 2025 21:32:09 +0800</lastBuildDate>
-        <category>Harbor</category>
         <category>Kubernetes</category>
         <category>rsync</category>
+        <category>Linux</category>
+        <category>Harbor</category>
         <category>MySQL</category>
         <category>Redis</category>
         <category>Windows</category>

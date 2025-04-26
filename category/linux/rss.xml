@@ -5,14 +5,68 @@
         <link>http://ixuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Sun, 30 Mar 2025 20:45:48 +0800</pubDate>
-        <lastBuildDate>Sun, 30 Mar 2025 20:45:48 +0800</lastBuildDate>
-        <category>Harbor</category>
+        <pubDate>Sat, 26 Apr 2025 16:20:14 +0800</pubDate>
+        <lastBuildDate>Sat, 26 Apr 2025 16:20:14 +0800</lastBuildDate>
         <category>Kubernetes</category>
         <category>rsync</category>
+        <category>Linux</category>
+        <category>Harbor</category>
         <category>MySQL</category>
         <category>Redis</category>
         <category>Windows</category>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/3364424907.html</guid>
+            <title>阿里云+Github构建镜像仓库</title>
+            <link>http://ixuyong.cn/posts/3364424907.html</link>
+            <category>Linux</category>
+            <pubDate>Sat, 26 Apr 2025 16:20:14 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;阿里云github构建镜像仓库解决-k8sgcrio访问&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#阿里云github构建镜像仓库解决-k8sgcrio访问&#34;&gt;#&lt;/a&gt; 阿里云 + github 构建镜像仓库解决 k8s.gcr.io 访问&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;http://xn--k8s-xi9d897o.gcr.io/&#34;&gt;由于 k8s.gcr.io/&lt;/a&gt; 镜像仓库位于国外，国内使用 kubeadm 构建 docker 集群时无法访问相应的 docker 镜像。&lt;/p&gt;
+&lt;h4 id=&#34;1-登录github创建仓库&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-登录github创建仓库&#34;&gt;#&lt;/a&gt; &lt;strong&gt;1.&lt;/strong&gt; 登录 Github 创建仓库&lt;/h4&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/vgZkKBC.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/VnJlhBE.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;2-创建dockerfile&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-创建dockerfile&#34;&gt;#&lt;/a&gt; &lt;strong&gt;2.&lt;/strong&gt; 创建 Dockerfile&lt;/h4&gt;
+&lt;p&gt;仓库下面创建一个 Dockerfile，以 ingress-nginx-controller 为例下的 dockerfile 内容如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@manager ~]# mkdir ingress-nginx-controller
+[root@manager ~]# cd ingress-nginx-controller/
+[root@manager ingress-nginx-controller]# cat Dockerfile 
+FROM registry.k8s.io/ingress-nginx/controller:v1.12.1 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;3-ssh免密登录github&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-ssh免密登录github&#34;&gt;#&lt;/a&gt; 3. SSH 免密登录 GitHub&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@manager ingress-nginx-controller]# ssh-keygen
+[root@manager ingress-nginx-controller]# cat ~/.ssh/id_rsa.pub
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;进入&lt;em&gt; GitHub&lt;/em&gt; 的个人设置，找到【&lt;em&gt;SSH and GPG keys&lt;/em&gt;】，然后点击新增 SSH Key，进入如下界面，&lt;em&gt;title&lt;/em&gt; 输入你对于当前&lt;em&gt; SSH key&lt;/em&gt; 的备注，下面的&lt;em&gt; key&lt;/em&gt; 就粘贴上一步生成的&lt;em&gt; id_rsa.pub&lt;/em&gt; 内的内容&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/3djSHRS.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/8gVcVu4.png&#34; alt=&#34;5.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;4-推送dockerfile至github&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-推送dockerfile至github&#34;&gt;#&lt;/a&gt; 4. 推送 Dockerfile 至 Github&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@manager ingress-nginx-controller]# yum install git -y
+[root@manager ingress-nginx-controller]# git --version
+[root@manager ingress-nginx-controller]# git config --global user.email &amp;quot;373370405@qq.com&amp;quot;
+[root@manager ingress-nginx-controller]# git config --global color.ui true
+[root@manager ingress-nginx-controller]# git init
+[root@manager ingress-nginx-controller]# git add .
+[root@manager ingress-nginx-controller]# git commit -m &amp;quot;first commit&amp;quot;
+[root@manager ingress-nginx-controller]# git branch -M main
+[root@manager ingress-nginx-controller]# git remote add origin git@github.com:xyapples/ingress-nginx-controller.git   #添加远程仓库
+[root@manager ingress-nginx-controller]# git remote -v
+[root@manager ingress-nginx-controller]# git push -u origin main
+[root@manager ingress-nginx-controller]# git remote remove origin  #移除远程仓库
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/N3t49eX.png&#34; alt=&#34;6.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;5-登录阿里云创建镜像仓库&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#5-登录阿里云创建镜像仓库&#34;&gt;#&lt;/a&gt; &lt;strong&gt;5.&lt;/strong&gt; 登录阿里云创建镜像仓库&lt;/h4&gt;
+&lt;p&gt;登录阿里云镜像：&lt;a href=&#34;https://cr.console.aliyun.com/%EF%BC%8C%E5%88%9B%E5%BB%BA%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93%EF%BC%9A&#34;&gt;https://cr.console.aliyun.com/，创建镜像仓库：&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/1zFqa35.png&#34; alt=&#34;7.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/PhzoeeT.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/iYAbB0x.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;6-构建镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#6-构建镜像&#34;&gt;#&lt;/a&gt; 6. 构建镜像&lt;/h4&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/KD3DI7J.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/WiwNBRK.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/155pUrE.png&#34; alt=&#34;7.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/155pUrE.png&#34; alt=&#34;7.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/AU1371X.png&#34; alt=&#34;8.png&#34; /&gt;&lt;/p&gt;
+ ]]></description>
+        </item>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1922841233.html</guid>
             <title>Rsync服务实践</title>
