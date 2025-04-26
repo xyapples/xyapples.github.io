@@ -5,10 +5,10 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-03-30T08:17:00.000Z</updated>
     <category term="Harbor" />
-    <category term="Linux" />
-    <category term="rsync" />
-    <category term="MySQL" />
     <category term="Kubernetes" />
+    <category term="rsync" />
+    <category term="Linux" />
+    <category term="MySQL" />
     <category term="Redis" />
     <category term="Windows" />
     <entry>
