@@ -11,18 +11,17 @@
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>默认tags</category>
-        <category>rsync</category>
         <category>MySQL</category>
-        <category>Redis</category>
+        <category>rsync</category>
         <category>Windows</category>
+        <category>Redis</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/170573601.html</guid>
             <title>K8s服务发布Ingress</title>
             <link>http://ixuyong.cn/posts/170573601.html</link>
             <category>默认tags</category>
             <pubDate>Sat, 26 Apr 2025 16:52:06 +0800</pubDate>
-            <description><![CDATA[ &lt;h3 id=&#34;k8s服务发布ingress&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s服务发布ingress&#34;&gt;#&lt;/a&gt; K8s 服务发布 Ingress&lt;/h3&gt;
-&lt;h4 id=&#34;1-ingress-nginx-controller-安装&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-ingress-nginx-controller-安装&#34;&gt;#&lt;/a&gt; 1. Ingress Nginx Controller 安装&lt;/h4&gt;
+            <description><![CDATA[ &lt;h4 id=&#34;1-ingress-nginx-controller-安装&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-ingress-nginx-controller-安装&#34;&gt;#&lt;/a&gt; 1. Ingress Nginx Controller 安装&lt;/h4&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -353,7 +352,7 @@ ingress-nginx-controller-kw5jk   1/1     Running   0          24s
 &lt;ol start=&#34;2&#34;&gt;
 &lt;li&gt;配置 Ingress&lt;/li&gt;
 &lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;# cat deploy.yaml 
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ingress-master]# cat deploy.yaml 
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -764,10 +763,6 @@ spec:
       app.kubernetes.io/component: controller
       app.kubernetes.io/instance: ingress-nginx
       app.kubernetes.io/name: ingress-nginx
-  strategy:
-    rollingUpdate:
-      maxUnavailable: 1
-    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -1033,52 +1028,458 @@ webhooks:
 &lt;ol start=&#34;3&#34;&gt;
 &lt;li&gt;在指定节点部署 Ingress-Controller&lt;/li&gt;
 &lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;[root@master01 ingress]# kubectl apply -f deploy.yaml -n ingress-nginx
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ingress-master]# kubectl apply -f deploy.yaml -n ingress-nginx
 
-[root@master01 ingress]# kubectl label node k8s-node01 ingress=true
-[root@master01 ingress]# kubectl label node k8s-node02 ingress=true
-[root@master01 ingress]# kubectl label node k8s-master03 ingress-     #取消节点部署
+[root@k8s-master01 ingress-master]# kubectl label node k8s-node01 ingress=true
+[root@k8s-master01 ingress-master]# kubectl label node k8s-node02 ingress=true
+[root@k8s-master01 ingress-master]# kubectl label node k8s-master03 ingress-     #取消节点部署
 
-[root@master01 ingress]# kubectl get pods -n ingress-nginx
+[root@k8s-master01 ingress-master]# kubectl get pods -n ingress-nginx 
 NAME                                   READY   STATUS      RESTARTS   AGE
-ingress-nginx-admission-create-qdf4z   0/1     Completed   0          5m6s
-ingress-nginx-admission-patch-fxkrf    0/1     Completed   1          5m6s
-ingress-nginx-controller-lx2rf         1/1     Running     0          101s
-ingress-nginx-controller-v4zht         1/1     Running     0          3m9s
+ingress-nginx-admission-create-zp6mh   0/1     Completed   0          12m
+ingress-nginx-admission-patch-f2bpd    0/1     Completed   0          12m
+ingress-nginx-controller-rgtkc         1/1     Running     0          3m59s
+ingress-nginx-controller-trmn8         1/1     Running     0          3m59s
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;2-ingress-nginx-入门使用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-ingress-nginx-入门使用&#34;&gt;#&lt;/a&gt; 2. Ingress Nginx 入门使用&lt;/h4&gt;
-&lt;pre&gt;&lt;code&gt;
+&lt;pre&gt;&lt;code&gt;# cat web-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-ingress
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: test.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;3-ingress-nginx-域名重定向-redirect&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-ingress-nginx-域名重定向-redirect&#34;&gt;#&lt;/a&gt; 3. Ingress Nginx 域名重定向 Redirect&lt;/h4&gt;
-&lt;pre&gt;&lt;code&gt;
+&lt;pre&gt;&lt;code&gt;# cat redirect-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: redirect-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/permanent-redirect: https://www.baidu.com
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: redirect.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;4-ingress-nginx-前后端分离-rewrite&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-ingress-nginx-前后端分离-rewrite&#34;&gt;#&lt;/a&gt; 4. Ingress Nginx 前后端分离 Rewrite&lt;/h4&gt;
-&lt;pre&gt;&lt;code&gt;
+&lt;pre&gt;&lt;code&gt;# cat rewrite-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rewrite-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: rewrite.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /api(/|$)(.*)
+        pathType: ImplementationSpecif
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;5-ingress-nginx-错误代码重定向&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#5-ingress-nginx-错误代码重定向&#34;&gt;#&lt;/a&gt; 5. Ingress Nginx 错误代码重定向&lt;/h4&gt;
 &lt;pre&gt;&lt;code&gt;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;6-ingress-nginx-ssl&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#6-ingress-nginx-ssl&#34;&gt;#&lt;/a&gt; 6. Ingress Nginx SSL&lt;/h4&gt;
-&lt;pre&gt;&lt;code&gt;
+&lt;pre&gt;&lt;code&gt;1.生成证书
+# openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.cert -subj &amp;quot;/CN=s.hmallleasing.com/O=tls.hmallleasing.com&amp;quot;
+
+2.创建证书
+# kubectl create secret tls tls.hmallleasig.com --key tls.key --cert tls.cert
+
+3.ingress配置
+# kubectl create secret tls tls.hmallleasig.com --cert=tls.crt --key=tls.key
+# cat tls-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tls-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: &amp;quot;false&amp;quot;    #禁用https强制跳转
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: tls.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+  tls:                  #https
+  - hosts:
+    - tls.hmallleasing.com
+    secretName: &amp;quot;tls.hmallleasig.com&amp;quot;	
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;7-ingress-nginx-匹配请求头&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#7-ingress-nginx-匹配请求头&#34;&gt;#&lt;/a&gt; 7. Ingress Nginx 匹配请求头&lt;/h4&gt;
-&lt;pre&gt;&lt;code&gt;
+&lt;pre&gt;&lt;code&gt;1.部署移动端应用
+# kubectl create deploy phone --image=registry.cn-beijing.aliyuncs.com/dotbalo/nginx:phone
+# kubectl expose deploy phone --port 80
+# vim m-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: m-ingress
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: m.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: phone
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+
+2.部署PC端应用		
+# kubectl create deploy laptop --image=registry.cn-beijing.aliyuncs.com/dotbalo/nginx:laptop	
+# kubectl expose deploy laptop --port 80
+# vim laptop-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/server-snippet: |
+      set $agentflag 0;
+          if ($http_user_agent ~* &amp;quot;(Android|iPhone|Windows Phone|UC|Kindle)&amp;quot; )&amp;#123;
+              set $agentflag 1;
+          &amp;#125;
+          if ( $agentflag = 1 ) &amp;#123;
+              return 301 http://m.hmallleaing.com;
+          &amp;#125;
+  name: laptop-ingress
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: laptop
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific	
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;8ingress-nginx-基本认证&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#8ingress-nginx-基本认证&#34;&gt;#&lt;/a&gt; 8.Ingress Nginx 基本认证&lt;/h4&gt;
-&lt;pre&gt;&lt;code&gt;
+&lt;pre&gt;&lt;code&gt;# yum install httpd -y
+# htpasswd -c auth superman
+# cat auth 
+superman:$apr1$AC1pc3dK$RJyWnyDJFNKY6twneGVrA1		
+
+# kubectl create secret generic basic-auth --from-file=auth
+# cat basic-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: basic-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic  # 认证类型
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth  # 包含用户和密码的 secret 资源名称
+    nginx.ingress.kubernetes.io/auth-realm: &#39;Please User password&#39;  # 要显示的信息
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: basic.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;9-ingress-nginx-黑白名单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#9-ingress-nginx-黑白名单&#34;&gt;#&lt;/a&gt; 9. Ingress Nginx 黑 / 白名单&lt;/h4&gt;
-&lt;h5 id=&#34;91-配置黑名单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#91-配置黑名单&#34;&gt;#&lt;/a&gt; 9.1 配置黑名单&lt;/h5&gt;
-&lt;pre&gt;&lt;code&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;92-配置白名单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#92-配置白名单&#34;&gt;#&lt;/a&gt; 9.2 配置白名单&lt;/h5&gt;
-&lt;pre&gt;&lt;code&gt;
+&lt;pre&gt;&lt;code&gt;写法一：
+# cat white-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: white-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/whitelist-source-range: &amp;quot;192.168.40.101&amp;quot;
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: white.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific	
+
+写法二：		
+[root@k8s-master01 ingress]# cat white-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: white-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/whitelist-source-range: &amp;quot;192.168.40.0/24&amp;quot;
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: white.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+
+
+写法三：
+# cat white-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: white-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/server-snippet: |
+      allow 192.168.40.0/24;
+      deny all;
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: white.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+		
+
+#Master01测试		
+# curl -H &amp;quot;Host:white.hmallleasing.com&amp;quot; http://192.168.40.103 -I
+HTTP/1.1 200 OK
+Date: Sat, 14 Oct 2023 13:12:03 GMT
+Content-Type: text/html
+Content-Length: 612
+Connection: keep-alive
+Last-Modified: Tue, 16 Apr 2019 13:08:19 GMT
+ETag: &amp;quot;5cb5d3c3-264&amp;quot;
+Accept-Ranges: bytes		
+
+#Master02测试
+# curl -H &amp;quot;Host:white.hmallleasing.com&amp;quot; http://192.168.40.103 -I
+HTTP/1.1 403 Forbidden
+Date: Sat, 14 Oct 2023 13:13:34 GMT
+Content-Type: text/html
+Content-Length: 146
+Connection: keep-alive
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;10-ingress-nginx-速率限制&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#10-ingress-nginx-速率限制&#34;&gt;#&lt;/a&gt; 10. Ingress Nginx 速率限制&lt;/h4&gt;
-&lt;pre&gt;&lt;code&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ingress]# cat limit-rate-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rate-limit-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/limit-rps: &amp;quot;50&amp;quot;
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: rate-limit.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+
+# ab -c 20 -n 1000 http://rate-limit.hmallleasing.com/ |grep request
+Complete requests:      1000
+Failed requests:        724
+Time per request:       10.301 [ms] (mean)
+Time per request:       0.515 [ms] (mean, across all concurrent requests)
+Percentage of the requests served within a certain time (ms)
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;11使用-nginx-实现灰度金丝雀发布&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11使用-nginx-实现灰度金丝雀发布&#34;&gt;#&lt;/a&gt; 11. 使用 Nginx 实现灰度 / 金丝雀发布&lt;/h4&gt;
-&lt;pre&gt;&lt;code&gt;
+&lt;pre&gt;&lt;code&gt;1.创建 v1 版本
+# kubectl create deploy canary-v1 --image=registry.cn-beijing.aliyuncs.com/dotbalo/canary:v1	
+# kubectl expose deploy canary-v1 --port 8080
+# cat canary-v1-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: canary-v1-ingress
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: canary.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: canary-v1
+            port:
+              number: 8080
+        path: /
+        pathType: ImplementationSpecific
+		
+# curl -H &amp;quot;Host:canary.hmallleasing.com&amp;quot; http://192.168.40.103 	
+
+2.创建 v2 版本
+# kubectl create deploy canary-v2 --image=registry.cn-beijing.aliyuncs.com/dotbalo/canary:v2
+# kubectl expose deploy canary-v2 --port 8080
+# cat canary-v2-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: canary-v2-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/canary: &amp;quot;true&amp;quot;    #启动灰度发布
+    nginx.ingress.kubernetes.io/canary-weight: &amp;quot;20&amp;quot;  #基于权重,50%流量调度到这个灰度的版本上
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: canary.hmallleasing.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: canary-v2
+            port:
+              number: 8080
+
+#测试灰度发布
+[root@k8s-master01 ingress]# cat canary.sh 
+#!/bin/bash
+
+while true
+do
+	curl -H &amp;quot;Host:canary.hmallleasing.com&amp;quot; http://192.168.40.103
+	sleep 0.5
+done
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;12-kubernetes-dashboard配置证书&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#12-kubernetes-dashboard配置证书&#34;&gt;#&lt;/a&gt; 12. kubernetes-dashboard 配置证书&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;1.创建证书
+kubectl create secret tls kubernetes-dashboard-certs --key *.hmallleasing.com_key.key --cert *.hmallleasing.com_chain.crt -n kubernetes-dashboard
+
+2.修改kubernetes-dashboard资源清单
+kubectl edit deployment -n kubernetes-dashboard kubernetes-dashboard
+...
+      - args:
+        - --auto-generate-certificates=false
+        - --tls-key-file=_.hmallleasing.com_key.key
+        - --tls-cert-file=_.hmallleasing.com_chain.crt
+        - --token-ttl=21600
+        - --authentication-mode=basic,token
+        - --namespace=kubernetes-dashboard
+...
+
+3.创建ingress
+#cat dashboard-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dashboard-ingress
+  namespace: kubernetes-dashboard
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-passthrough: &amp;quot;true&amp;quot;    
+    nginx.ingress.kubernetes.io/backend-protocol: &amp;quot;HTTPS&amp;quot;    
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: dashboard.hmallleasing.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kubernetes-dashboard
+            port:
+              number: 443
+
+# kubectl apply -f dashboard-ingress.yaml 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;13-入口lb配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#13-入口lb配置&#34;&gt;#&lt;/a&gt; 13. 入口 LB 配置&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@lb nginx]# cat /etc/nginx/conf.d/ingress.conf 
+upstream ingress &amp;#123;
+	server 192.168.40.103:80 max_conns=2000 max_fails=2 fail_timeout=5s;
+	server 192.168.40.104:80 max_conns=2000 max_fails=2 fail_timeout=5s;
+	server 192.168.40.105:80 max_conns=2000 max_fails=2 fail_timeout=5s;
+&amp;#125;
+
+server &amp;#123;
+    listen 443 ssl;
+    server_name test.hmallleasing.com;
+    client_max_body_size 1G; 
+    ssl_prefer_server_ciphers on;
+    ssl_certificate  /etc/nginx/sslkey/*.hmallleasing.com_chain.crt;
+    ssl_certificate_key  /etc/nginx/sslkey/*.hmallleasing.com_key.key;
+
+    location / &amp;#123;
+        proxy_pass http://ingress;
+        include proxy_params;
+	    proxy_next_upstream error timeout http_500 http_502 http_503 http_504;
+	    proxy_next_upstream_tries 2;
+	    proxy_next_upstream_timeout 3s;
+    &amp;#125;
+&amp;#125;
+
+server &amp;#123;
+    listen 80;
+    server_name test.hmallleasing.com;
+    return 302 https://$server_name$request_uri;
+&amp;#125;
+
+[root@lb ~]# mkdir /etc/nginx/sslkey -p
 &lt;/code&gt;&lt;/pre&gt;
  ]]></description>
         </item>
