@@ -10,10 +10,11 @@
         <category>Docker</category>
         <category>Harbor</category>
         <category>Kubernetes</category>
+        <category>默认tags</category>
         <category>rsync</category>
-        <category>Windows</category>
-        <category>Redis</category>
         <category>MySQL</category>
+        <category>Redis</category>
+        <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/3030097036.html</guid>
             <title>K8S云原生存储Rook-Ceph</title>

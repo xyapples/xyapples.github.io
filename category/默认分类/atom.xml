@@ -1,0 +1,1082 @@
+<?xml version="1.0"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>http://ixuyong.cn</id>
+    <title>LinuxSre云原生 • Posts by &#34;默认分类&#34; category</title>
+    <link href="http://ixuyong.cn" />
+    <updated>2025-04-26T08:52:06.000Z</updated>
+    <category term="Docker" />
+    <category term="Harbor" />
+    <category term="Kubernetes" />
+    <category term="默认tags" />
+    <category term="rsync" />
+    <category term="MySQL" />
+    <category term="Redis" />
+    <category term="Windows" />
+    <entry>
+        <id>http://ixuyong.cn/posts/170573601.html</id>
+        <title>K8s服务发布Ingress</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/170573601.html"/>
+        <content type="html">&lt;h3 id=&#34;k8s服务发布ingress&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s服务发布ingress&#34;&gt;#&lt;/a&gt; K8s 服务发布 Ingress&lt;/h3&gt;
+&lt;h4 id=&#34;1-ingress-nginx-controller-安装&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-ingress-nginx-controller-安装&#34;&gt;#&lt;/a&gt; 1. Ingress Nginx Controller 安装&lt;/h4&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Supported&lt;/th&gt;
+&lt;th&gt;Ingress-NGINX version&lt;/th&gt;
+&lt;th&gt;k8s supported version&lt;/th&gt;
+&lt;th&gt;Alpine Version&lt;/th&gt;
+&lt;th&gt;Nginx Version&lt;/th&gt;
+&lt;th&gt;Helm Chart Version&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.12.1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.32, 1.31, 1.30, 1.29, 1.28&lt;/td&gt;
+&lt;td&gt;3.21.3&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.12.1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.12.0&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.32, 1.31, 1.30, 1.29, 1.28&lt;/td&gt;
+&lt;td&gt;3.21.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.12.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.12.0-beta.0&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.32, 1.31, 1.30, 1.29, 1.28&lt;/td&gt;
+&lt;td&gt;3.20.3&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.12.0-beta.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.11.5&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.21.3&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.11.5&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.11.4&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.21.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.11.4&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.11.3&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.3&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.11.3&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.11.2&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.11.2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.11.1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.11.1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.11.0&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.11.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.6&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.21.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.10.6&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.5&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.3&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.10.5&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.4&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.10.4&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.3&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.10.3&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.2&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.10.2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.19.1&lt;/td&gt;
+&lt;td&gt;1.25.3&lt;/td&gt;
+&lt;td&gt;4.10.1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.0&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.19.1&lt;/td&gt;
+&lt;td&gt;1.25.3&lt;/td&gt;
+&lt;td&gt;4.10.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.9.6&lt;/td&gt;
+&lt;td&gt;1.29, 1.28, 1.27, 1.26, 1.25&lt;/td&gt;
+&lt;td&gt;3.19.0&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.9.1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.9.5&lt;/td&gt;
+&lt;td&gt;1.28, 1.27, 1.26, 1.25&lt;/td&gt;
+&lt;td&gt;3.18.4&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.9.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.9.4&lt;/td&gt;
+&lt;td&gt;1.28, 1.27, 1.26, 1.25&lt;/td&gt;
+&lt;td&gt;3.18.4&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.8.3&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.9.3&lt;/td&gt;
+&lt;td&gt;1.28, 1.27, 1.26, 1.25&lt;/td&gt;
+&lt;td&gt;3.18.4&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.8.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.9.1&lt;/td&gt;
+&lt;td&gt;1.28, 1.27, 1.26, 1.25&lt;/td&gt;
+&lt;td&gt;3.18.4&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.8.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.9.0&lt;/td&gt;
+&lt;td&gt;1.28, 1.27, 1.26, 1.25&lt;/td&gt;
+&lt;td&gt;3.18.2&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.8.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.8.4&lt;/td&gt;
+&lt;td&gt;1.27, 1.26, 1.25, 1.24&lt;/td&gt;
+&lt;td&gt;3.18.2&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.7.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.7.1&lt;/td&gt;
+&lt;td&gt;1.27, 1.26, 1.25, 1.24&lt;/td&gt;
+&lt;td&gt;3.17.2&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.6.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.6.4&lt;/td&gt;
+&lt;td&gt;1.26, 1.25, 1.24, 1.23&lt;/td&gt;
+&lt;td&gt;3.17.0&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.5.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.5.1&lt;/td&gt;
+&lt;td&gt;1.25, 1.24, 1.23&lt;/td&gt;
+&lt;td&gt;3.16.2&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.4.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.4.0&lt;/td&gt;
+&lt;td&gt;1.25, 1.24, 1.23, 1.22&lt;/td&gt;
+&lt;td&gt;3.16.2&lt;/td&gt;
+&lt;td&gt;1.19.10†&lt;/td&gt;
+&lt;td&gt;4.3.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.3.1&lt;/td&gt;
+&lt;td&gt;1.24, 1.23, 1.22, 1.21, 1.20&lt;/td&gt;
+&lt;td&gt;3.16.2&lt;/td&gt;
+&lt;td&gt;1.19.10†&lt;/td&gt;
+&lt;td&gt;4.2.5&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h5 id=&#34;11-helm安装ingress-nginx-controller&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-helm安装ingress-nginx-controller&#34;&gt;#&lt;/a&gt; 1.1 Helm 安装 Ingress Nginx Controller&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;安装 Helm&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# wget https://get.helm.sh/helm-v3.6.3-linux-amd64.tar.gz
+# tar xf helm-v3.6.3-linux-amd64.tar.gz
+# mv linux-amd64/helm /usr/local/bin/helm
+# helm version
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;下载 Ingress Nginx Controller 安装包&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;官方文档：https://github.com/kubernetes/ingress-nginx/tree/helm-chart-4.8.2         #根据自己k8s版本下载
+# helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+# helm repo update
+# helm repo list
+# helm pull ingress-nginx/ingress-nginx --version 4.8.2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;配置 Ingress Nginx Controller&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# tar xf ingress-nginx-4.8.2.tgz
+# cd ingress-nginx
+# vim values.yaml
+...
+ 16 controller:
+ 17   name: controller
+ 18   enableAnnotationValidations: false
+ 19   image:
+ 20     ## Keep false as default for now!
+ 21     chroot: false
+ 22     registry: registry.cn-hangzhou.aliyuncs.com
+ 23     image: kubernetes_public/ingress-nginx-controller
+ 24     ## for backwards compatibility consider setting the full image url via the repository value below
+ 25     ## use *either* current default registry/image or repository format or installing chart by providing the values.yaml wil    l fail
+ 26     ## repository:
+ 27     tag: &amp;quot;v1.9.3&amp;quot;
+ 28     #digest: sha256:8fd21d59428507671ce0fb47f818b1d859c92d2ad07bb7c947268d433030ba98
+...
+ 42   # -- Will add custom configuration options to Nginx https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configurat    ion/configmap/
+ 43   config:
+ 44     allow-snippet-annotations: true          #开启server snippet的配置
+...
+ 67   dnsPolicy: ClusterFirstWithHostNet
+...
+ 88   hostNetwork: true
+...
+107   ingressClassResource:
+108     # -- Name of the ingressClass
+109     name: nginx
+110     # -- Is this ingressClass enabled or not
+111     enabled: true
+112     # -- Is this the default ingressClass for the cluster
+113     default: true
+...
+184   kind: DaemonSet
+...
+287   nodeSelector:
+288     kubernetes.io/os: linux
+289     ingress: &amp;quot;true&amp;quot;
+...
+638       image:
+639         registry: registry.cn-hangzhou.aliyuncs.com
+640         image: kubernetes_public/kube-webhook-certgen
+641         ## for backwards compatibility consider setting the full image url via the repository value below
+642         ## use *either* current default registry/image or repository format or installing chart by providing the values.yaml     will fail
+643         ## repository:
+644         tag: v20231011-8b53cabe0
+645         #digest: sha256:a7943503b45d552785aa3b5e457f169a5661fb94d82b8a3373bcd9ebaf9aac80
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;4. 给需要部署 ingress 的节点上打标签&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl label node k8s-node02 ingress=true
+# kubectl label node k8s-node01 ingress=true
+# kubectl create ns ingress-nginx
+# helm install ingress-nginx -n ingress-nginx .     #安装
+# helm upgrade ingress-nginx -n ingress-nginx .     #更新
+# kubectl get pods -n ingress-nginx 
+NAME                             READY   STATUS    RESTARTS   AGE
+ingress-nginx-controller-7nfqn   1/1     Running   0          27s
+ingress-nginx-controller-k4p2n   1/1     Running   0          17m
+ingress-nginx-controller-kw5jk   1/1     Running   0          24s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;12-bare-metal安装ingress-nginx-controller&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#12-bare-metal安装ingress-nginx-controller&#34;&gt;#&lt;/a&gt; 1.2 Bare metal 安装 Ingress Nginx Controller&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;下载 Ingress 部署文件，链接地址：&lt;a href=&#34;https://kubernetes.github.io/ingress-nginx/deploy/#bare-metal-clusters&#34;&gt;https://kubernetes.github.io/ingress-nginx/deploy/#bare-metal-clusters&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.12.1/deploy/static/provider/baremetal/deploy.yaml
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;配置 Ingress&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# cat deploy.yaml 
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  name: ingress-nginx
+---
+apiVersion: v1
+automountServiceAccountToken: true
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx
+  namespace: ingress-nginx
+---
+apiVersion: v1
+automountServiceAccountToken: true
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission
+  namespace: ingress-nginx
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx
+  namespace: ingress-nginx
+rules:
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - namespaces
+  verbs:
+  - get
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - configmaps
+  - pods
+  - secrets
+  - endpoints
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - coordination.k8s.io
+  resourceNames:
+  - ingress-nginx-leader
+  resources:
+  - leases
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - list
+  - watch
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission
+  namespace: ingress-nginx
+rules:
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - secrets
+  verbs:
+  - get
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx
+rules:
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - configmaps
+  - endpoints
+  - nodes
+  - pods
+  - secrets
+  - namespaces
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - nodes
+  verbs:
+  - get
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - list
+  - watch
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission
+rules:
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - validatingwebhookconfigurations
+  verbs:
+  - get
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx
+  namespace: ingress-nginx
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ingress-nginx
+subjects:
+- kind: ServiceAccount
+  name: ingress-nginx
+  namespace: ingress-nginx
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission
+  namespace: ingress-nginx
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ingress-nginx-admission
+subjects:
+- kind: ServiceAccount
+  name: ingress-nginx-admission
+  namespace: ingress-nginx
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ingress-nginx
+subjects:
+- kind: ServiceAccount
+  name: ingress-nginx
+  namespace: ingress-nginx
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ingress-nginx-admission
+subjects:
+- kind: ServiceAccount
+  name: ingress-nginx-admission
+  namespace: ingress-nginx
+---
+apiVersion: v1
+data: null
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+spec:
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - appProtocol: http
+    name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  - appProtocol: https
+    name: https
+    port: 443
+    protocol: TCP
+    targetPort: https
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  #type: NodePort
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-controller-admission
+  namespace: ingress-nginx
+spec:
+  ports:
+  - appProtocol: https
+    name: https-webhook
+    port: 443
+    targetPort: webhook
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  type: ClusterIP
+---
+apiVersion: apps/v1
+#kind: Deployment
+kind: DaemonSet
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+spec:
+  minReadySeconds: 0
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/instance: ingress-nginx
+      app.kubernetes.io/name: ingress-nginx
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: controller
+        app.kubernetes.io/instance: ingress-nginx
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/part-of: ingress-nginx
+        app.kubernetes.io/version: 1.12.1
+    spec:
+      containers:
+      - args:
+        - /nginx-ingress-controller
+        - --election-id=ingress-nginx-leader
+        - --controller-class=k8s.io/ingress-nginx
+        - --ingress-class=nginx
+        - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
+        - --validating-webhook=:8443
+        - --validating-webhook-certificate=/usr/local/certificates/cert
+        - --validating-webhook-key=/usr/local/certificates/key
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: LD_PRELOAD
+          value: /usr/local/lib/libmimalloc.so
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/ingress-nginx-controller-v1.12.1:v1.12.1 
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /wait-shutdown
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: controller
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 443
+          name: https
+          protocol: TCP
+        - containerPort: 8443
+          name: webhook
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 100m
+            memory: 90Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsGroup: 82
+          runAsNonRoot: true
+          runAsUser: 101
+          seccompProfile:
+            type: RuntimeDefault
+        volumeMounts:
+        - mountPath: /usr/local/certificates/
+          name: webhook-cert
+          readOnly: true
+      hostNetwork: true                         # 与节点共享网络名称空间
+      #dnsPolicy: ClusterFirst
+      dnsPolicy: ClusterFirstWithHostNet        # dns 策略
+      nodeSelector:                             # 节点选择器
+        kubernetes.io/os: linux
+        ingress: &amp;quot;true&amp;quot;
+      serviceAccountName: ingress-nginx
+      terminationGracePeriodSeconds: 300
+      volumes:
+      - name: webhook-cert
+        secret:
+          secretName: ingress-nginx-admission
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission-create
+  namespace: ingress-nginx
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: admission-webhook
+        app.kubernetes.io/instance: ingress-nginx
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/part-of: ingress-nginx
+        app.kubernetes.io/version: 1.12.1
+      name: ingress-nginx-admission-create
+    spec:
+      containers:
+      - args:
+        - create
+        - --host=ingress-nginx-controller-admission,ingress-nginx-controller-admission.$(POD_NAMESPACE).svc
+        - --namespace=$(POD_NAMESPACE)
+        - --secret-name=ingress-nginx-admission
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kube-webhook-certgen-v1.5.2:v1.5.2 
+        imagePullPolicy: IfNotPresent
+        name: create
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 65532
+          runAsNonRoot: true
+          runAsUser: 65532
+          seccompProfile:
+            type: RuntimeDefault
+      nodeSelector:
+        kubernetes.io/os: linux
+      restartPolicy: OnFailure
+      serviceAccountName: ingress-nginx-admission
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission-patch
+  namespace: ingress-nginx
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: admission-webhook
+        app.kubernetes.io/instance: ingress-nginx
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/part-of: ingress-nginx
+        app.kubernetes.io/version: 1.12.1
+      name: ingress-nginx-admission-patch
+    spec:
+      containers:
+      - args:
+        - patch
+        - --webhook-name=ingress-nginx-admission
+        - --namespace=$(POD_NAMESPACE)
+        - --patch-mutating=false
+        - --secret-name=ingress-nginx-admission
+        - --patch-failure-policy=Fail
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kube-webhook-certgen-v1.5.2:v1.5.2 
+        imagePullPolicy: IfNotPresent
+        name: patch
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 65532
+          runAsNonRoot: true
+          runAsUser: 65532
+          seccompProfile:
+            type: RuntimeDefault
+      nodeSelector:
+        kubernetes.io/os: linux
+      restartPolicy: OnFailure
+      serviceAccountName: ingress-nginx-admission
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: nginx
+spec:
+  controller: k8s.io/ingress-nginx
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: ingress-nginx-controller-admission
+      namespace: ingress-nginx
+      path: /networking/v1/ingresses
+      port: 443
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: validate.nginx.ingress.kubernetes.io
+  rules:
+  - apiGroups:
+    - networking.k8s.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - ingresses
+  sideEffects: None
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;type: ClusterIP                                              #service 类型改为 ClusterIP&lt;/li&gt;
+&lt;li&gt;hostNetwork: true                                      # 与节点共享网络名称空间&lt;/li&gt;
+&lt;li&gt;dnsPolicy: ClusterFirstWithHostNet        # dns 策略&lt;/li&gt;
+&lt;li&gt;nodeSelector:                                             # 节点选择器&lt;/li&gt;
+&lt;li&gt;kind: DaemonSet                                        # 资源类型 DaemonSet&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;在指定节点部署 Ingress-Controller&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;[root@master01 ingress]# kubectl apply -f deploy.yaml -n ingress-nginx
+
+[root@master01 ingress]# kubectl label node k8s-node01 ingress=true
+[root@master01 ingress]# kubectl label node k8s-node02 ingress=true
+[root@master01 ingress]# kubectl label node k8s-master03 ingress-     #取消节点部署
+
+[root@master01 ingress]# kubectl get pods -n ingress-nginx
+NAME                                   READY   STATUS      RESTARTS   AGE
+ingress-nginx-admission-create-qdf4z   0/1     Completed   0          5m6s
+ingress-nginx-admission-patch-fxkrf    0/1     Completed   1          5m6s
+ingress-nginx-controller-lx2rf         1/1     Running     0          101s
+ingress-nginx-controller-v4zht         1/1     Running     0          3m9s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;2-ingress-nginx-入门使用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-ingress-nginx-入门使用&#34;&gt;#&lt;/a&gt; 2. Ingress Nginx 入门使用&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;3-ingress-nginx-域名重定向-redirect&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-ingress-nginx-域名重定向-redirect&#34;&gt;#&lt;/a&gt; 3. Ingress Nginx 域名重定向 Redirect&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;4-ingress-nginx-前后端分离-rewrite&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-ingress-nginx-前后端分离-rewrite&#34;&gt;#&lt;/a&gt; 4. Ingress Nginx 前后端分离 Rewrite&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;5-ingress-nginx-错误代码重定向&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#5-ingress-nginx-错误代码重定向&#34;&gt;#&lt;/a&gt; 5. Ingress Nginx 错误代码重定向&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;6-ingress-nginx-ssl&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#6-ingress-nginx-ssl&#34;&gt;#&lt;/a&gt; 6. Ingress Nginx SSL&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;7-ingress-nginx-匹配请求头&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#7-ingress-nginx-匹配请求头&#34;&gt;#&lt;/a&gt; 7. Ingress Nginx 匹配请求头&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;8ingress-nginx-基本认证&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#8ingress-nginx-基本认证&#34;&gt;#&lt;/a&gt; 8.Ingress Nginx 基本认证&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;9-ingress-nginx-黑白名单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#9-ingress-nginx-黑白名单&#34;&gt;#&lt;/a&gt; 9. Ingress Nginx 黑 / 白名单&lt;/h4&gt;
+&lt;h5 id=&#34;91-配置黑名单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#91-配置黑名单&#34;&gt;#&lt;/a&gt; 9.1 配置黑名单&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;92-配置白名单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#92-配置白名单&#34;&gt;#&lt;/a&gt; 9.2 配置白名单&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;10-ingress-nginx-速率限制&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#10-ingress-nginx-速率限制&#34;&gt;#&lt;/a&gt; 10. Ingress Nginx 速率限制&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;11使用-nginx-实现灰度金丝雀发布&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11使用-nginx-实现灰度金丝雀发布&#34;&gt;#&lt;/a&gt; 11. 使用 Nginx 实现灰度 / 金丝雀发布&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+        <category term="默认tags" />
+        <updated>2025-04-26T08:52:06.000Z</updated>
+    </entry>
+</feed>
