@@ -1,4 +1,676 @@
-<!-- build time:Sat Apr 26 2025 21:49:27 GMT+0800 (中国标准时间) --><!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2"><meta name="theme-color" content="#222"><meta http-equiv="X-UA-COMPATIBLE" content="IE=edge,chrome=1"><meta name="renderer" content="webkit"><link rel="icon" type="image/ico" sizes="32x32" href="/assets/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon.ico"><link rel="alternate" href="/rss.xml" title="LinuxSre云原生" type="application/rss+xml"><link rel="alternate" href="/atom.xml" title="LinuxSre云原生" type="application/atom+xml"><link rel="alternate" type="application/json" title="LinuxSre云原生" href="http://ixuyong.cn/feed.json"><link rel="preconnect" href="https://s4.zstatic.net"><link rel="preconnect" href="https://at.alicdn.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic%7CFredericka%20the%20Great:400,400italic,700,700italic%7CNoto%20Serif%20JP:400,400italic,700,700italic%7CNoto%20Serif%20SC:400,400italic,700,700italic%7CInconsolata:400,400italic,700,700italic&display=swap&subset=latin,latin-ext" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/app.css?v=0.4.17"><link rel="modulepreload" href="/js/chunk-GV364XSK.js"><link rel="modulepreload" href="/js/chunk-NYSE5UKM.js"><link rel="modulepreload" href="/js/chunk-RONCYO2S.js"><link rel="modulepreload" href="/js/chunk-THHXCRSX.js"><link rel="modulepreload" href="/js/chunk-WIQECBEN.js"><link rel="modulepreload" href="/js/comments-DL2IYMPZ.js"><link rel="modulepreload" href="/js/copy-tex-NADCTXPG.js"><link rel="modulepreload" href="/js/post-DA635IH6.js"><link rel="modulepreload" href="/js/quicklink-WEDHL4BA.js"><link rel="modulepreload" href="/js/search-VCZRKTM5.js"><link rel="modulepreload" href="/js/siteInit.js"><link rel="modulepreload" href="/js/waline-NNBYRQEE.js"><link rel="stylesheet" href="/css/comments-F4ZGS7LD.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/siteInit.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/waline-IDNZKML2.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="preload" href="https://s21.ax1x.com/2025/03/29/pEsS0hD.png" as="image" fetchpriority="high"><meta name="keywords" content="Kubernetes"><meta name="description" content="专注于 Linux 运维、云计算、云原⽣等技术"><link rel="canonical" href="http://ixuyong.cn/posts/3030097036.html"><title>K8S云原生存储Rook-Ceph</title><meta name="generator" content="Hexo 7.3.0"></head><body itemscope itemtype="http://schema.org/WebPage"><div id="loading"><div class="cat"><div class="body"></div><div class="head"><div class="face"></div></div><div class="foot"><div class="tummy-end"></div><div class="bottom"></div><div class="legs left"></div><div class="legs right"></div></div><div class="paw"><div class="hands left"></div><div class="hands right"></div></div></div></div><div id="container"><header id="header" itemscope itemtype="http://schema.org/WPHeader"><div class="inner"><div id="brand"><div class="pjax"><h1 itemprop="name headline">K8S云原生存储Rook-Ceph</h1><div class="meta"><span class="item" title="创建时间：2025-04-24 21:43:19"><span class="icon"><i class="ic i-calendar"></i></span><span class="text">发表于</span><time itemprop="dateCreated datePublished" datetime="2025-04-24T21:43:19+08:00">2025-04-24</time></span><span class="item" title="本文字数"><span class="icon"><i class="ic i-pen"></i></span><span class="text">本文字数</span><span>276</span><span class="text">字</span></span><span class="item" title="阅读时长"><span class="icon"><i class="ic i-clock"></i></span><span class="text">阅读时长</span><span>1 分钟</span></span></div></div></div><nav id="nav"><div class="inner"><div class="toggle"><div class="lines" aria-label="切换导航栏"><span class="line"></span><span class="line"></span><span class="line"></span></div></div><ul class="menu"><li class="item title"><a href="/" rel="start">LinuxSre云原生</a></li></ul><ul class="right" id="rightNav"><li class="item theme"><i class="ic i-sun"></i></li><li class="item search"><i class="ic i-search"></i></li></ul></div></nav></div><div class="pjax" id="imgs"><img src="https://s21.ax1x.com/2025/03/29/pEsS0hD.png" loading="eager" decoding="async" fetchpriority="high" alt="LinuxSre云原生"></div></header><div id="waves"><svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path></defs><g class="parallax"><use xlink:href="#gentle-wave" x="48" y="0"></use><use xlink:href="#gentle-wave" x="48" y="3"></use><use xlink:href="#gentle-wave" x="48" y="5"></use><use xlink:href="#gentle-wave" x="48" y="7"></use></g></svg></div><main><div class="inner"><div class="pjax" id="main"><div class="article wrap"><div class="breadcrumb" itemlistelement itemscope itemtype="https://schema.org/BreadcrumbList"><i class="ic i-home"></i><span><a href="/">首页</a></span><i class="ic i-angle-right"></i><span class="current" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a href="/categories/Kubernetes/" itemprop="item" rel="index" title="分类于Kubernetes"><span itemprop="name">Kubernetes<meta itemprop="position" content="0"></span></a></span></div><article class="post block" itemscope itemtype="http://schema.org/Article" lang="zh-CN"><link itemprop="mainEntityOfPage" href="http://ixuyong.cn/posts/3030097036.html"><span hidden itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="image" content="/assets/avatar.png"><meta itemprop="name" content="Xu Yong"><meta itemprop="description" content="致力于技术布道、普及前沿技术、打造云原生系列标杆博客, 专注于 Linux 运维、云计算、云原⽣等技术"></span><span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="LinuxSre云原生"></span><div class="body md" itemprop="articleBody"><h3 id="k8s云原生存储rook-ceph"><a class="anchor" href="#k8s云原生存储rook-ceph">#</a> K8S 云原生存储 Rook-Ceph</h3><p>Rook 是一个自我管理的分布式存储编排系统，它本身并不是存储系统，在存储和 k8s 之前搭建了一个桥梁，使存储系统的搭建或者维护变得特别简单，Rook 将分布式存储系统转变为自我管理、自我扩展、自我修复的存储服务。它让一些存储的操作，比如部署、配置、扩容、升级、迁移、灾难恢复、监视和资源管理变得自动化，无需人工处理。并且 Rook 支持 CSI，可以利用 CSI 做一些 PVC 的快照、扩容、克隆等操作。</p><p><em>本文出自于：<a target="_blank" rel="noopener" href="https://edu.51cto.com/course/23845.html">https://edu.51cto.com/course/23845.html</a></em></p><div class="tags"><a href="/tags/Kubernetes/" rel="tag"><i class="ic i-tag"></i>Kubernetes</a></div></div><footer><div class="meta"><span class="icon"><i class="ic i-eye"></i></span><span>此文章已被阅读次数:</span><span class="waline-pageview-count" id="twikoo_visitors" data-path="/posts/3030097036.html">正在加载...</span><span class="item"><span class="icon"><i class="ic i-calendar-check"></i></span><span class="text">更新于</span><time title="修改时间：2025-04-24 21:48:29" itemprop="dateModified" datetime="2025-04-24T21:48:29+08:00">2025-04-24</time></span></div><div class="reward"><button><i class="ic i-heartbeat"></i>赞赏</button><p>请我喝[茶]~(￣▽￣)~*</p><div id="qr"><div><img loading="lazy" data-src="/assets/wechatpay.png" alt="Xu Yong 微信支付"><p>微信支付</p></div><div><img loading="lazy" data-src="/assets/alipay.png" alt="Xu Yong 支付宝"><p>支付宝</p></div></div></div><div id="copyright"><ul><li class="author"><strong>本文作者：</strong>Xu Yong<i class="ic i-at"><em>@</em></i>LinuxSre云原生</li><li class="link"><strong>本文链接：</strong><a href="http://ixuyong.cn/posts/3030097036.html" title="K8S云原生存储Rook-Ceph">http://ixuyong.cn/posts/3030097036.html</a></li><li class="license"><strong>版权声明：</strong>本站所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh"><i class="ic i-creative-commons"><em>(CC)</em></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li></ul></div></footer></article></div><div class="post-nav"><div class="item left"><a href="/posts/3890389502.html" rel="prev" itemprop="url" data-background-image="https:&#x2F;&#x2F;wp-cdn.4ce.cn&#x2F;v2&#x2F;MrtgBDG.jpeg" title="K8S持久化存储NFS+StorageClass"><span class="type">上一篇</span><span class="category"><i class="ic i-flag"></i>Kubernetes</span><h3>K8S持久化存储NFS+StorageClass</h3></a></div><div class="item right"><a href="/posts/0.html" rel="next" itemprop="url" data-background-image="http:&#x2F;&#x2F;linux.oldxu.net&#x2F;202501172255779.jpg" title="未命名"><span class="type">下一篇</span><h3>未命名</h3></a></div></div><div class="wrap" id="comments"></div></div><div id="sidebar"><div class="inner"><div class="panels"><div class="inner"><div class="contents panel pjax" data-title="文章目录"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#k8s%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AD%98%E5%82%A8rook-ceph"><span class="toc-number">1.</span> <span class="toc-text">K8S 云原生存储 Rook-Ceph</span></a></li></ol></div><div class="related panel pjax" data-title="系列文章"><ul><li><a href="/posts/3166738000.html" rel="bookmark" title="Kubeadm高可用安装K8s集群">Kubeadm高可用安装K8s集群</a></li><li><a href="/posts/2771271649.html" rel="bookmark" title="云原生K8s安全专家CKS认证考题详解">云原生K8s安全专家CKS认证考题详解</a></li><li><a href="/posts/985149017.html" rel="bookmark" title="二进制高可用安装K8S集群">二进制高可用安装K8S集群</a></li><li><a href="/posts/1771242682.html" rel="bookmark" title="K8s零宕机服务发布-探针">K8s零宕机服务发布-探针</a></li><li><a href="/posts/108692210.html" rel="bookmark" title="K8s资源调度deployment、statefulset、daemonset">K8s资源调度deployment、statefulset、daemonset</a></li><li><a href="/posts/858611107.html" rel="bookmark" title="K8s服务发布Service">K8s服务发布Service</a></li><li><a href="/posts/3992668367.html" rel="bookmark" title="K8s配置管理Configmap">K8s配置管理Configmap</a></li><li><a href="/posts/169153047.html" rel="bookmark" title="K8s持久化存储">K8s持久化存储</a></li><li><a href="/posts/3833778957.html" rel="bookmark" title="K8s计划任务Job、Cronjob">K8s计划任务Job、Cronjob</a></li><li><a href="/posts/3142072607.html" rel="bookmark" title="K8s初始化容器、临时容器">K8s初始化容器、临时容器</a></li><li><a href="/posts/3254599477.html" rel="bookmark" title="K8s容忍和污点">K8s容忍和污点</a></li><li><a href="/posts/312010518.html" rel="bookmark" title="K8s亲和力Affinity">K8s亲和力Affinity</a></li><li><a href="/posts/176412055.html" rel="bookmark" title="K8s准入控制ResourceQuota、LimitRange、QoS服务质量">K8s准入控制ResourceQuota、LimitRange、QoS服务质量</a></li><li><a href="/posts/722512536.html" rel="bookmark" title="K8s细粒度权限控制RBAC">K8s细粒度权限控制RBAC</a></li><li><a href="/posts/3890389502.html" rel="bookmark" title="K8S持久化存储NFS+StorageClass">K8S持久化存储NFS+StorageClass</a></li><li class="active"><a href="/posts/3030097036.html" rel="bookmark" title="K8S云原生存储Rook-Ceph">K8S云原生存储Rook-Ceph</a></li></ul></div><div class="overview panel" data-title="站点概览"><div class="author" itemprop="author" itemscope itemtype="http://schema.org/Person"><img class="image" loading="lazy" decoding="async" itemprop="image" alt="Xu Yong" src="/assets/avatar.png"><p class="name" itemprop="name">Xu Yong</p><div class="description" itemprop="description">专注于 Linux 运维、云计算、云原⽣等技术</div></div><nav class="state"><div class="item posts"><a href="/archives/"><span class="count">24</span><span class="name">文章</span></a></div><div class="item categories"><a href="/categories/"><span class="count">8</span><span class="name">分类</span></a></div><div class="item tags"><a href="/tags/"><span class="count">8</span><span class="name">标签</span></a></div></nav><div class="social"><a target="_blank" rel="noopener" href="https://github.com/xyapples" class="item github" title="https:&#x2F;&#x2F;github.com&#x2F;xyapples"><i class="ic i-github"></i></a><a target="_blank" rel="noopener" href="https://gitee.com/chinagei" class="item gitee" title="https:&#x2F;&#x2F;gitee.com&#x2F;chinagei"><i class="ic i-gitee"></i></a><a href="mailto:373370405@qq.com" class="item email" title="mailto:373370405@qq.com"><i class="ic i-envelope"></i></a></div><div class="menu"><li class="item"><a href="/" rel="section"><i class="ic i-home"></i>首页</a></li><li class="item"><a href="/categories/" rel="section"><i class="ic i-th"></i>分类</a></li><li class="item"><a href="/archives/" rel="section"><i class="ic i-list-alt"></i>归档</a></li><li class="item"><a href="/tags/" rel="section"><i class="ic i-tags"></i>标签</a></li><li class="item"><a href="/about/" rel="section"><i class="ic i-about"></i>关于</a></li><li class="item"><a href="/friends/" rel="section"><i class="ic i-heart"></i>友链</a></li></div></div></div></div><ul id="quick"><li class="prev pjax"><a href="/posts/0.html" rel="prev" title="上一篇"><i class="ic i-chevron-left"></i></a></li><li class="up"><i class="ic i-arrow-up"></i></li><li class="down"><i class="ic i-arrow-down"></i></li><li class="next pjax"><a href="/posts/3890389502.html" rel="next" title="下一篇"><i class="ic i-chevron-right"></i></a></li><li class="percent"></li></ul></div></div><div class="dimmer"></div></div></main><footer id="footer"><div class="inner"><div class="widgets"><div class="rpost pjax"><h2>随机文章</h2><ul><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/3833778957.html">K8s计划任务Job、Cronjob</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/%E9%BB%98%E8%AE%A4%E5%88%86%E7%B1%BB/" title="分类于默认分类">默认分类</a></div><span><a href="/posts/170573601.html">K8s服务发布Ingress</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/MySQL/" title="分类于MySQL">MySQL</a></div><span><a href="/posts/2628187572.html">MySQL运维DBA应用与实践</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/3142072607.html">K8s初始化容器、临时容器</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/985149017.html">二进制高可用安装K8S集群</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/2771271649.html">云原生K8s安全专家CKS认证考题详解</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/176412055.html">K8s准入控制ResourceQuota、LimitRange、QoS服务质量</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/108692210.html">K8s资源调度deployment、statefulset、daemonset</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Redis/" title="分类于Redis">Redis</a></div><span><a href="/posts/1414180692.html">Redis集群（主从+哨兵）模式</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/722512536.html">K8s细粒度权限控制RBAC</a></span></li></ul></div><div class="rpost pjax"><h2>最新评论</h2><ul class="leancloud-recent-comment" id="new-comment"></ul></div></div><div class="status"><div class="copyright">&copy; 2022 -<span itemprop="copyrightYear">2025</span><span class="with-love"><i class="ic i-sakura rotate"></i></span><span class="author" itemprop="copyrightHolder">Xu Yong @ LinuxSre云原生</span></div><div class="count"><span class="post-meta-item-icon"><i class="ic i-chart-area"></i></span><span title="站点总字数">340k 字</span><span class="post-meta-divider"> | </span><span class="post-meta-item-icon"><i class="ic i-coffee"></i></span><span title="站点阅读时长">5:09</span></div><div class="powered-by">基于 <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & Theme.<a target="_blank" rel="noopener" href="https://github.com/theme-shoka-x/hexo-theme-shokaX/">ShokaX</a></div></div></div></footer></div><script data-config type="text/javascript">var LOCAL = {
+<!-- build time:Mon May 12 2025 21:23:59 GMT+0800 (中国标准时间) --><!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2"><meta name="theme-color" content="#222"><meta http-equiv="X-UA-COMPATIBLE" content="IE=edge,chrome=1"><meta name="renderer" content="webkit"><link rel="icon" type="image/ico" sizes="32x32" href="/assets/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon.ico"><link rel="alternate" href="/rss.xml" title="LinuxSre云原生" type="application/rss+xml"><link rel="alternate" href="/atom.xml" title="LinuxSre云原生" type="application/atom+xml"><link rel="alternate" type="application/json" title="LinuxSre云原生" href="http://ixuyong.cn/feed.json"><link rel="preconnect" href="https://s4.zstatic.net"><link rel="preconnect" href="https://at.alicdn.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic%7CFredericka%20the%20Great:400,400italic,700,700italic%7CNoto%20Serif%20JP:400,400italic,700,700italic%7CNoto%20Serif%20SC:400,400italic,700,700italic%7CInconsolata:400,400italic,700,700italic&display=swap&subset=latin,latin-ext" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/app.css?v=0.4.17"><link rel="modulepreload" href="/js/chunk-GV364XSK.js"><link rel="modulepreload" href="/js/chunk-NYSE5UKM.js"><link rel="modulepreload" href="/js/chunk-RONCYO2S.js"><link rel="modulepreload" href="/js/chunk-THHXCRSX.js"><link rel="modulepreload" href="/js/chunk-WIQECBEN.js"><link rel="modulepreload" href="/js/comments-DL2IYMPZ.js"><link rel="modulepreload" href="/js/copy-tex-NADCTXPG.js"><link rel="modulepreload" href="/js/post-DA635IH6.js"><link rel="modulepreload" href="/js/quicklink-WEDHL4BA.js"><link rel="modulepreload" href="/js/search-VCZRKTM5.js"><link rel="modulepreload" href="/js/siteInit.js"><link rel="modulepreload" href="/js/waline-NNBYRQEE.js"><link rel="stylesheet" href="/css/comments-F4ZGS7LD.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/siteInit.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/waline-IDNZKML2.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="preload" href="https://s21.ax1x.com/2025/03/29/pEsS0hD.png" as="image" fetchpriority="high"><meta name="keywords" content="Kubernetes"><meta name="description" content="专注于 Linux 运维、云计算、云原⽣等技术"><link rel="canonical" href="http://ixuyong.cn/posts/3030097036.html"><title>K8S云原生存储Rook-Ceph</title><meta name="generator" content="Hexo 7.3.0"></head><body itemscope itemtype="http://schema.org/WebPage"><div id="loading"><div class="cat"><div class="body"></div><div class="head"><div class="face"></div></div><div class="foot"><div class="tummy-end"></div><div class="bottom"></div><div class="legs left"></div><div class="legs right"></div></div><div class="paw"><div class="hands left"></div><div class="hands right"></div></div></div></div><div id="container"><header id="header" itemscope itemtype="http://schema.org/WPHeader"><div class="inner"><div id="brand"><div class="pjax"><h1 itemprop="name headline">K8S云原生存储Rook-Ceph</h1><div class="meta"><span class="item" title="创建时间：2025-04-24 21:43:19"><span class="icon"><i class="ic i-calendar"></i></span><span class="text">发表于</span><time itemprop="dateCreated datePublished" datetime="2025-04-24T21:43:19+08:00">2025-04-24</time></span><span class="item" title="本文字数"><span class="icon"><i class="ic i-pen"></i></span><span class="text">本文字数</span><span>35k</span><span class="text">字</span></span><span class="item" title="阅读时长"><span class="icon"><i class="ic i-clock"></i></span><span class="text">阅读时长</span><span>32 分钟</span></span></div></div></div><nav id="nav"><div class="inner"><div class="toggle"><div class="lines" aria-label="切换导航栏"><span class="line"></span><span class="line"></span><span class="line"></span></div></div><ul class="menu"><li class="item title"><a href="/" rel="start">LinuxSre云原生</a></li></ul><ul class="right" id="rightNav"><li class="item theme"><i class="ic i-sun"></i></li><li class="item search"><i class="ic i-search"></i></li></ul></div></nav></div><div class="pjax" id="imgs"><img src="https://s21.ax1x.com/2025/03/29/pEsS0hD.png" loading="eager" decoding="async" fetchpriority="high" alt="LinuxSre云原生"></div></header><div id="waves"><svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path></defs><g class="parallax"><use xlink:href="#gentle-wave" x="48" y="0"></use><use xlink:href="#gentle-wave" x="48" y="3"></use><use xlink:href="#gentle-wave" x="48" y="5"></use><use xlink:href="#gentle-wave" x="48" y="7"></use></g></svg></div><main><div class="inner"><div class="pjax" id="main"><div class="article wrap"><div class="breadcrumb" itemlistelement itemscope itemtype="https://schema.org/BreadcrumbList"><i class="ic i-home"></i><span><a href="/">首页</a></span><i class="ic i-angle-right"></i><span class="current" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a href="/categories/Kubernetes/" itemprop="item" rel="index" title="分类于Kubernetes"><span itemprop="name">Kubernetes<meta itemprop="position" content="0"></span></a></span></div><article class="post block" itemscope itemtype="http://schema.org/Article" lang="zh-CN"><link itemprop="mainEntityOfPage" href="http://ixuyong.cn/posts/3030097036.html"><span hidden itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="image" content="/assets/avatar.png"><meta itemprop="name" content="Xu Yong"><meta itemprop="description" content="致力于技术布道、普及前沿技术、打造云原生系列标杆博客, 专注于 Linux 运维、云计算、云原⽣等技术"></span><span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="LinuxSre云原生"></span><div class="body md" itemprop="articleBody"><h3 id="k8s云原生存储rook-ceph"><a class="anchor" href="#k8s云原生存储rook-ceph">#</a> K8S 云原生存储 Rook-Ceph</h3><h4 id="1-storageclass动态存储"><a class="anchor" href="#1-storageclass动态存储">#</a> 1. StorageClass 动态存储</h4><p>StorageClass：存储类，由 K8s 管理员创建，用于动态 PV 的管理，可以链接至不同的后端存储，比如 Ceph、GlusterFS 等。之后对存储的请求可以指向 StorageClass，然后 StorageClass 会自动的创建、删除 PV。</p><p>实现方式：</p><ul><li>in-tree: 内置于 K8s 核心代码，对于存储的管理，都需要编写相应的代码。</li><li>out-of-tree：由存储厂商提供一个驱动（CSI 或 Flex Volume），安装到 K8s 集群，然后 StorageClass 只需要配置该驱动即可，驱动器会代替 StorageClass 管理存储。</li></ul><p>StorageClass 官网介绍：<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/storage-classes/">https://kubernetes.io/docs/concepts/storage/storage-classes/</a></p><h4 id="2-云原生存储rook"><a class="anchor" href="#2-云原生存储rook">#</a> 2. 云原生存储 Rook</h4><p>Rook 是一个自我管理的分布式存储编排系统，它本身并不是存储系统，在存储和 k8s 之前搭建了一个桥梁，使存储系统的搭建或者维护变得特别简单，Rook 将分布式存储系统转变为自我管理、自我扩展、自我修复的存储服务。它让一些存储的操作，比如部署、配置、扩容、升级、迁移、灾难恢复、监视和资源管理变得自动化，无需人工处理。并且 Rook 支持 CSI，可以利用 CSI 做一些 PVC 的快照、扩容、克隆等操作。</p><p>Rook 官网介绍：<a target="_blank" rel="noopener" href="https://rook.io/">https://rook.io/</a></p><p><img loading="lazy" data-src="https://wp-cdn.4ce.cn/v2/CK4Gn1u.jpeg" alt="Snipaste_2025-05-07_20-15-59.jpg"></p><h4 id="3-rook-安装"><a class="anchor" href="#3-rook-安装">#</a> 3. Rook 安装</h4><p>环境准备</p><ul><li>K8s 集群至少五个节点，每个节点的内存不低于 5G，CPU 不低于 2 核</li><li>所有节点时间同步</li><li>至少有三个存储节点，并且每个节点至少有一个裸盘，k8s-master03、k8s-node01、k8s-node02 增加裸盘</li></ul><h5 id="31-下载-rook-安装文件"><a class="anchor" href="#31-下载-rook-安装文件">#</a> 3.1 下载 Rook 安装文件</h5><pre><code>[root@k8s-master01 ~]# git clone --single-branch --branch v1.17.2 https://github.com/rook/rook.git
+</code></pre><h5 id="32-配置更改"><a class="anchor" href="#32-配置更改">#</a> 3.2 配置更改</h5><pre><code>[root@k8s-master01 ~]# cd rook/deploy/examples
+[root@k8s-master01 ~]# vim operator.yaml
+  ROOK_CSI_CEPH_IMAGE: &quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/cephcsi:v3.14.0&quot;
+  ROOK_CSI_REGISTRAR_IMAGE: &quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-node-driver-registrar:v2.13.0&quot;
+  ROOK_CSI_RESIZER_IMAGE: &quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-resizer:csi-resizer:v1.13.1&quot;
+  ROOK_CSI_PROVISIONER_IMAGE: &quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-provisioner:v5.1.0&quot;
+  ROOK_CSI_SNAPSHOTTER_IMAGE: &quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-snapshotter:v8.2.0&quot;
+  ROOK_CSI_ATTACHER_IMAGE: &quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-attacher:v4.8.0&quot;
+
+#ROOK_ENABLE_DISCOVERY_DAEMON 改成 true 即可
+ROOK_ENABLE_DISCOVERY_DAEMON: &quot;true&quot;
+</code></pre><h5 id="33-部署-rook"><a class="anchor" href="#33-部署-rook">#</a> 3.3 部署 rook</h5><pre><code>[root@k8s-master01 ceph]# kubectl create -f crds.yaml -f common.yaml -f operator.yaml
+[root@k8s-master01 examples]# kubectl get pods -n rook-ceph
+NAME                                  READY   STATUS    RESTARTS   AGE
+rook-ceph-operator-84ff77778b-7ww2w   1/1     Running   0          91m
+rook-discover-6j68f                   1/1     Running   0          82m
+rook-discover-9w4kt                   1/1     Running   0          82m
+rook-discover-h2zfm                   1/1     Running   0          82m
+rook-discover-hsz8b                   1/1     Running   0          19m
+rook-discover-rj4t7                   1/1     Running   0          82m
+</code></pre><h4 id="4创建-ceph-集群"><a class="anchor" href="#4创建-ceph-集群">#</a> 4. 创建 Ceph 集群</h4><h5 id="41-配置更改"><a class="anchor" href="#41-配置更改">#</a> 4.1 配置更改</h5><pre><code>[root@k8s-master01 examples]# vim cluster.yaml
+...
+    image: registry.cn-hangzhou.aliyuncs.com/old_xu/cephv17.2.5:v17.2.5
+...
+  skipUpgradeChecks: true     #改为true，跳过升级
+....
+  dashboard:
+    enabled: true
+    # serve the dashboard under a subpath (useful when you are accessing the dashboard via a reverse proxy)
+    # urlPrefix: /ceph-dashboard
+    # serve the dashboard at the given port.
+    # port: 8443
+    # serve the dashboard using SSL
+    ssl: false          #改为false
+...
+  storage: # cluster level storage configuration and selection
+    useAllNodes: false      #改为false,不使用所有的节点当osd
+    useAllDevices: false    #改为false,不使用所有的磁盘当osd
+...
+    #     deviceFilter: &quot;^sd.&quot;
+    nodes:
+    - name: &quot;k8s-master03&quot;
+      devices:
+      - name: &quot;sdb&quot;
+    - name: &quot;k8s-node01&quot;
+      devices:
+      - name: &quot;sdb&quot;
+    - name: &quot;k8s-node02&quot;
+      devices:
+      - name: &quot;sdb&quot;
+...
+</code></pre><p>注意：新版必须采用裸盘，即未格式化的磁盘。其中 k8s-master03、 k8s-node01、 k8s-node02 有新加的一个磁盘，可以通过 lsblk -f 查看新添加的磁盘名称。建议最少三个节点，否则后面的试验可能会出现问题</p><h5 id="42-创建-ceph-集群"><a class="anchor" href="#42-创建-ceph-集群">#</a> 4.2 创建 Ceph 集群</h5><pre><code>[root@k8s-master01 examples]# kubectl create -f cluster.yaml
+[root@k8s-master01 examples]#  kubectl get pods -n rook-ceph  
+NAME                                                     READY   STATUS      RESTARTS        AGE
+csi-cephfsplugin-87dqj                                   2/2     Running     0               55m
+csi-cephfsplugin-9mtd9                                   2/2     Running     0               55m
+csi-cephfsplugin-l7crk                                   2/2     Running     0               55m
+csi-cephfsplugin-ls85p                                   2/2     Running     0               55m
+csi-cephfsplugin-provisioner-c95769646-l6vxb             5/5     Running     0               55m
+csi-cephfsplugin-provisioner-c95769646-x697s             5/5     Running     0               55m
+csi-cephfsplugin-r5687                                   2/2     Running     0               55m
+csi-rbdplugin-4s562                                      2/2     Running     0               55m
+csi-rbdplugin-8mhs7                                      2/2     Running     0               55m
+csi-rbdplugin-9whfd                                      2/2     Running     0               55m
+csi-rbdplugin-d6j92                                      2/2     Running     0               55m
+csi-rbdplugin-mcm8t                                      2/2     Running     0               55m
+csi-rbdplugin-provisioner-68d9c8f455-hdksw               5/5     Running     0               55m
+csi-rbdplugin-provisioner-68d9c8f455-lthm9               5/5     Running     0               55m
+rook-ceph-crashcollector-k8s-master01-78bcb685d8-b5b7j   1/1     Running     0               34m
+rook-ceph-crashcollector-k8s-master03-6db7c77d4b-57g4k   1/1     Running     0               30m
+rook-ceph-crashcollector-k8s-node01-6758596958-g86zk     1/1     Running     0               33m
+rook-ceph-crashcollector-k8s-node02-764d875747-2b8jm     1/1     Running     0               33m
+rook-ceph-mgr-a-7764dfcdd-jx7fr                          2/2     Running     0               34m
+rook-ceph-mgr-b-768bdbd495-hbvm8                         1/2     Running     0               34m
+rook-ceph-mon-a-f89c955b5-zjccx                          2/2     Running     4 (92s ago)     50m
+rook-ceph-mon-b-7d54c89dff-xp9dx                         2/2     Running     3 (8m21s ago)   44m
+rook-ceph-mon-c-85fcbdc7f8-kvbrj                         2/2     Running     0               39m
+rook-ceph-operator-84ff77778b-7ww2w                      1/1     Running     3 (73m ago)     22h
+rook-ceph-osd-0-ccfb66b79-5dx6t                          2/2     Running     0               33m
+rook-ceph-osd-1-67fc6d854b-t92m8                         2/2     Running     0               33m
+rook-ceph-osd-2-6649d4d67c-vmmbk                         2/2     Running     0               30m
+rook-ceph-osd-prepare-k8s-master03-w7hh7                 0/1     Completed   0               33m
+rook-ceph-osd-prepare-k8s-node01-9z5ls                   0/1     Completed   0               33m
+rook-ceph-osd-prepare-k8s-node02-v6jnw                   0/1     Completed   0               33m
+rook-discover-6j68f                                      1/1     Running     1 (79m ago)     22h
+rook-discover-9w4kt                                      1/1     Running     1 (79m ago)     22h
+rook-discover-h2zfm                                      1/1     Running     2 (73m ago)     22h
+rook-discover-hsz8b                                      1/1     Running     2 (73m ago)     21h
+rook-discover-rj4t7                                      1/1     Running     1 (79m ago)     22h
+
+[root@k8s-master01 examples]# kubectl get cephcluster -n rook-ceph
+NAME        DATADIRHOSTPATH   MONCOUNT   AGE    PHASE   MESSAGE                        HEALTH        EXTERNAL
+rook-ceph   /var/lib/rook     3          4h2m   Ready   Cluster created successfully   HEALTH_WARN 
+</code></pre><h5 id="43-安装-ceph-snapshot-控制器"><a class="anchor" href="#43-安装-ceph-snapshot-控制器">#</a> 4.3 安装 ceph snapshot 控制器</h5><pre><code>[root@k8s-master01 ~]# cd /root/k8s-ha-install/
+[root@k8s-master01 k8s-ha-install]# git checkout manual-installation-v1.32.x
+[root@k8s-master01 k8s-ha-install]# kubectl create -f snapshotter/ -n kube-system
+[root@k8s-master01 k8s-ha-install]# kubectl get po -n kube-system -l app=snapshot-controller
+NAME                    READY   STATUS    RESTARTS   AGE
+snapshot-controller-0   1/1     Running   0          2m2s
+</code></pre><h4 id="5-安装-ceph-客户端工具"><a class="anchor" href="#5-安装-ceph-客户端工具">#</a> 5. 安装 ceph 客户端工具</h4><pre><code>[root@k8s-master01 k8s-ha-install]# cd /root/rook/deploy/examples/
+[root@k8s-master01 examples]# kubectl create -f toolbox.yaml -n rook-ceph
+[root@k8s-master01 examples]# kubectl get po -n rook-ceph -l app=rook-ceph-tools
+NAME                               READY   STATUS    RESTARTS   AGE
+rook-ceph-tools-7b75b967db-clqzg   1/1     Running   0          58s
+[root@k8s-master01 examples]# kubectl exec -it rook-ceph-tools-7b75b967db-clqzg -n rook-ceph -- bash
+bash-5.1$ ceph status
+  cluster:
+    id:     87b85368-9487-4967-a4e4-5970d2e0ec94
+    health: HEALTH_WARN
+            1 mgr modules have recently crashed
+ 
+  services:
+    mon: 3 daemons, quorum b,c (age 12s), out of quorum: a
+    mgr: a(active, since 7m), standbys: b
+    osd: 3 osds: 3 up (since 8m), 3 in (since 3h)
+ 
+  data:
+    pools:   0 pools, 0 pgs
+    objects: 0 objects, 0 B
+    usage:   82 MiB used, 60 GiB / 60 GiB avail
+    pgs: 
+	
+bash-4.4$  ceph osd status
+ID  HOST           USED  AVAIL  WR OPS  WR DATA  RD OPS  RD DATA  STATE      
+ 0  k8s-master03  20.6M  19.9G      0        0       0        0   exists,up  
+ 1  k8s-node01    20.6M  19.9G      0        0       0        0   exists,up  
+ 2  k8s-node02    20.6M  19.9G      0        0       0        0   exists,up 
+
+bash-4.4$ ceph df
+--- RAW STORAGE ---
+CLASS    SIZE   AVAIL    USED  RAW USED  %RAW USED
+hdd    60 GiB  60 GiB  62 MiB    62 MiB       0.10
+TOTAL  60 GiB  60 GiB  62 MiB    62 MiB       0.10
+
+--- POOLS ---
+POOL  ID  PGS   STORED  OBJECTS     USED  %USED  MAX AVAIL
+.mgr   1    1  449 KiB        2  1.3 MiB      0     19 GiB
+</code></pre><h4 id="6-ceph-dashboard"><a class="anchor" href="#6-ceph-dashboard">#</a> 6. Ceph dashboard</h4><h5 id="61-暴露服务"><a class="anchor" href="#61-暴露服务">#</a> 6.1 暴露服务</h5><pre><code>[root@k8s-master01 ~]# kubectl get svc -n rook-ceph
+NAME                      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
+rook-ceph-mgr             ClusterIP   10.96.54.15     &lt;none&gt;        9283/TCP            133m
+rook-ceph-mgr-dashboard   ClusterIP   10.96.97.117    &lt;none&gt;        7000/TCP            133m        #暴露ingresss也可
+rook-ceph-mon-a           ClusterIP   10.96.125.216   &lt;none&gt;        6789/TCP,3300/TCP   170m
+rook-ceph-mon-b           ClusterIP   10.96.34.183    &lt;none&gt;        6789/TCP,3300/TCP   133m
+rook-ceph-mon-c           ClusterIP   10.96.232.252   &lt;none&gt;        6789/TCP,3300/TCP   133m
+
+
+[root@k8s-master01 examples]# kubectl create -f dashboard-external-http.yaml           #暴露nodeport
+[root@k8s-master01 examples]# kubectl get svc -n rook-ceph rook-ceph-mgr-dashboard-external-http
+NAME                                     TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+rook-ceph-mgr-dashboard-external-https   NodePort   10.96.11.120   &lt;none&gt;        8443:32611/TCP   45s
+</code></pre><h5 id="62-配置ingress访问ceph"><a class="anchor" href="#62-配置ingress访问ceph">#</a> 6.2 配置 ingress 访问 ceph</h5><pre><code>[root@k8s-master01 examples]# cat dashboard-ingress-https.yaml 
+#
+# This example is for Kubernetes running an nginx-ingress
+# and an ACME (e.g. Let's Encrypt) certificate service
+#
+# The nginx-ingress annotations support the dashboard
+# running using HTTPS with a self-signed certificate
+#
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rook-ceph-mgr-dashboard
+  namespace: rook-ceph # namespace:cluster
+#  annotations:
+#    kubernetes.io/ingress.class: &quot;nginx&quot;
+#    kubernetes.io/tls-acme: &quot;true&quot;
+#    nginx.ingress.kubernetes.io/backend-protocol: &quot;HTTPS&quot;
+#    nginx.ingress.kubernetes.io/server-snippet: |
+#      proxy_ssl_verify off;
+
+spec:
+  ingressClassName: &quot;nginx&quot;
+#  tls:
+#    - hosts:
+#        - rook-ceph.hmallleasing.com
+#      secretName: rook-ceph.example.com
+  rules:
+    - host: rook-ceph.hmallleasing.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rook-ceph-mgr-dashboard
+                port:
+                  name: http-dashboard
+</code></pre><h5 id="63-登录"><a class="anchor" href="#63-登录">#</a> 6.3 登录</h5><pre><code>http://192.168.40.100:32611
+用户名：admin
+密码：kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o jsonpath=&quot;&#123;['data']['password']&#125;&quot; | base64 --decode &amp;&amp; echo
+</code></pre><h4 id="7-ceph-块存储的使用"><a class="anchor" href="#7-ceph-块存储的使用">#</a> 7. Ceph 块存储的使用</h4><p>块存储一般用于一个 Pod 挂载一块存储使用，相当于一个服务器新挂了一个盘，只给一个应用使用。</p><h5 id="71-创建-storageclass-和-ceph-的存储池"><a class="anchor" href="#71-创建-storageclass-和-ceph-的存储池">#</a> 7.1 创建 StorageClass 和 ceph 的存储池</h5><pre><code>[root@k8s-master01 examples]# kubectl get csidriver
+NAME                            ATTACHREQUIRED   PODINFOONMOUNT   STORAGECAPACITY   TOKENREQUESTS   REQUIRESREPUBLISH   MODES        AGE
+rook-ceph.cephfs.csi.ceph.com   true             false            false             &lt;unset&gt;         false               Persistent   15h       #文件存储csi
+rook-ceph.rbd.csi.ceph.com      true             false            false             &lt;unset&gt;         false               Persistent   15h       #块存储csi
+
+[root@k8s-master01 ~]# cd /root/rook/deploy/examples/
+[root@k8s-master01 examples]# vim csi/rbd/storageclass.yaml
+...
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  name: replicapool
+  namespace: rook-ceph # namespace:cluster
+spec:
+  failureDomain: host
+  replicated:
+    size: 3                #数据保存几份，测试环境可以将副本数设置成了 2（不能设置为 1），生产环境最少为 3，且要小于等于 osd 的数量
+...
+allowVolumeExpansion: true     #是否可以扩容
+reclaimPolicy: Delete          #pv回收策略
+
+[root@k8s-master01 examples]# kubectl create -f csi/rbd/storageclass.yaml -n rook-ceph
+
+[root@k8s-master01 examples]# kubectl get cephblockpool -n rook-ceph
+NAME          PHASE
+replicapool   Ready
+[root@k8s-master01 examples]# kubectl get sc
+NAME              PROVISIONER                  RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+nfs-storage       nfzl.com/nfs                 Delete          Immediate           false                  16h
+rook-ceph-block   rook-ceph.rbd.csi.ceph.com   Delete          Immediate           true                   37s
+</code></pre><h5 id="72-挂载测试"><a class="anchor" href="#72-挂载测试">#</a> 7.2 挂载测试</h5><pre><code>[root@k8s-master01 ~]# cat ceph-block-pvc.yaml        #创建PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ceph-block-pvc
+spec:
+  storageClassName: &quot;rook-ceph-block&quot;     # 明确指定使用哪个sc的供应商来创建pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi                      # 根据业务实际大小进行资源申请
+
+[root@k8s-master01 ~]# kubectl apply -f ceph-block-pvc.yaml 
+
+[root@k8s-master01 ~]# kubectl get pvc
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS      AGE
+ceph-block-pvc   Bound    pvc-86c94d8d-c359-47b8-b5d3-31dcdaf86551   1Gi        RWO            rook-ceph-block   3s
+
+[root@k8s-master01 ~]# kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                    STORAGECLASS      REASON   AGE
+pvc-86c94d8d-c359-47b8-b5d3-31dcdaf86551   1Gi        RWO            Delete           Bound    default/ceph-block-pvc   rook-ceph-block
+	  
+[root@k8s-master01 ~]# cat ceph-block-pvc-pod.yaml    #挂载PVC测试 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ceph-block-pvc-pod
+spec:
+  containers:
+  - name: ceph-block-pvc-pod
+    image: nginx
+    volumeMounts:
+    - name: nginx-page
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: nginx-page
+    persistentVolumeClaim:      
+      claimName: ceph-block-pv
+
+[root@k8s-master01 ~]# kubectl apply -f ceph-block-pvc-pod.yaml
+</code></pre><h5 id="73-statefulset-volumeclaimtemplates"><a class="anchor" href="#73-statefulset-volumeclaimtemplates">#</a> 7.3 StatefulSet volumeClaimTemplates</h5><pre><code>[root@k8s-master01 ~]# cat ceph-block-pvc-sts.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+
+  - port: 80
+    name: web
+      clusterIP: None
+      selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: nginx # 必须匹配 .spec.template.metadata.labels
+  serviceName: &quot;nginx&quot;
+  replicas: 3 # 默认值是 1
+  template:
+    metadata:
+      labels:
+        app: nginx # 必须匹配 .spec.selector.matchLabels
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.20
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+  - metadata:
+    name: www
+    spec:
+      accessModes: [ &quot;ReadWriteOnce&quot; ]
+      storageClassName: &quot;rook-ceph-block&quot;
+      resources:
+        requests:
+          storage: 1Gi
+    	  
+[root@k8s-master01 ~]# kubectl apply -f ceph-block-pvc-sts.yaml 
+
+[root@k8s-master01 ~]# kubectl get pods
+NAME                                      READY   STATUS    RESTARTS       AGE
+web-0                                     1/1     Running   0              4m19s
+web-1                                     1/1     Running   0              4m10s
+web-2                                     1/1     Running   0              2m21s
+
+[root@k8s-master01 ~]# kubectl get pvc
+NAME        STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS      AGE
+www-web-0   Bound    pvc-27cab5bf-f989-4050-aa84-1b2dac9fa745   1Gi        RWO            rook-ceph-block   4m23s
+www-web-1   Bound    pvc-76fb08f4-2195-4678-b6b8-286c2f722cc9   1Gi        RWO            rook-ceph-block   4m14s
+www-web-2   Bound    pvc-6b858cd9-288f-48bc-bc96-33e6eb519613   1Gi        RWO            rook-ceph-block   2m25s
+
+[root@k8s-master01 ~]# kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM               STORAGECLASS      REASON   AGE
+pvc-27cab5bf-f989-4050-aa84-1b2dac9fa745   1Gi        RWO            Delete           Bound    default/www-web-0   rook-ceph-block            4m25s
+pvc-6b858cd9-288f-48bc-bc96-33e6eb519613   1Gi        RWO            Delete           Bound    default/www-web-2   rook-ceph-block            2m27s
+pvc-76fb08f4-2195-4678-b6b8-286c2f722cc9   1Gi        RWO            Delete           Bound    default/www-web-1   rook-ceph-block            4m16s
+</code></pre><h4 id="8-共享文件系统的使用"><a class="anchor" href="#8-共享文件系统的使用">#</a> 8. 共享文件系统的使用</h4><p>共享文件系统一般用于多个 Pod 共享一个存储</p><h5 id="81-创建共享类型的文件系统"><a class="anchor" href="#81-创建共享类型的文件系统">#</a> 8.1 创建共享类型的文件系统</h5><pre><code>[root@k8s-master01 ~]# cd /root/rook/deploy/examples/
+[root@k8s-master01 examples]# kubectl apply -f filesystem.yaml
+[root@k8s-master01 examples]# kubectl get pod -l app=rook-ceph-mds -n rook-ceph
+NAME                                    READY   STATUS    RESTARTS   AGE
+rook-ceph-mds-myfs-a-7d76cb5988-9nz9p   2/2     Running   0          36s
+rook-ceph-mds-myfs-b-76ff7c784c-vs8nm   2/2     Running   0          33s
+</code></pre><h5 id="82-创建共享类型文件系统的-storageclass"><a class="anchor" href="#82-创建共享类型文件系统的-storageclass">#</a> 8.2 创建共享类型文件系统的 StorageClass</h5><pre><code>[root@k8s-master01 examples]# cd csi/cephfs
+[root@k8s-master01 cephfs]# kubectl create -f storageclass.yaml
+[root@k8s-master01 cephfs]# kubectl get sc
+NAME              PROVISIONER                     RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+nfs-storage       nfzl.com/nfs                    Delete          Immediate           false                  17h
+rook-ceph-block   rook-ceph.rbd.csi.ceph.com      Delete          Immediate           true                   82m
+rook-cephfs       rook-ceph.cephfs.csi.ceph.com   Delete          Immediate           true                   13s
+</code></pre><h5 id="83-挂载测试"><a class="anchor" href="#83-挂载测试">#</a> 8.3 挂载测试</h5><pre><code>[root@k8s-master01 ~]# cat cephfs-pvc-deploy.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+  selector:
+    app: nginx
+  type: ClusterIP
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nginx-share-pvc
+spec:
+  storageClassName: rook-cephfs 
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: nginx # has to match .spec.template.metadata.labels
+  replicas: 3 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: nginx # has to match .spec.selector.matchLabels
+    spec:
+      containers:
+      - name: nginx
+        image: nginx 
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+      volumes:
+        - name: www
+          persistentVolumeClaim:
+            claimName: nginx-share-pvc
+			
+[root@k8s-master01 ~]# kubectl apply -f cephfs-pvc-deploy.yaml
+[root@k8s-master01 ~]# kubectl get pods
+NAME                                      READY   STATUS    RESTARTS        AGE
+cluster-test-84dfc9c68b-5q4ng             1/1     Running   84 (4m2s ago)   16d
+nfs-client-provisioner-5dbbd8d796-lhdgw   1/1     Running   5 (123m ago)    18h
+web-6c59f8559-g5xzb                       1/1     Running   0               46s
+web-6c59f8559-ns77q                       1/1     Running   0               46s
+web-6c59f8559-qxb5f                       1/1     Running   0               46s
+
+[root@k8s-master01 ~]# kubectl get pvc
+NAME              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nginx-share-pvc   Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   2Gi        RWX            rook-cephfs    52s
+
+[root@k8s-master01 ~]# kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                     STORAGECLASS   REASON   AGE
+pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   2Gi        RWX            Delete           Bound    default/nginx-share-pvc   rook-cephfs             53s
+
+[root@k8s-master01 ~]# kubectl exec -it web-6c59f8559-g5xzb -- bash
+root@web-6c59f8559-g5xzb:/# cd /usr/share/nginx/html/
+root@web-6c59f8559-g5xzb:/usr/share/nginx/html# echo &quot;hello cephfs&quot; &gt;&gt; index.html
+
+[root@k8s-master01 ~]# kubectl get svc
+NAME                 TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)    AGE
+kubernetes           ClusterIP   10.96.0.1     &lt;none&gt;        443/TCP    16d
+mysql-svc-external   ClusterIP   None          &lt;none&gt;        3306/TCP   9d
+nginx                ClusterIP   10.96.58.17   &lt;none&gt;        80/TCP     4m34s
+[root@k8s-master01 ~]# curl 10.96.58.17
+hello cephfs
+</code></pre><h4 id="9pvc-扩容"><a class="anchor" href="#9pvc-扩容">#</a> 9.PVC 扩容</h4><pre><code>[root@k8s-master01 ~]# kubectl get sc
+NAME              PROVISIONER                     RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+nfs-storage       nfzl.com/nfs                    Delete          Immediate           false                  18h
+rook-ceph-block   rook-ceph.rbd.csi.ceph.com      Delete          Immediate           true                   104m     #true允许扩容
+rook-cephfs       rook-ceph.cephfs.csi.ceph.com   Delete          Immediate           true                   22m      #true允许扩容
+
+[root@k8s-master01 ~]# kubectl get pvc
+NAME              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nginx-share-pvc   Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   2Gi        RWX            rook-cephfs    13m
+[root@k8s-master01 ~]# kubectl edit pvc nginx-share-pvc
+...
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi         #更改pvc大小
+  storageClassName: rook-cephfs
+...
+
+[root@k8s-master01 ~]# kubectl get pvc       #查看PVC是否扩容
+NAME              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nginx-share-pvc   Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   5Gi        RWX            rook-cephfs    15m
+
+[root@k8s-master01 ~]# kubectl get pv         #查看PV是否扩容
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                     STORAGECLASS   REASON   AGE
+pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   5Gi        RWX            Delete           Bound    default/nginx-share-pvc   rook-cephfs             15m
+
+[root@k8s-master01 ~]# kubectl exec -it web-6c59f8559-g5xzb -- bash       #进入容器，查看pod是否扩容  
+root@web-6c59f8559-g5xzb:/# df -h 
+Filesystem                                                                                                                                             Size  Used Avail Use% Mounted on
+overlay                                                                                                                                                 17G   13G  4.1G  76% /
+tmpfs                                                                                                                                                   64M     0   64M   0% /dev
+tmpfs                                                                                                                                                  2.0G     0  2.0G   0% /sys/fs/cgroup
+/dev/sda3                                                                                                                                               17G   13G  4.1G  76% /etc/hosts
+shm                                                                                                                                                     64M     0   64M   0% /dev/shm
+10.96.121.140:6789,10.96.131.130:6789,10.96.62.64:6789:/volumes/csi/csi-vol-3b645a11-58f4-475a-9404-5d84964f5291/e4bdf743-eb18-42c8-b04f-41964f76de4f  5.0G     0  5.0G   0% /usr/share/nginx/html
+tmpfs                                                                                                                                                  3.8G   12K  3.8G   1% /run/secrets/kubernetes.io/serviceaccount
+tmpfs                                                                                                                                                  2.0G     0  2.0G   0% /proc/asound
+tmpfs                                                                                                                                                  2.0G     0  2.0G   0% /proc/acpi
+tmpfs                                                                                                                                                  2.0G     0  2.0G   0% /proc/scsi
+tmpfs                                                                                                                                                  2.0G     0  2.0G   0% /sys/firmware
+</code></pre><h4 id="10-pvc-快照"><a class="anchor" href="#10-pvc-快照">#</a> 10. PVC 快照</h4><h5 id="101-文件共享类型快照"><a class="anchor" href="#101-文件共享类型快照">#</a> 10.1 文件共享类型快照</h5><pre><code>[root@k8s-master01 ~]# cd rook/deploy/examples
+[root@k8s-master01 examples]# kubectl create -f csi/cephfs/snapshotclass.yaml 
+
+[root@k8s-master01 examples]# kubectl get volumesnapshotclass
+NAME                         DRIVER                          DELETIONPOLICY   AGE
+csi-cephfsplugin-snapclass   rook-ceph.cephfs.csi.ceph.com   Delete           25s
+
+
+#拍摄快照	
+[root@k8s-master01 examples]# kubectl exec -it web-6c59f8559-g5xzb -- bash         #pvc新增数据
+root@web-6c59f8559-g5xzb:/# cd /usr/share/nginx/html/
+root@web-6c59f8559-g5xzb:/usr/share/nginx/html# touch &#123;1..10&#125;
+root@web-6c59f8559-g5xzb:/usr/share/nginx/html# ls
+1  10  2  3  4	5  6  7  8  9  index.html
+
+[root@k8s-master01 examples]# kubectl get pvc       #查看pvs并对nginx-share-pvc拍摄快照
+NAME              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nginx-share-pvc   Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   5Gi        RWX            rook-cephfs    4h23m
+
+[root@k8s-master01 examples]# cat csi/cephfs/snapshot.yaml         #拍摄快照
+---
+# 1.17 &lt;= K8s &lt;= v1.19
+# apiVersion: snapshot.storage.k8s.io/v1beta1
+# K8s &gt;= v1.20
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: cephfs-pvc-snapshot
+spec:
+  volumeSnapshotClassName: csi-cephfsplugin-snapclass
+  source:
+    persistentVolumeClaimName: nginx-share-pvc         #基于那个PVC拍摄快照
+	
+[root@k8s-master01 examples]# kubectl apply -f csi/cephfs/snapshot.yaml
+[root@k8s-master01 examples]# kubectl get volumesnapshot
+NAME                  READYTOUSE   SOURCEPVC         SOURCESNAPSHOTCONTENT   RESTORESIZE   SNAPSHOTCLASS                SNAPSHOTCONTENT                                    CREATIONTIME   AGE
+cephfs-pvc-snapshot   true         nginx-share-pvc                           5Gi           csi-cephfsplugin-snapclass   snapcontent-bdaddb97-debe-4f42-9423-13bf1c5b5402   4m6s           4m8s
+
+#删除pvc数据
+[root@k8s-master01 examples]# kubectl exec -it web-6c59f8559-g5xzb -- bash
+root@web-6c59f8559-g5xzb:/# cd /usr/share/nginx/html/
+root@web-6c59f8559-g5xzb:/usr/share/nginx/html# ls
+1  10  2  3  4	5  6  7  8  9  index.html
+root@web-6c59f8559-g5xzb:/usr/share/nginx/html# rm -rf &#123;1..10&#125;
+root@web-6c59f8559-g5xzb:/usr/share/nginx/html# ls
+index.html
+
+#pvc回滚数据
+[root@k8s-master01 examples]# kubectl get volumesnapshot
+NAME                  READYTOUSE   SOURCEPVC         SOURCESNAPSHOTCONTENT   RESTORESIZE   SNAPSHOTCLASS                SNAPSHOTCONTENT                                    CREATIONTIME   AGE
+cephfs-pvc-snapshot   true         nginx-share-pvc                           5Gi           csi-cephfsplugin-snapclass   snapcontent-bdaddb97-debe-4f42-9423-13bf1c5b5402   7m39s          7m41s
+	
+[root@k8s-master01 examples]# cat csi/cephfs/pvc-restore.yaml 
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cephfs-pvc-restore
+spec:
+  storageClassName: rook-cephfs       #创建pv的storageclass名称相同
+  dataSource:
+    name: cephfs-pvc-snapshot         #volumesnapshot数据源
+    kind: VolumeSnapshot
+    apiGroup: snapshot.storage.k8s.io
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi      #大小等于snapshot大小
+
+[root@k8s-master01 examples]# kubectl apply -f csi/cephfs/pvc-restore.yaml
+
+[root@k8s-master01 examples]# kubectl get pvc
+NAME                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+cephfs-pvc-restore   Bound    pvc-9e845f2b-df1f-450d-8aa2-f9a46db6adb6   5Gi        RWX            rook-cephfs    54s          
+nginx-share-pvc      Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   5Gi        RWX            rook-cephfs    4h50m
+
+#挂载PVC测试数据是否恢复
+[root@k8s-master01 examples]# cat csi/cephfs/pod.yaml 
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: csicephfs-demo-pod
+spec:
+  containers:
+    - name: web-server
+      image: nginx
+      volumeMounts:
+        - name: mypvc
+          mountPath: /var/lib/www/html
+  volumes:
+    - name: mypvc
+      persistentVolumeClaim:
+        claimName: cephfs-pvc-restore        #挂载恢复pvc
+        readOnly: false
+
+[root@k8s-master01 examples]# kubectl apply -f csi/cephfs/pod.yaml
+[root@k8s-master01 examples]# kubectl get pods
+NAME                                      READY   STATUS    RESTARTS        AGE
+cluster-test-84dfc9c68b-5q4ng             1/1     Running   88 (57m ago)    16d
+csicephfs-demo-pod                        1/1     Running   0               24s
+nfs-client-provisioner-5dbbd8d796-lhdgw   1/1     Running   5 (6h57m ago)   23h
+web-6c59f8559-g5xzb                       1/1     Running   0               4h54m
+web-6c59f8559-ns77q                       1/1     Running   0               4h54m
+web-6c59f8559-qxb5f                       1/1     Running   0               4h54m
+[root@k8s-master01 examples]# kubectl exec -it csicephfs-demo-pod -- bash
+root@csicephfs-demo-pod:/# ls /var/lib/www/html/               #s删除数据已经恢复
+1  10  2  3  4	5  6  7  8  9  index.html
+</code></pre><h5 id="102-pvc-克隆"><a class="anchor" href="#102-pvc-克隆">#</a> 10.2 PVC 克隆</h5><pre><code>[root@k8s-master01 examples]# kubectl get pvc
+NAME                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+cephfs-pvc-restore   Bound    pvc-9e845f2b-df1f-450d-8aa2-f9a46db6adb6   5Gi        RWX            rook-cephfs    11m
+nginx-share-pvc      Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   5Gi        RWX            rook-cephfs    5h1m
+
+
+[root@k8s-master01 examples]# cat csi/cephfs/pvc-clone.yaml 
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cephfs-pvc-clone
+spec:
+  storageClassName: rook-cephfs      # pvc 的 storageClass 名称
+  dataSource:
+    name: nginx-share-pvc          #克隆的PVC名称
+    kind: PersistentVolumeClaim
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi                 #大小等于所克隆的PVC大小
+
+[root@k8s-master01 examples]# kubectl apply -f csi/cephfs/pvc-clone.yaml
+
+[root@k8s-master01 examples]# kubectl get pvc
+NAME                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+cephfs-pvc-clone     Bound    pvc-0a19b65e-cb5e-4379-a7f7-e0783fcf8ddf   5Gi        RWX            rook-cephfs    22s
+cephfs-pvc-restore   Bound    pvc-9e845f2b-df1f-450d-8aa2-f9a46db6adb6   5Gi        RWX            rook-cephfs    15m
+nginx-share-pvc      Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   5Gi        RWX            rook-cephfs    5h4m
+
+#挂载克隆PVC测试
+[root@k8s-master01 examples]# cat csi/cephfs/pod.yaml 
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: csicephfs-demo-pod
+spec:
+  containers:
+    - name: web-server
+      image: nginx
+      volumeMounts:
+        - name: mypvc
+          mountPath: /var/lib/www/html
+  volumes:
+    - name: mypvc
+      persistentVolumeClaim:
+        claimName: cephfs-pvc-clone      #挂载克隆的pvc
+        readOnly: false
+
+[root@k8s-master01 examples]# kubectl apply -f csi/cephfs/pod.yaml          
+[root@k8s-master01 examples]# kubectl get pods
+NAME                                      READY   STATUS    RESTARTS         AGE
+cluster-test-84dfc9c68b-5q4ng             1/1     Running   89 (9m54s ago)   16d
+csicephfs-demo-pod                        1/1     Running   0                17s
+nfs-client-provisioner-5dbbd8d796-lhdgw   1/1     Running   5 (7h9m ago)     23h
+web-6c59f8559-g5xzb                       1/1     Running   0                5h6m
+web-6c59f8559-ns77q                       1/1     Running   0                5h6m
+web-6c59f8559-qxb5f                       1/1     Running   0                5h6m
+
+[root@k8s-master01 examples]# kubectl exec -it csicephfs-demo-pod -- bash
+root@csicephfs-demo-pod:/# cat /var/lib/www/html/index.html 
+hello cephfs
+</code></pre><h4 id="11-测试数据清理"><a class="anchor" href="#11-测试数据清理">#</a> 11. 测试数据清理</h4><pre><code>参考文档：https://rook.io/docs/rook/v1.11/Getting-Started/ceph-teardown/#delete-the-cephcluster-crd
+[root@k8s-master01 ~]# kubectl delete deploy web
+
+[root@k8s-master01 ~]# kubectl delete pods csicephfs-demo-pod
+
+[root@k8s-master01 ~]# kubectl delete pvc --all
+[root@k8s-master01 ~]# kubectl get pvc
+No resources found in default namespace.
+[root@k8s-master01 ~]# kubectl get pv
+No resources found
+
+
+[root@k8s-master01 ~]# kubectl get volumesnapshot
+NAME                  READYTOUSE   SOURCEPVC         SOURCESNAPSHOTCONTENT   RESTORESIZE   SNAPSHOTCLASS                SNAPSHOTCONTENT                                    CREATIONTIME   AGE
+cephfs-pvc-snapshot   true         nginx-share-pvc                           5Gi           csi-cephfsplugin-snapclass   snapcontent-bdaddb97-debe-4f42-9423-13bf1c5b5402   61m            61m
+[root@k8s-master01 ~]# kubectl delete volumesnapshot cephfs-pvc-snapshot
+volumesnapshot.snapshot.storage.k8s.io &quot;cephfs-pvc-snapshot&quot; deleted
+
+kubectl delete -n rook-ceph cephblockpool replicapool
+kubectl delete -n rook-ceph cephfilesystem myfs
+
+kubectl delete storageclass rook-ceph-block
+kubectl delete storageclass rook-cephfs
+kubectl delete -f csi/cephfs/kube-registry.yaml
+kubectl delete storageclass csi-cephfs
+
+kubectl -n rook-ceph delete cephcluster rook-ceph
+
+kubectl delete -f operator.yaml
+kubectl delete -f common.yaml
+kubectl delete -f crds.yaml
+</code></pre><p><em>本文出自于：<a target="_blank" rel="noopener" href="https://edu.51cto.com/course/23845.html">https://edu.51cto.com/course/23845.html</a></em></p><div class="tags"><a href="/tags/Kubernetes/" rel="tag"><i class="ic i-tag"></i>Kubernetes</a></div></div><footer><div class="meta"><span class="icon"><i class="ic i-eye"></i></span><span>此文章已被阅读次数:</span><span class="waline-pageview-count" id="twikoo_visitors" data-path="/posts/3030097036.html">正在加载...</span><span class="item"><span class="icon"><i class="ic i-calendar-check"></i></span><span class="text">更新于</span><time title="修改时间：2025-05-12 20:25:04" itemprop="dateModified" datetime="2025-05-12T20:25:04+08:00">2025-05-12</time></span></div><div class="reward"><button><i class="ic i-heartbeat"></i>赞赏</button><p>请我喝[茶]~(￣▽￣)~*</p><div id="qr"><div><img loading="lazy" data-src="/assets/wechatpay.png" alt="Xu Yong 微信支付"><p>微信支付</p></div><div><img loading="lazy" data-src="/assets/alipay.png" alt="Xu Yong 支付宝"><p>支付宝</p></div></div></div><div id="copyright"><ul><li class="author"><strong>本文作者：</strong>Xu Yong<i class="ic i-at"><em>@</em></i>LinuxSre云原生</li><li class="link"><strong>本文链接：</strong><a href="http://ixuyong.cn/posts/3030097036.html" title="K8S云原生存储Rook-Ceph">http://ixuyong.cn/posts/3030097036.html</a></li><li class="license"><strong>版权声明：</strong>本站所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh"><i class="ic i-creative-commons"><em>(CC)</em></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li></ul></div></footer></article></div><div class="post-nav"><div class="item left"><a href="/posts/3890389502.html" rel="prev" itemprop="url" data-background-image="https:&#x2F;&#x2F;wp-cdn.4ce.cn&#x2F;v2&#x2F;MrtgBDG.jpeg" title="K8S持久化存储NFS+StorageClass"><span class="type">上一篇</span><span class="category"><i class="ic i-flag"></i>Kubernetes</span><h3>K8S持久化存储NFS+StorageClass</h3></a></div><div class="item right"><a href="/posts/3364424907.html" rel="next" itemprop="url" data-background-image="https:&#x2F;&#x2F;wp-cdn.4ce.cn&#x2F;v2&#x2F;q5MesmM.jpeg" title="阿里云+Github构建镜像仓库"><span class="type">下一篇</span><span class="category"><i class="ic i-flag"></i>Docker</span><h3>阿里云+Github构建镜像仓库</h3></a></div></div><div class="wrap" id="comments"></div></div><div id="sidebar"><div class="inner"><div class="panels"><div class="inner"><div class="contents panel pjax" data-title="文章目录"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#k8s%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AD%98%E5%82%A8rook-ceph"><span class="toc-number">1.</span> <span class="toc-text">K8S 云原生存储 Rook-Ceph</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-storageclass%E5%8A%A8%E6%80%81%E5%AD%98%E5%82%A8"><span class="toc-number">1.1.</span> <span class="toc-text">1. StorageClass 动态存储</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AD%98%E5%82%A8rook"><span class="toc-number">1.2.</span> <span class="toc-text">2. 云原生存储 Rook</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-rook-%E5%AE%89%E8%A3%85"><span class="toc-number">1.3.</span> <span class="toc-text">3. Rook 安装</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#31-%E4%B8%8B%E8%BD%BD-rook-%E5%AE%89%E8%A3%85%E6%96%87%E4%BB%B6"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 下载 Rook 安装文件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#32-%E9%85%8D%E7%BD%AE%E6%9B%B4%E6%94%B9"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 配置更改</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#33-%E9%83%A8%E7%BD%B2-rook"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 部署 rook</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4%E5%88%9B%E5%BB%BA-ceph-%E9%9B%86%E7%BE%A4"><span class="toc-number">1.4.</span> <span class="toc-text">4. 创建 Ceph 集群</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#41-%E9%85%8D%E7%BD%AE%E6%9B%B4%E6%94%B9"><span class="toc-number">1.4.1.</span> <span class="toc-text">4.1 配置更改</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#42-%E5%88%9B%E5%BB%BA-ceph-%E9%9B%86%E7%BE%A4"><span class="toc-number">1.4.2.</span> <span class="toc-text">4.2 创建 Ceph 集群</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#43-%E5%AE%89%E8%A3%85-ceph-snapshot-%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="toc-number">1.4.3.</span> <span class="toc-text">4.3 安装 ceph snapshot 控制器</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-%E5%AE%89%E8%A3%85-ceph-%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%B7%A5%E5%85%B7"><span class="toc-number">1.5.</span> <span class="toc-text">5. 安装 ceph 客户端工具</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#6-ceph-dashboard"><span class="toc-number">1.6.</span> <span class="toc-text">6. Ceph dashboard</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#61-%E6%9A%B4%E9%9C%B2%E6%9C%8D%E5%8A%A1"><span class="toc-number">1.6.1.</span> <span class="toc-text">6.1 暴露服务</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#62-%E9%85%8D%E7%BD%AEingress%E8%AE%BF%E9%97%AEceph"><span class="toc-number">1.6.2.</span> <span class="toc-text">6.2 配置 ingress 访问 ceph</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#63-%E7%99%BB%E5%BD%95"><span class="toc-number">1.6.3.</span> <span class="toc-text">6.3 登录</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#7-ceph-%E5%9D%97%E5%AD%98%E5%82%A8%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">1.7.</span> <span class="toc-text">7. Ceph 块存储的使用</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#71-%E5%88%9B%E5%BB%BA-storageclass-%E5%92%8C-ceph-%E7%9A%84%E5%AD%98%E5%82%A8%E6%B1%A0"><span class="toc-number">1.7.1.</span> <span class="toc-text">7.1 创建 StorageClass 和 ceph 的存储池</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#72-%E6%8C%82%E8%BD%BD%E6%B5%8B%E8%AF%95"><span class="toc-number">1.7.2.</span> <span class="toc-text">7.2 挂载测试</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#73-statefulset-volumeclaimtemplates"><span class="toc-number">1.7.3.</span> <span class="toc-text">7.3 StatefulSet volumeClaimTemplates</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#8-%E5%85%B1%E4%BA%AB%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">1.8.</span> <span class="toc-text">8. 共享文件系统的使用</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#81-%E5%88%9B%E5%BB%BA%E5%85%B1%E4%BA%AB%E7%B1%BB%E5%9E%8B%E7%9A%84%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="toc-number">1.8.1.</span> <span class="toc-text">8.1 创建共享类型的文件系统</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#82-%E5%88%9B%E5%BB%BA%E5%85%B1%E4%BA%AB%E7%B1%BB%E5%9E%8B%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84-storageclass"><span class="toc-number">1.8.2.</span> <span class="toc-text">8.2 创建共享类型文件系统的 StorageClass</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#83-%E6%8C%82%E8%BD%BD%E6%B5%8B%E8%AF%95"><span class="toc-number">1.8.3.</span> <span class="toc-text">8.3 挂载测试</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#9pvc-%E6%89%A9%E5%AE%B9"><span class="toc-number">1.9.</span> <span class="toc-text">9.PVC 扩容</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#10-pvc-%E5%BF%AB%E7%85%A7"><span class="toc-number">1.10.</span> <span class="toc-text">10. PVC 快照</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#101-%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB%E7%B1%BB%E5%9E%8B%E5%BF%AB%E7%85%A7"><span class="toc-number">1.10.1.</span> <span class="toc-text">10.1 文件共享类型快照</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#102-pvc-%E5%85%8B%E9%9A%86"><span class="toc-number">1.10.2.</span> <span class="toc-text">10.2 PVC 克隆</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#11-%E6%B5%8B%E8%AF%95%E6%95%B0%E6%8D%AE%E6%B8%85%E7%90%86"><span class="toc-number">1.11.</span> <span class="toc-text">11. 测试数据清理</span></a></li></ol></li></ol></div><div class="related panel pjax" data-title="系列文章"><ul><li><a href="/posts/3166738000.html" rel="bookmark" title="Kubeadm高可用安装K8s集群">Kubeadm高可用安装K8s集群</a></li><li><a href="/posts/2771271649.html" rel="bookmark" title="云原生K8s安全专家CKS认证考题详解">云原生K8s安全专家CKS认证考题详解</a></li><li><a href="/posts/985149017.html" rel="bookmark" title="二进制高可用安装K8S集群">二进制高可用安装K8S集群</a></li><li><a href="/posts/1771242682.html" rel="bookmark" title="K8s零宕机服务发布-探针">K8s零宕机服务发布-探针</a></li><li><a href="/posts/108692210.html" rel="bookmark" title="K8s资源调度deployment、statefulset、daemonset">K8s资源调度deployment、statefulset、daemonset</a></li><li><a href="/posts/858611107.html" rel="bookmark" title="K8s服务发布Service">K8s服务发布Service</a></li><li><a href="/posts/3992668367.html" rel="bookmark" title="K8s配置管理Configmap">K8s配置管理Configmap</a></li><li><a href="/posts/169153047.html" rel="bookmark" title="K8s持久化存储">K8s持久化存储</a></li><li><a href="/posts/3833778957.html" rel="bookmark" title="K8s计划任务Job、Cronjob">K8s计划任务Job、Cronjob</a></li><li><a href="/posts/3142072607.html" rel="bookmark" title="K8s初始化容器、临时容器">K8s初始化容器、临时容器</a></li><li><a href="/posts/3254599477.html" rel="bookmark" title="K8s容忍和污点">K8s容忍和污点</a></li><li><a href="/posts/312010518.html" rel="bookmark" title="K8s亲和力Affinity">K8s亲和力Affinity</a></li><li><a href="/posts/176412055.html" rel="bookmark" title="K8s准入控制ResourceQuota、LimitRange、QoS服务质量">K8s准入控制ResourceQuota、LimitRange、QoS服务质量</a></li><li><a href="/posts/722512536.html" rel="bookmark" title="K8s细粒度权限控制RBAC">K8s细粒度权限控制RBAC</a></li><li><a href="/posts/3890389502.html" rel="bookmark" title="K8S持久化存储NFS+StorageClass">K8S持久化存储NFS+StorageClass</a></li><li class="active"><a href="/posts/3030097036.html" rel="bookmark" title="K8S云原生存储Rook-Ceph">K8S云原生存储Rook-Ceph</a></li><li><a href="/posts/170573601.html" rel="bookmark" title="K8s服务发布Ingress">K8s服务发布Ingress</a></li></ul></div><div class="overview panel" data-title="站点概览"><div class="author" itemprop="author" itemscope itemtype="http://schema.org/Person"><img class="image" loading="lazy" decoding="async" itemprop="image" alt="Xu Yong" src="/assets/avatar.png"><p class="name" itemprop="name">Xu Yong</p><div class="description" itemprop="description">专注于 Linux 运维、云计算、云原⽣等技术</div></div><nav class="state"><div class="item posts"><a href="/archives/"><span class="count">24</span><span class="name">文章</span></a></div><div class="item categories"><a href="/categories/"><span class="count">7</span><span class="name">分类</span></a></div><div class="item tags"><a href="/tags/"><span class="count">7</span><span class="name">标签</span></a></div></nav><div class="social"><a target="_blank" rel="noopener" href="https://github.com/xyapples" class="item github" title="https:&#x2F;&#x2F;github.com&#x2F;xyapples"><i class="ic i-github"></i></a><a target="_blank" rel="noopener" href="https://gitee.com/chinagei" class="item gitee" title="https:&#x2F;&#x2F;gitee.com&#x2F;chinagei"><i class="ic i-gitee"></i></a><a href="mailto:373370405@qq.com" class="item email" title="mailto:373370405@qq.com"><i class="ic i-envelope"></i></a></div><div class="menu"><li class="item"><a href="/" rel="section"><i class="ic i-home"></i>首页</a></li><li class="item"><a href="/categories/" rel="section"><i class="ic i-th"></i>分类</a></li><li class="item"><a href="/archives/" rel="section"><i class="ic i-list-alt"></i>归档</a></li><li class="item"><a href="/tags/" rel="section"><i class="ic i-tags"></i>标签</a></li><li class="item"><a href="/about/" rel="section"><i class="ic i-about"></i>关于</a></li><li class="item"><a href="/friends/" rel="section"><i class="ic i-heart"></i>友链</a></li></div></div></div></div><ul id="quick"><li class="prev pjax"><a href="/posts/3364424907.html" rel="prev" title="上一篇"><i class="ic i-chevron-left"></i></a></li><li class="up"><i class="ic i-arrow-up"></i></li><li class="down"><i class="ic i-arrow-down"></i></li><li class="next pjax"><a href="/posts/3890389502.html" rel="next" title="下一篇"><i class="ic i-chevron-right"></i></a></li><li class="percent"></li></ul></div></div><div class="dimmer"></div></div></main><footer id="footer"><div class="inner"><div class="widgets"><div class="rpost pjax"><h2>随机文章</h2><ul><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/108692210.html">K8s资源调度deployment、statefulset、daemonset</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/985149017.html">二进制高可用安装K8S集群</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/3030097036.html">K8S云原生存储Rook-Ceph</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/722512536.html">K8s细粒度权限控制RBAC</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/1771242682.html">K8s零宕机服务发布-探针</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Harbor/" title="分类于Harbor">Harbor</a></div><span><a href="/posts/3071070978.html">企业级私有仓库Harbor搭建</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Windows/" title="分类于Windows">Windows</a></div><span><a href="/posts/3071070979.html">一键永久激活Window、office教程</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/3833778957.html">K8s计划任务Job、Cronjob</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/312010518.html">K8s亲和力Affinity</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/MySQL/" title="分类于MySQL">MySQL</a></div><span><a href="/posts/2628187572.html">MySQL运维DBA应用与实践</a></span></li></ul></div><div class="rpost pjax"><h2>最新评论</h2><ul class="leancloud-recent-comment" id="new-comment"></ul></div></div><div class="status"><div class="copyright">&copy; 2022 -<span itemprop="copyrightYear">2025</span><span class="with-love"><i class="ic i-sakura rotate"></i></span><span class="author" itemprop="copyrightHolder">Xu Yong @ LinuxSre云原生</span></div><div class="count"><span class="post-meta-item-icon"><i class="ic i-chart-area"></i></span><span title="站点总字数">388k 字</span><span class="post-meta-divider"> | </span><span class="post-meta-item-icon"><i class="ic i-coffee"></i></span><span title="站点阅读时长">5:53</span></div><div class="powered-by">基于 <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & Theme.<a target="_blank" rel="noopener" href="https://github.com/theme-shoka-x/hexo-theme-shokaX/">ShokaX</a></div></div></div></footer></div><script data-config type="text/javascript">var LOCAL = {
     ispost: true,
         path: `posts/3030097036.html`,
         favicon: {

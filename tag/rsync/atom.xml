@@ -5,13 +5,12 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-03-30T12:45:48.000Z</updated>
     <category term="Harbor" />
-    <category term="Docker" />
     <category term="Kubernetes" />
-    <category term="默认tags" />
-    <category term="MySQL" />
-    <category term="rsync" />
     <category term="Redis" />
+    <category term="MySQL" />
     <category term="Windows" />
+    <category term="Docker" />
+    <category term="rsync" />
     <entry>
         <id>http://ixuyong.cn/posts/1922841233.html</id>
         <title>Rsync服务实践</title>

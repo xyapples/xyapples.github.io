@@ -5,16 +5,1502 @@
         <link>http://ixuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Thu, 24 Apr 2025 21:43:19 +0800</pubDate>
-        <lastBuildDate>Thu, 24 Apr 2025 21:43:19 +0800</lastBuildDate>
+        <pubDate>Sat, 26 Apr 2025 16:52:06 +0800</pubDate>
+        <lastBuildDate>Sat, 26 Apr 2025 16:52:06 +0800</lastBuildDate>
         <category>Harbor</category>
-        <category>Docker</category>
         <category>Kubernetes</category>
-        <category>默认tags</category>
-        <category>MySQL</category>
-        <category>rsync</category>
         <category>Redis</category>
+        <category>MySQL</category>
         <category>Windows</category>
+        <category>Docker</category>
+        <category>rsync</category>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/170573601.html</guid>
+            <title>K8s服务发布Ingress</title>
+            <link>http://ixuyong.cn/posts/170573601.html</link>
+            <category>Kubernetes</category>
+            <pubDate>Sat, 26 Apr 2025 16:52:06 +0800</pubDate>
+            <description><![CDATA[ &lt;h4 id=&#34;1-ingress-nginx-controller-安装&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-ingress-nginx-controller-安装&#34;&gt;#&lt;/a&gt; 1. Ingress Nginx Controller 安装&lt;/h4&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Supported&lt;/th&gt;
+&lt;th&gt;Ingress-NGINX version&lt;/th&gt;
+&lt;th&gt;k8s supported version&lt;/th&gt;
+&lt;th&gt;Alpine Version&lt;/th&gt;
+&lt;th&gt;Nginx Version&lt;/th&gt;
+&lt;th&gt;Helm Chart Version&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.12.1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.32, 1.31, 1.30, 1.29, 1.28&lt;/td&gt;
+&lt;td&gt;3.21.3&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.12.1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.12.0&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.32, 1.31, 1.30, 1.29, 1.28&lt;/td&gt;
+&lt;td&gt;3.21.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.12.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.12.0-beta.0&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.32, 1.31, 1.30, 1.29, 1.28&lt;/td&gt;
+&lt;td&gt;3.20.3&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.12.0-beta.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.11.5&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.21.3&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.11.5&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.11.4&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.21.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.11.4&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.11.3&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.3&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.11.3&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.11.2&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.11.2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.11.1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.11.1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🔄&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.11.0&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.11.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.6&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.21.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.10.6&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.5&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.3&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.10.5&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.4&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.10.4&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.3&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.10.3&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.2&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.20.0&lt;/td&gt;
+&lt;td&gt;1.25.5&lt;/td&gt;
+&lt;td&gt;4.10.2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.30, 1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.19.1&lt;/td&gt;
+&lt;td&gt;1.25.3&lt;/td&gt;
+&lt;td&gt;4.10.1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;v1.10.0&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1.29, 1.28, 1.27, 1.26&lt;/td&gt;
+&lt;td&gt;3.19.1&lt;/td&gt;
+&lt;td&gt;1.25.3&lt;/td&gt;
+&lt;td&gt;4.10.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.9.6&lt;/td&gt;
+&lt;td&gt;1.29, 1.28, 1.27, 1.26, 1.25&lt;/td&gt;
+&lt;td&gt;3.19.0&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.9.1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.9.5&lt;/td&gt;
+&lt;td&gt;1.28, 1.27, 1.26, 1.25&lt;/td&gt;
+&lt;td&gt;3.18.4&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.9.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.9.4&lt;/td&gt;
+&lt;td&gt;1.28, 1.27, 1.26, 1.25&lt;/td&gt;
+&lt;td&gt;3.18.4&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.8.3&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.9.3&lt;/td&gt;
+&lt;td&gt;1.28, 1.27, 1.26, 1.25&lt;/td&gt;
+&lt;td&gt;3.18.4&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.8.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.9.1&lt;/td&gt;
+&lt;td&gt;1.28, 1.27, 1.26, 1.25&lt;/td&gt;
+&lt;td&gt;3.18.4&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.8.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.9.0&lt;/td&gt;
+&lt;td&gt;1.28, 1.27, 1.26, 1.25&lt;/td&gt;
+&lt;td&gt;3.18.2&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.8.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.8.4&lt;/td&gt;
+&lt;td&gt;1.27, 1.26, 1.25, 1.24&lt;/td&gt;
+&lt;td&gt;3.18.2&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.7.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.7.1&lt;/td&gt;
+&lt;td&gt;1.27, 1.26, 1.25, 1.24&lt;/td&gt;
+&lt;td&gt;3.17.2&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.6.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.6.4&lt;/td&gt;
+&lt;td&gt;1.26, 1.25, 1.24, 1.23&lt;/td&gt;
+&lt;td&gt;3.17.0&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.5.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.5.1&lt;/td&gt;
+&lt;td&gt;1.25, 1.24, 1.23&lt;/td&gt;
+&lt;td&gt;3.16.2&lt;/td&gt;
+&lt;td&gt;1.21.6&lt;/td&gt;
+&lt;td&gt;4.4.*&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.4.0&lt;/td&gt;
+&lt;td&gt;1.25, 1.24, 1.23, 1.22&lt;/td&gt;
+&lt;td&gt;3.16.2&lt;/td&gt;
+&lt;td&gt;1.19.10†&lt;/td&gt;
+&lt;td&gt;4.3.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;v1.3.1&lt;/td&gt;
+&lt;td&gt;1.24, 1.23, 1.22, 1.21, 1.20&lt;/td&gt;
+&lt;td&gt;3.16.2&lt;/td&gt;
+&lt;td&gt;1.19.10†&lt;/td&gt;
+&lt;td&gt;4.2.5&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h5 id=&#34;11-helm安装ingress-nginx-controller&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-helm安装ingress-nginx-controller&#34;&gt;#&lt;/a&gt; 1.1 Helm 安装 Ingress Nginx Controller&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;安装 Helm&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# wget https://get.helm.sh/helm-v3.6.3-linux-amd64.tar.gz
+# tar xf helm-v3.6.3-linux-amd64.tar.gz
+# mv linux-amd64/helm /usr/local/bin/helm
+# helm version
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;下载 Ingress Nginx Controller 安装包&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;官方文档：https://github.com/kubernetes/ingress-nginx/tree/helm-chart-4.8.2         #根据自己k8s版本下载
+# helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+# helm repo update
+# helm repo list
+# helm pull ingress-nginx/ingress-nginx --version 4.8.2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;配置 Ingress Nginx Controller&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# tar xf ingress-nginx-4.8.2.tgz
+# cd ingress-nginx
+# vim values.yaml
+...
+ 16 controller:
+ 17   name: controller
+ 18   enableAnnotationValidations: false
+ 19   image:
+ 20     ## Keep false as default for now!
+ 21     chroot: false
+ 22     registry: registry.cn-hangzhou.aliyuncs.com
+ 23     image: kubernetes_public/ingress-nginx-controller
+ 24     ## for backwards compatibility consider setting the full image url via the repository value below
+ 25     ## use *either* current default registry/image or repository format or installing chart by providing the values.yaml wil    l fail
+ 26     ## repository:
+ 27     tag: &amp;quot;v1.9.3&amp;quot;
+ 28     #digest: sha256:8fd21d59428507671ce0fb47f818b1d859c92d2ad07bb7c947268d433030ba98
+...
+ 42   # -- Will add custom configuration options to Nginx https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configurat    ion/configmap/
+ 43   config:
+ 44     allow-snippet-annotations: true          #开启server snippet的配置
+...
+ 67   dnsPolicy: ClusterFirstWithHostNet
+...
+ 88   hostNetwork: true
+...
+107   ingressClassResource:
+108     # -- Name of the ingressClass
+109     name: nginx
+110     # -- Is this ingressClass enabled or not
+111     enabled: true
+112     # -- Is this the default ingressClass for the cluster
+113     default: true
+...
+184   kind: DaemonSet
+...
+287   nodeSelector:
+288     kubernetes.io/os: linux
+289     ingress: &amp;quot;true&amp;quot;
+...
+638       image:
+639         registry: registry.cn-hangzhou.aliyuncs.com
+640         image: kubernetes_public/kube-webhook-certgen
+641         ## for backwards compatibility consider setting the full image url via the repository value below
+642         ## use *either* current default registry/image or repository format or installing chart by providing the values.yaml     will fail
+643         ## repository:
+644         tag: v20231011-8b53cabe0
+645         #digest: sha256:a7943503b45d552785aa3b5e457f169a5661fb94d82b8a3373bcd9ebaf9aac80
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;4. 给需要部署 ingress 的节点上打标签&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl label node k8s-node02 ingress=true
+# kubectl label node k8s-node01 ingress=true
+# kubectl create ns ingress-nginx
+# helm install ingress-nginx -n ingress-nginx .     #安装
+# helm upgrade ingress-nginx -n ingress-nginx .     #更新
+# kubectl get pods -n ingress-nginx 
+NAME                             READY   STATUS    RESTARTS   AGE
+ingress-nginx-controller-7nfqn   1/1     Running   0          27s
+ingress-nginx-controller-k4p2n   1/1     Running   0          17m
+ingress-nginx-controller-kw5jk   1/1     Running   0          24s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;12-bare-metal安装ingress-nginx-controller&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#12-bare-metal安装ingress-nginx-controller&#34;&gt;#&lt;/a&gt; 1.2 Bare metal 安装 Ingress Nginx Controller&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;下载 Ingress 部署文件，链接地址：&lt;a href=&#34;https://kubernetes.github.io/ingress-nginx/deploy/#bare-metal-clusters&#34;&gt;https://kubernetes.github.io/ingress-nginx/deploy/#bare-metal-clusters&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.12.1/deploy/static/provider/baremetal/deploy.yaml
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;配置 Ingress&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ingress-master]# cat deploy.yaml 
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  name: ingress-nginx
+---
+apiVersion: v1
+automountServiceAccountToken: true
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx
+  namespace: ingress-nginx
+---
+apiVersion: v1
+automountServiceAccountToken: true
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission
+  namespace: ingress-nginx
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx
+  namespace: ingress-nginx
+rules:
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - namespaces
+  verbs:
+  - get
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - configmaps
+  - pods
+  - secrets
+  - endpoints
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - coordination.k8s.io
+  resourceNames:
+  - ingress-nginx-leader
+  resources:
+  - leases
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - list
+  - watch
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission
+  namespace: ingress-nginx
+rules:
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - secrets
+  verbs:
+  - get
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx
+rules:
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - configmaps
+  - endpoints
+  - nodes
+  - pods
+  - secrets
+  - namespaces
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - nodes
+  verbs:
+  - get
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - &amp;quot;&amp;quot;
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - list
+  - watch
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission
+rules:
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - validatingwebhookconfigurations
+  verbs:
+  - get
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx
+  namespace: ingress-nginx
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ingress-nginx
+subjects:
+- kind: ServiceAccount
+  name: ingress-nginx
+  namespace: ingress-nginx
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission
+  namespace: ingress-nginx
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ingress-nginx-admission
+subjects:
+- kind: ServiceAccount
+  name: ingress-nginx-admission
+  namespace: ingress-nginx
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ingress-nginx
+subjects:
+- kind: ServiceAccount
+  name: ingress-nginx
+  namespace: ingress-nginx
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ingress-nginx-admission
+subjects:
+- kind: ServiceAccount
+  name: ingress-nginx-admission
+  namespace: ingress-nginx
+---
+apiVersion: v1
+data: null
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+spec:
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - appProtocol: http
+    name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  - appProtocol: https
+    name: https
+    port: 443
+    protocol: TCP
+    targetPort: https
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  #type: NodePort
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-controller-admission
+  namespace: ingress-nginx
+spec:
+  ports:
+  - appProtocol: https
+    name: https-webhook
+    port: 443
+    targetPort: webhook
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  type: ClusterIP
+---
+apiVersion: apps/v1
+#kind: Deployment
+kind: DaemonSet
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+spec:
+  minReadySeconds: 0
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/instance: ingress-nginx
+      app.kubernetes.io/name: ingress-nginx
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: controller
+        app.kubernetes.io/instance: ingress-nginx
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/part-of: ingress-nginx
+        app.kubernetes.io/version: 1.12.1
+    spec:
+      containers:
+      - args:
+        - /nginx-ingress-controller
+        - --election-id=ingress-nginx-leader
+        - --controller-class=k8s.io/ingress-nginx
+        - --ingress-class=nginx
+        - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
+        - --validating-webhook=:8443
+        - --validating-webhook-certificate=/usr/local/certificates/cert
+        - --validating-webhook-key=/usr/local/certificates/key
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: LD_PRELOAD
+          value: /usr/local/lib/libmimalloc.so
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/ingress-nginx-controller-v1.12.1:v1.12.1 
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /wait-shutdown
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: controller
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 443
+          name: https
+          protocol: TCP
+        - containerPort: 8443
+          name: webhook
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 100m
+            memory: 90Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsGroup: 82
+          runAsNonRoot: true
+          runAsUser: 101
+          seccompProfile:
+            type: RuntimeDefault
+        volumeMounts:
+        - mountPath: /usr/local/certificates/
+          name: webhook-cert
+          readOnly: true
+      hostNetwork: true                         # 与节点共享网络名称空间
+      #dnsPolicy: ClusterFirst
+      dnsPolicy: ClusterFirstWithHostNet        # dns 策略
+      nodeSelector:                             # 节点选择器
+        kubernetes.io/os: linux
+        ingress: &amp;quot;true&amp;quot;
+      serviceAccountName: ingress-nginx
+      terminationGracePeriodSeconds: 300
+      volumes:
+      - name: webhook-cert
+        secret:
+          secretName: ingress-nginx-admission
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission-create
+  namespace: ingress-nginx
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: admission-webhook
+        app.kubernetes.io/instance: ingress-nginx
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/part-of: ingress-nginx
+        app.kubernetes.io/version: 1.12.1
+      name: ingress-nginx-admission-create
+    spec:
+      containers:
+      - args:
+        - create
+        - --host=ingress-nginx-controller-admission,ingress-nginx-controller-admission.$(POD_NAMESPACE).svc
+        - --namespace=$(POD_NAMESPACE)
+        - --secret-name=ingress-nginx-admission
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kube-webhook-certgen-v1.5.2:v1.5.2 
+        imagePullPolicy: IfNotPresent
+        name: create
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 65532
+          runAsNonRoot: true
+          runAsUser: 65532
+          seccompProfile:
+            type: RuntimeDefault
+      nodeSelector:
+        kubernetes.io/os: linux
+      restartPolicy: OnFailure
+      serviceAccountName: ingress-nginx-admission
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission-patch
+  namespace: ingress-nginx
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: admission-webhook
+        app.kubernetes.io/instance: ingress-nginx
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/part-of: ingress-nginx
+        app.kubernetes.io/version: 1.12.1
+      name: ingress-nginx-admission-patch
+    spec:
+      containers:
+      - args:
+        - patch
+        - --webhook-name=ingress-nginx-admission
+        - --namespace=$(POD_NAMESPACE)
+        - --patch-mutating=false
+        - --secret-name=ingress-nginx-admission
+        - --patch-failure-policy=Fail
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kube-webhook-certgen-v1.5.2:v1.5.2 
+        imagePullPolicy: IfNotPresent
+        name: patch
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 65532
+          runAsNonRoot: true
+          runAsUser: 65532
+          seccompProfile:
+            type: RuntimeDefault
+      nodeSelector:
+        kubernetes.io/os: linux
+      restartPolicy: OnFailure
+      serviceAccountName: ingress-nginx-admission
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: nginx
+spec:
+  controller: k8s.io/ingress-nginx
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.12.1
+  name: ingress-nginx-admission
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: ingress-nginx-controller-admission
+      namespace: ingress-nginx
+      path: /networking/v1/ingresses
+      port: 443
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: validate.nginx.ingress.kubernetes.io
+  rules:
+  - apiGroups:
+    - networking.k8s.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - ingresses
+  sideEffects: None
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;type: ClusterIP                                              #service 类型改为 ClusterIP&lt;/li&gt;
+&lt;li&gt;hostNetwork: true                                      # 与节点共享网络名称空间&lt;/li&gt;
+&lt;li&gt;dnsPolicy: ClusterFirstWithHostNet        # dns 策略&lt;/li&gt;
+&lt;li&gt;nodeSelector:                                             # 节点选择器&lt;/li&gt;
+&lt;li&gt;kind: DaemonSet                                        # 资源类型 DaemonSet&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;在指定节点部署 Ingress-Controller&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ingress-master]# kubectl apply -f deploy.yaml -n ingress-nginx
+
+[root@k8s-master01 ingress-master]# kubectl label node k8s-node01 ingress=true
+[root@k8s-master01 ingress-master]# kubectl label node k8s-node02 ingress=true
+[root@k8s-master01 ingress-master]# kubectl label node k8s-master03 ingress-     #取消节点部署
+
+[root@k8s-master01 ingress-master]# kubectl get pods -n ingress-nginx 
+NAME                                   READY   STATUS      RESTARTS   AGE
+ingress-nginx-admission-create-zp6mh   0/1     Completed   0          12m
+ingress-nginx-admission-patch-f2bpd    0/1     Completed   0          12m
+ingress-nginx-controller-rgtkc         1/1     Running     0          3m59s
+ingress-nginx-controller-trmn8         1/1     Running     0          3m59s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;2-ingress-nginx-入门使用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-ingress-nginx-入门使用&#34;&gt;#&lt;/a&gt; 2. Ingress Nginx 入门使用&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# cat web-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-ingress
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: test.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;3-ingress-nginx-域名重定向-redirect&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-ingress-nginx-域名重定向-redirect&#34;&gt;#&lt;/a&gt; 3. Ingress Nginx 域名重定向 Redirect&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# cat redirect-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: redirect-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/permanent-redirect: https://www.baidu.com
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: redirect.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;4-ingress-nginx-前后端分离-rewrite&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-ingress-nginx-前后端分离-rewrite&#34;&gt;#&lt;/a&gt; 4. Ingress Nginx 前后端分离 Rewrite&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# cat rewrite-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rewrite-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: rewrite.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /api(/|$)(.*)
+        pathType: ImplementationSpecif
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;5-ingress-nginx-错误代码重定向&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#5-ingress-nginx-错误代码重定向&#34;&gt;#&lt;/a&gt; 5. Ingress Nginx 错误代码重定向&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;6-ingress-nginx-ssl&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#6-ingress-nginx-ssl&#34;&gt;#&lt;/a&gt; 6. Ingress Nginx SSL&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;1.生成证书
+# openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.cert -subj &amp;quot;/CN=s.hmallleasing.com/O=tls.hmallleasing.com&amp;quot;
+
+2.创建证书
+# kubectl create secret tls tls.hmallleasig.com --key tls.key --cert tls.cert
+
+3.ingress配置
+# kubectl create secret tls tls.hmallleasig.com --cert=tls.crt --key=tls.key
+# cat tls-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tls-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: &amp;quot;false&amp;quot;    #禁用https强制跳转
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: tls.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+  tls:                  #https
+  - hosts:
+    - tls.hmallleasing.com
+    secretName: &amp;quot;tls.hmallleasig.com&amp;quot;	
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;7-ingress-nginx-匹配请求头&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#7-ingress-nginx-匹配请求头&#34;&gt;#&lt;/a&gt; 7. Ingress Nginx 匹配请求头&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;1.部署移动端应用
+# kubectl create deploy phone --image=registry.cn-beijing.aliyuncs.com/dotbalo/nginx:phone
+# kubectl expose deploy phone --port 80
+# vim m-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: m-ingress
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: m.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: phone
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+
+2.部署PC端应用		
+# kubectl create deploy laptop --image=registry.cn-beijing.aliyuncs.com/dotbalo/nginx:laptop	
+# kubectl expose deploy laptop --port 80
+# vim laptop-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/server-snippet: |
+      set $agentflag 0;
+          if ($http_user_agent ~* &amp;quot;(Android|iPhone|Windows Phone|UC|Kindle)&amp;quot; )&amp;#123;
+              set $agentflag 1;
+          &amp;#125;
+          if ( $agentflag = 1 ) &amp;#123;
+              return 301 http://m.hmallleaing.com;
+          &amp;#125;
+  name: laptop-ingress
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: laptop
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific	
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;8ingress-nginx-基本认证&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#8ingress-nginx-基本认证&#34;&gt;#&lt;/a&gt; 8.Ingress Nginx 基本认证&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# yum install httpd -y
+# htpasswd -c auth superman
+# cat auth 
+superman:$apr1$AC1pc3dK$RJyWnyDJFNKY6twneGVrA1		
+
+# kubectl create secret generic basic-auth --from-file=auth
+# cat basic-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: basic-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic  # 认证类型
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth  # 包含用户和密码的 secret 资源名称
+    nginx.ingress.kubernetes.io/auth-realm: &#39;Please User password&#39;  # 要显示的信息
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: basic.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;9-ingress-nginx-黑白名单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#9-ingress-nginx-黑白名单&#34;&gt;#&lt;/a&gt; 9. Ingress Nginx 黑 / 白名单&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;写法一：
+# cat white-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: white-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/whitelist-source-range: &amp;quot;192.168.40.101&amp;quot;
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: white.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific	
+
+写法二：		
+[root@k8s-master01 ingress]# cat white-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: white-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/whitelist-source-range: &amp;quot;192.168.40.0/24&amp;quot;
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: white.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+
+
+写法三：
+# cat white-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: white-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/server-snippet: |
+      allow 192.168.40.0/24;
+      deny all;
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: white.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+		
+
+#Master01测试		
+# curl -H &amp;quot;Host:white.hmallleasing.com&amp;quot; http://192.168.40.103 -I
+HTTP/1.1 200 OK
+Date: Sat, 14 Oct 2023 13:12:03 GMT
+Content-Type: text/html
+Content-Length: 612
+Connection: keep-alive
+Last-Modified: Tue, 16 Apr 2019 13:08:19 GMT
+ETag: &amp;quot;5cb5d3c3-264&amp;quot;
+Accept-Ranges: bytes		
+
+#Master02测试
+# curl -H &amp;quot;Host:white.hmallleasing.com&amp;quot; http://192.168.40.103 -I
+HTTP/1.1 403 Forbidden
+Date: Sat, 14 Oct 2023 13:13:34 GMT
+Content-Type: text/html
+Content-Length: 146
+Connection: keep-alive
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;10-ingress-nginx-速率限制&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#10-ingress-nginx-速率限制&#34;&gt;#&lt;/a&gt; 10. Ingress Nginx 速率限制&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ingress]# cat limit-rate-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rate-limit-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/limit-rps: &amp;quot;50&amp;quot;
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: rate-limit.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+
+# ab -c 20 -n 1000 http://rate-limit.hmallleasing.com/ |grep request
+Complete requests:      1000
+Failed requests:        724
+Time per request:       10.301 [ms] (mean)
+Time per request:       0.515 [ms] (mean, across all concurrent requests)
+Percentage of the requests served within a certain time (ms)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;11使用-nginx-实现灰度金丝雀发布&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11使用-nginx-实现灰度金丝雀发布&#34;&gt;#&lt;/a&gt; 11. 使用 Nginx 实现灰度 / 金丝雀发布&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;1.创建 v1 版本
+# kubectl create deploy canary-v1 --image=registry.cn-beijing.aliyuncs.com/dotbalo/canary:v1	
+# kubectl expose deploy canary-v1 --port 8080
+# cat canary-v1-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: canary-v1-ingress
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: canary.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: canary-v1
+            port:
+              number: 8080
+        path: /
+        pathType: ImplementationSpecific
+		
+# curl -H &amp;quot;Host:canary.hmallleasing.com&amp;quot; http://192.168.40.103 	
+
+2.创建 v2 版本
+# kubectl create deploy canary-v2 --image=registry.cn-beijing.aliyuncs.com/dotbalo/canary:v2
+# kubectl expose deploy canary-v2 --port 8080
+# cat canary-v2-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: canary-v2-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/canary: &amp;quot;true&amp;quot;    #启动灰度发布
+    nginx.ingress.kubernetes.io/canary-weight: &amp;quot;20&amp;quot;  #基于权重,50%流量调度到这个灰度的版本上
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: canary.hmallleasing.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: canary-v2
+            port:
+              number: 8080
+
+#测试灰度发布
+[root@k8s-master01 ingress]# cat canary.sh 
+#!/bin/bash
+
+while true
+do
+	curl -H &amp;quot;Host:canary.hmallleasing.com&amp;quot; http://192.168.40.103
+	sleep 0.5
+done
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;12-kubernetes-dashboard配置证书&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#12-kubernetes-dashboard配置证书&#34;&gt;#&lt;/a&gt; 12. kubernetes-dashboard 配置证书&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;1.创建证书
+kubectl create secret tls kubernetes-dashboard-certs --key *.hmallleasing.com_key.key --cert *.hmallleasing.com_chain.crt -n kubernetes-dashboard
+
+2.修改kubernetes-dashboard资源清单
+kubectl edit deployment -n kubernetes-dashboard kubernetes-dashboard
+...
+      - args:
+        - --auto-generate-certificates=false
+        - --tls-key-file=_.hmallleasing.com_key.key
+        - --tls-cert-file=_.hmallleasing.com_chain.crt
+        - --token-ttl=21600
+        - --authentication-mode=basic,token
+        - --namespace=kubernetes-dashboard
+...
+
+3.创建ingress
+#cat dashboard-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dashboard-ingress
+  namespace: kubernetes-dashboard
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-passthrough: &amp;quot;true&amp;quot;    
+    nginx.ingress.kubernetes.io/backend-protocol: &amp;quot;HTTPS&amp;quot;    
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: dashboard.hmallleasing.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kubernetes-dashboard
+            port:
+              number: 443
+
+# kubectl apply -f dashboard-ingress.yaml 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;13-入口lb配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#13-入口lb配置&#34;&gt;#&lt;/a&gt; 13. 入口 LB 配置&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@lb nginx]# cat /etc/nginx/conf.d/ingress.conf 
+upstream ingress &amp;#123;
+	server 192.168.40.103:80 max_conns=2000 max_fails=2 fail_timeout=5s;
+	server 192.168.40.104:80 max_conns=2000 max_fails=2 fail_timeout=5s;
+	server 192.168.40.105:80 max_conns=2000 max_fails=2 fail_timeout=5s;
+&amp;#125;
+
+server &amp;#123;
+    listen 443 ssl;
+    server_name test.hmallleasing.com;
+    client_max_body_size 1G; 
+    ssl_prefer_server_ciphers on;
+    ssl_certificate  /etc/nginx/sslkey/*.hmallleasing.com_chain.crt;
+    ssl_certificate_key  /etc/nginx/sslkey/*.hmallleasing.com_key.key;
+
+    location / &amp;#123;
+        proxy_pass http://ingress;
+        include proxy_params;
+	    proxy_next_upstream error timeout http_500 http_502 http_503 http_504;
+	    proxy_next_upstream_tries 2;
+	    proxy_next_upstream_timeout 3s;
+    &amp;#125;
+&amp;#125;
+
+server &amp;#123;
+    listen 80;
+    server_name test.hmallleasing.com;
+    return 302 https://$server_name$request_uri;
+&amp;#125;
+
+[root@lb ~]# mkdir /etc/nginx/sslkey -p
+
+
+[root@lb ~]# cat proxy_params 
+proxy_http_version 1.1;
+proxy_set_header Connectin &amp;quot;&amp;quot;;
+
+proxy_set_header Host $http_host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+proxy_connect_timeout 60;
+proxy_send_timeout 120;
+proxy_read_timeout 120;
+
+proxy_buffering on;
+proxy_buffer_size 32k;
+proxy_buffers 4 128k;
+proxy_temp_file_write_size 10240k;
+proxy_max_temp_file_size 10240k;
+&lt;/code&gt;&lt;/pre&gt;
+ ]]></description>
+        </item>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/3030097036.html</guid>
             <title>K8S云原生存储Rook-Ceph</title>
@@ -22,7 +1508,745 @@
             <category>Kubernetes</category>
             <pubDate>Thu, 24 Apr 2025 21:43:19 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;k8s云原生存储rook-ceph&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s云原生存储rook-ceph&#34;&gt;#&lt;/a&gt; K8S 云原生存储 Rook-Ceph&lt;/h3&gt;
+&lt;h4 id=&#34;1-storageclass动态存储&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-storageclass动态存储&#34;&gt;#&lt;/a&gt; 1. StorageClass 动态存储&lt;/h4&gt;
+&lt;p&gt;StorageClass：存储类，由 K8s 管理员创建，用于动态 PV 的管理，可以链接至不同的后端存储，比如 Ceph、GlusterFS 等。之后对存储的请求可以指向 StorageClass，然后 StorageClass 会自动的创建、删除 PV。&lt;/p&gt;
+&lt;p&gt;实现方式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;in-tree: 内置于 K8s 核心代码，对于存储的管理，都需要编写相应的代码。&lt;/li&gt;
+&lt;li&gt;out-of-tree：由存储厂商提供一个驱动（CSI 或 Flex Volume），安装到 K8s 集群，然后 StorageClass 只需要配置该驱动即可，驱动器会代替 StorageClass 管理存储。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;StorageClass 官网介绍：&lt;a href=&#34;https://kubernetes.io/docs/concepts/storage/storage-classes/&#34;&gt;https://kubernetes.io/docs/concepts/storage/storage-classes/&lt;/a&gt;&lt;/p&gt;
+&lt;h4 id=&#34;2-云原生存储rook&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-云原生存储rook&#34;&gt;#&lt;/a&gt; 2. 云原生存储 Rook&lt;/h4&gt;
 &lt;p&gt;Rook 是一个自我管理的分布式存储编排系统，它本身并不是存储系统，在存储和 k8s 之前搭建了一个桥梁，使存储系统的搭建或者维护变得特别简单，Rook 将分布式存储系统转变为自我管理、自我扩展、自我修复的存储服务。它让一些存储的操作，比如部署、配置、扩容、升级、迁移、灾难恢复、监视和资源管理变得自动化，无需人工处理。并且 Rook 支持 CSI，可以利用 CSI 做一些 PVC 的快照、扩容、克隆等操作。&lt;/p&gt;
+&lt;p&gt;Rook 官网介绍：&lt;a href=&#34;https://rook.io/&#34;&gt;https://rook.io/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/CK4Gn1u.jpeg&#34; alt=&#34;Snipaste_2025-05-07_20-15-59.jpg&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;3-rook-安装&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-rook-安装&#34;&gt;#&lt;/a&gt; 3. Rook 安装&lt;/h4&gt;
+&lt;p&gt;环境准备&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;K8s 集群至少五个节点，每个节点的内存不低于 5G，CPU 不低于 2 核&lt;/li&gt;
+&lt;li&gt;所有节点时间同步&lt;/li&gt;
+&lt;li&gt;至少有三个存储节点，并且每个节点至少有一个裸盘，k8s-master03、k8s-node01、k8s-node02 增加裸盘&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;31-下载-rook-安装文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#31-下载-rook-安装文件&#34;&gt;#&lt;/a&gt; 3.1 下载 Rook 安装文件&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# git clone --single-branch --branch v1.17.2 https://github.com/rook/rook.git
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;32-配置更改&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#32-配置更改&#34;&gt;#&lt;/a&gt; 3.2 配置更改&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cd rook/deploy/examples
+[root@k8s-master01 ~]# vim operator.yaml
+  ROOK_CSI_CEPH_IMAGE: &amp;quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/cephcsi:v3.14.0&amp;quot;
+  ROOK_CSI_REGISTRAR_IMAGE: &amp;quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-node-driver-registrar:v2.13.0&amp;quot;
+  ROOK_CSI_RESIZER_IMAGE: &amp;quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-resizer:csi-resizer:v1.13.1&amp;quot;
+  ROOK_CSI_PROVISIONER_IMAGE: &amp;quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-provisioner:v5.1.0&amp;quot;
+  ROOK_CSI_SNAPSHOTTER_IMAGE: &amp;quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-snapshotter:v8.2.0&amp;quot;
+  ROOK_CSI_ATTACHER_IMAGE: &amp;quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-attacher:v4.8.0&amp;quot;
+
+#ROOK_ENABLE_DISCOVERY_DAEMON 改成 true 即可
+ROOK_ENABLE_DISCOVERY_DAEMON: &amp;quot;true&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;33-部署-rook&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#33-部署-rook&#34;&gt;#&lt;/a&gt; 3.3 部署 rook&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ceph]# kubectl create -f crds.yaml -f common.yaml -f operator.yaml
+[root@k8s-master01 examples]# kubectl get pods -n rook-ceph
+NAME                                  READY   STATUS    RESTARTS   AGE
+rook-ceph-operator-84ff77778b-7ww2w   1/1     Running   0          91m
+rook-discover-6j68f                   1/1     Running   0          82m
+rook-discover-9w4kt                   1/1     Running   0          82m
+rook-discover-h2zfm                   1/1     Running   0          82m
+rook-discover-hsz8b                   1/1     Running   0          19m
+rook-discover-rj4t7                   1/1     Running   0          82m
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;4创建-ceph-集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4创建-ceph-集群&#34;&gt;#&lt;/a&gt; 4. 创建 Ceph 集群&lt;/h4&gt;
+&lt;h5 id=&#34;41-配置更改&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#41-配置更改&#34;&gt;#&lt;/a&gt; 4.1 配置更改&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 examples]# vim cluster.yaml
+...
+    image: registry.cn-hangzhou.aliyuncs.com/old_xu/cephv17.2.5:v17.2.5
+...
+  skipUpgradeChecks: true     #改为true，跳过升级
+....
+  dashboard:
+    enabled: true
+    # serve the dashboard under a subpath (useful when you are accessing the dashboard via a reverse proxy)
+    # urlPrefix: /ceph-dashboard
+    # serve the dashboard at the given port.
+    # port: 8443
+    # serve the dashboard using SSL
+    ssl: false          #改为false
+...
+  storage: # cluster level storage configuration and selection
+    useAllNodes: false      #改为false,不使用所有的节点当osd
+    useAllDevices: false    #改为false,不使用所有的磁盘当osd
+...
+    #     deviceFilter: &amp;quot;^sd.&amp;quot;
+    nodes:
+    - name: &amp;quot;k8s-master03&amp;quot;
+      devices:
+      - name: &amp;quot;sdb&amp;quot;
+    - name: &amp;quot;k8s-node01&amp;quot;
+      devices:
+      - name: &amp;quot;sdb&amp;quot;
+    - name: &amp;quot;k8s-node02&amp;quot;
+      devices:
+      - name: &amp;quot;sdb&amp;quot;
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;注意：新版必须采用裸盘，即未格式化的磁盘。其中 k8s-master03、 k8s-node01、  k8s-node02 有新加的一个磁盘，可以通过 lsblk -f 查看新添加的磁盘名称。建议最少三个节点，否则后面的试验可能会出现问题&lt;/p&gt;
+&lt;h5 id=&#34;42-创建-ceph-集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#42-创建-ceph-集群&#34;&gt;#&lt;/a&gt; 4.2 创建 Ceph 集群&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 examples]# kubectl create -f cluster.yaml
+[root@k8s-master01 examples]#  kubectl get pods -n rook-ceph  
+NAME                                                     READY   STATUS      RESTARTS        AGE
+csi-cephfsplugin-87dqj                                   2/2     Running     0               55m
+csi-cephfsplugin-9mtd9                                   2/2     Running     0               55m
+csi-cephfsplugin-l7crk                                   2/2     Running     0               55m
+csi-cephfsplugin-ls85p                                   2/2     Running     0               55m
+csi-cephfsplugin-provisioner-c95769646-l6vxb             5/5     Running     0               55m
+csi-cephfsplugin-provisioner-c95769646-x697s             5/5     Running     0               55m
+csi-cephfsplugin-r5687                                   2/2     Running     0               55m
+csi-rbdplugin-4s562                                      2/2     Running     0               55m
+csi-rbdplugin-8mhs7                                      2/2     Running     0               55m
+csi-rbdplugin-9whfd                                      2/2     Running     0               55m
+csi-rbdplugin-d6j92                                      2/2     Running     0               55m
+csi-rbdplugin-mcm8t                                      2/2     Running     0               55m
+csi-rbdplugin-provisioner-68d9c8f455-hdksw               5/5     Running     0               55m
+csi-rbdplugin-provisioner-68d9c8f455-lthm9               5/5     Running     0               55m
+rook-ceph-crashcollector-k8s-master01-78bcb685d8-b5b7j   1/1     Running     0               34m
+rook-ceph-crashcollector-k8s-master03-6db7c77d4b-57g4k   1/1     Running     0               30m
+rook-ceph-crashcollector-k8s-node01-6758596958-g86zk     1/1     Running     0               33m
+rook-ceph-crashcollector-k8s-node02-764d875747-2b8jm     1/1     Running     0               33m
+rook-ceph-mgr-a-7764dfcdd-jx7fr                          2/2     Running     0               34m
+rook-ceph-mgr-b-768bdbd495-hbvm8                         1/2     Running     0               34m
+rook-ceph-mon-a-f89c955b5-zjccx                          2/2     Running     4 (92s ago)     50m
+rook-ceph-mon-b-7d54c89dff-xp9dx                         2/2     Running     3 (8m21s ago)   44m
+rook-ceph-mon-c-85fcbdc7f8-kvbrj                         2/2     Running     0               39m
+rook-ceph-operator-84ff77778b-7ww2w                      1/1     Running     3 (73m ago)     22h
+rook-ceph-osd-0-ccfb66b79-5dx6t                          2/2     Running     0               33m
+rook-ceph-osd-1-67fc6d854b-t92m8                         2/2     Running     0               33m
+rook-ceph-osd-2-6649d4d67c-vmmbk                         2/2     Running     0               30m
+rook-ceph-osd-prepare-k8s-master03-w7hh7                 0/1     Completed   0               33m
+rook-ceph-osd-prepare-k8s-node01-9z5ls                   0/1     Completed   0               33m
+rook-ceph-osd-prepare-k8s-node02-v6jnw                   0/1     Completed   0               33m
+rook-discover-6j68f                                      1/1     Running     1 (79m ago)     22h
+rook-discover-9w4kt                                      1/1     Running     1 (79m ago)     22h
+rook-discover-h2zfm                                      1/1     Running     2 (73m ago)     22h
+rook-discover-hsz8b                                      1/1     Running     2 (73m ago)     21h
+rook-discover-rj4t7                                      1/1     Running     1 (79m ago)     22h
+
+[root@k8s-master01 examples]# kubectl get cephcluster -n rook-ceph
+NAME        DATADIRHOSTPATH   MONCOUNT   AGE    PHASE   MESSAGE                        HEALTH        EXTERNAL
+rook-ceph   /var/lib/rook     3          4h2m   Ready   Cluster created successfully   HEALTH_WARN 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;43-安装-ceph-snapshot-控制器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#43-安装-ceph-snapshot-控制器&#34;&gt;#&lt;/a&gt; 4.3 安装 ceph snapshot 控制器&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cd /root/k8s-ha-install/
+[root@k8s-master01 k8s-ha-install]# git checkout manual-installation-v1.32.x
+[root@k8s-master01 k8s-ha-install]# kubectl create -f snapshotter/ -n kube-system
+[root@k8s-master01 k8s-ha-install]# kubectl get po -n kube-system -l app=snapshot-controller
+NAME                    READY   STATUS    RESTARTS   AGE
+snapshot-controller-0   1/1     Running   0          2m2s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;5-安装-ceph-客户端工具&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#5-安装-ceph-客户端工具&#34;&gt;#&lt;/a&gt; 5. 安装 ceph 客户端工具&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 k8s-ha-install]# cd /root/rook/deploy/examples/
+[root@k8s-master01 examples]# kubectl create -f toolbox.yaml -n rook-ceph
+[root@k8s-master01 examples]# kubectl get po -n rook-ceph -l app=rook-ceph-tools
+NAME                               READY   STATUS    RESTARTS   AGE
+rook-ceph-tools-7b75b967db-clqzg   1/1     Running   0          58s
+[root@k8s-master01 examples]# kubectl exec -it rook-ceph-tools-7b75b967db-clqzg -n rook-ceph -- bash
+bash-5.1$ ceph status
+  cluster:
+    id:     87b85368-9487-4967-a4e4-5970d2e0ec94
+    health: HEALTH_WARN
+            1 mgr modules have recently crashed
+ 
+  services:
+    mon: 3 daemons, quorum b,c (age 12s), out of quorum: a
+    mgr: a(active, since 7m), standbys: b
+    osd: 3 osds: 3 up (since 8m), 3 in (since 3h)
+ 
+  data:
+    pools:   0 pools, 0 pgs
+    objects: 0 objects, 0 B
+    usage:   82 MiB used, 60 GiB / 60 GiB avail
+    pgs: 
+	
+bash-4.4$  ceph osd status
+ID  HOST           USED  AVAIL  WR OPS  WR DATA  RD OPS  RD DATA  STATE      
+ 0  k8s-master03  20.6M  19.9G      0        0       0        0   exists,up  
+ 1  k8s-node01    20.6M  19.9G      0        0       0        0   exists,up  
+ 2  k8s-node02    20.6M  19.9G      0        0       0        0   exists,up 
+
+bash-4.4$ ceph df
+--- RAW STORAGE ---
+CLASS    SIZE   AVAIL    USED  RAW USED  %RAW USED
+hdd    60 GiB  60 GiB  62 MiB    62 MiB       0.10
+TOTAL  60 GiB  60 GiB  62 MiB    62 MiB       0.10
+
+--- POOLS ---
+POOL  ID  PGS   STORED  OBJECTS     USED  %USED  MAX AVAIL
+.mgr   1    1  449 KiB        2  1.3 MiB      0     19 GiB
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;6-ceph-dashboard&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#6-ceph-dashboard&#34;&gt;#&lt;/a&gt; 6. Ceph dashboard&lt;/h4&gt;
+&lt;h5 id=&#34;61-暴露服务&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#61-暴露服务&#34;&gt;#&lt;/a&gt; 6.1 暴露服务&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl get svc -n rook-ceph
+NAME                      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
+rook-ceph-mgr             ClusterIP   10.96.54.15     &amp;lt;none&amp;gt;        9283/TCP            133m
+rook-ceph-mgr-dashboard   ClusterIP   10.96.97.117    &amp;lt;none&amp;gt;        7000/TCP            133m        #暴露ingresss也可
+rook-ceph-mon-a           ClusterIP   10.96.125.216   &amp;lt;none&amp;gt;        6789/TCP,3300/TCP   170m
+rook-ceph-mon-b           ClusterIP   10.96.34.183    &amp;lt;none&amp;gt;        6789/TCP,3300/TCP   133m
+rook-ceph-mon-c           ClusterIP   10.96.232.252   &amp;lt;none&amp;gt;        6789/TCP,3300/TCP   133m
+
+
+[root@k8s-master01 examples]# kubectl create -f dashboard-external-http.yaml           #暴露nodeport
+[root@k8s-master01 examples]# kubectl get svc -n rook-ceph rook-ceph-mgr-dashboard-external-http
+NAME                                     TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+rook-ceph-mgr-dashboard-external-https   NodePort   10.96.11.120   &amp;lt;none&amp;gt;        8443:32611/TCP   45s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;62-配置ingress访问ceph&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#62-配置ingress访问ceph&#34;&gt;#&lt;/a&gt; 6.2 配置 ingress 访问 ceph&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 examples]# cat dashboard-ingress-https.yaml 
+#
+# This example is for Kubernetes running an nginx-ingress
+# and an ACME (e.g. Let&#39;s Encrypt) certificate service
+#
+# The nginx-ingress annotations support the dashboard
+# running using HTTPS with a self-signed certificate
+#
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rook-ceph-mgr-dashboard
+  namespace: rook-ceph # namespace:cluster
+#  annotations:
+#    kubernetes.io/ingress.class: &amp;quot;nginx&amp;quot;
+#    kubernetes.io/tls-acme: &amp;quot;true&amp;quot;
+#    nginx.ingress.kubernetes.io/backend-protocol: &amp;quot;HTTPS&amp;quot;
+#    nginx.ingress.kubernetes.io/server-snippet: |
+#      proxy_ssl_verify off;
+
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+#  tls:
+#    - hosts:
+#        - rook-ceph.hmallleasing.com
+#      secretName: rook-ceph.example.com
+  rules:
+    - host: rook-ceph.hmallleasing.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rook-ceph-mgr-dashboard
+                port:
+                  name: http-dashboard
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;63-登录&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#63-登录&#34;&gt;#&lt;/a&gt; 6.3 登录&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;http://192.168.40.100:32611
+用户名：admin
+密码：kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o jsonpath=&amp;quot;&amp;#123;[&#39;data&#39;][&#39;password&#39;]&amp;#125;&amp;quot; | base64 --decode &amp;amp;&amp;amp; echo
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;7-ceph-块存储的使用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#7-ceph-块存储的使用&#34;&gt;#&lt;/a&gt; 7. Ceph 块存储的使用&lt;/h4&gt;
+&lt;p&gt;块存储一般用于一个 Pod 挂载一块存储使用，相当于一个服务器新挂了一个盘，只给一个应用使用。&lt;/p&gt;
+&lt;h5 id=&#34;71-创建-storageclass-和-ceph-的存储池&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#71-创建-storageclass-和-ceph-的存储池&#34;&gt;#&lt;/a&gt; 7.1 创建 StorageClass 和 ceph 的存储池&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 examples]# kubectl get csidriver
+NAME                            ATTACHREQUIRED   PODINFOONMOUNT   STORAGECAPACITY   TOKENREQUESTS   REQUIRESREPUBLISH   MODES        AGE
+rook-ceph.cephfs.csi.ceph.com   true             false            false             &amp;lt;unset&amp;gt;         false               Persistent   15h       #文件存储csi
+rook-ceph.rbd.csi.ceph.com      true             false            false             &amp;lt;unset&amp;gt;         false               Persistent   15h       #块存储csi
+
+[root@k8s-master01 ~]# cd /root/rook/deploy/examples/
+[root@k8s-master01 examples]# vim csi/rbd/storageclass.yaml
+...
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  name: replicapool
+  namespace: rook-ceph # namespace:cluster
+spec:
+  failureDomain: host
+  replicated:
+    size: 3                #数据保存几份，测试环境可以将副本数设置成了 2（不能设置为 1），生产环境最少为 3，且要小于等于 osd 的数量
+...
+allowVolumeExpansion: true     #是否可以扩容
+reclaimPolicy: Delete          #pv回收策略
+
+[root@k8s-master01 examples]# kubectl create -f csi/rbd/storageclass.yaml -n rook-ceph
+
+[root@k8s-master01 examples]# kubectl get cephblockpool -n rook-ceph
+NAME          PHASE
+replicapool   Ready
+[root@k8s-master01 examples]# kubectl get sc
+NAME              PROVISIONER                  RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+nfs-storage       nfzl.com/nfs                 Delete          Immediate           false                  16h
+rook-ceph-block   rook-ceph.rbd.csi.ceph.com   Delete          Immediate           true                   37s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;72-挂载测试&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#72-挂载测试&#34;&gt;#&lt;/a&gt; 7.2 挂载测试&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cat ceph-block-pvc.yaml        #创建PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ceph-block-pvc
+spec:
+  storageClassName: &amp;quot;rook-ceph-block&amp;quot;     # 明确指定使用哪个sc的供应商来创建pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi                      # 根据业务实际大小进行资源申请
+
+[root@k8s-master01 ~]# kubectl apply -f ceph-block-pvc.yaml 
+
+[root@k8s-master01 ~]# kubectl get pvc
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS      AGE
+ceph-block-pvc   Bound    pvc-86c94d8d-c359-47b8-b5d3-31dcdaf86551   1Gi        RWO            rook-ceph-block   3s
+
+[root@k8s-master01 ~]# kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                    STORAGECLASS      REASON   AGE
+pvc-86c94d8d-c359-47b8-b5d3-31dcdaf86551   1Gi        RWO            Delete           Bound    default/ceph-block-pvc   rook-ceph-block
+	  
+[root@k8s-master01 ~]# cat ceph-block-pvc-pod.yaml    #挂载PVC测试 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ceph-block-pvc-pod
+spec:
+  containers:
+  - name: ceph-block-pvc-pod
+    image: nginx
+    volumeMounts:
+    - name: nginx-page
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: nginx-page
+    persistentVolumeClaim:      
+      claimName: ceph-block-pv
+
+[root@k8s-master01 ~]# kubectl apply -f ceph-block-pvc-pod.yaml
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;73-statefulset-volumeclaimtemplates&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#73-statefulset-volumeclaimtemplates&#34;&gt;#&lt;/a&gt; 7.3 StatefulSet volumeClaimTemplates&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cat ceph-block-pvc-sts.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+
+  - port: 80
+    name: web
+      clusterIP: None
+      selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: nginx # 必须匹配 .spec.template.metadata.labels
+  serviceName: &amp;quot;nginx&amp;quot;
+  replicas: 3 # 默认值是 1
+  template:
+    metadata:
+      labels:
+        app: nginx # 必须匹配 .spec.selector.matchLabels
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.20
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+  - metadata:
+    name: www
+    spec:
+      accessModes: [ &amp;quot;ReadWriteOnce&amp;quot; ]
+      storageClassName: &amp;quot;rook-ceph-block&amp;quot;
+      resources:
+        requests:
+          storage: 1Gi
+    	  
+[root@k8s-master01 ~]# kubectl apply -f ceph-block-pvc-sts.yaml 
+
+[root@k8s-master01 ~]# kubectl get pods
+NAME                                      READY   STATUS    RESTARTS       AGE
+web-0                                     1/1     Running   0              4m19s
+web-1                                     1/1     Running   0              4m10s
+web-2                                     1/1     Running   0              2m21s
+
+[root@k8s-master01 ~]# kubectl get pvc
+NAME        STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS      AGE
+www-web-0   Bound    pvc-27cab5bf-f989-4050-aa84-1b2dac9fa745   1Gi        RWO            rook-ceph-block   4m23s
+www-web-1   Bound    pvc-76fb08f4-2195-4678-b6b8-286c2f722cc9   1Gi        RWO            rook-ceph-block   4m14s
+www-web-2   Bound    pvc-6b858cd9-288f-48bc-bc96-33e6eb519613   1Gi        RWO            rook-ceph-block   2m25s
+
+[root@k8s-master01 ~]# kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM               STORAGECLASS      REASON   AGE
+pvc-27cab5bf-f989-4050-aa84-1b2dac9fa745   1Gi        RWO            Delete           Bound    default/www-web-0   rook-ceph-block            4m25s
+pvc-6b858cd9-288f-48bc-bc96-33e6eb519613   1Gi        RWO            Delete           Bound    default/www-web-2   rook-ceph-block            2m27s
+pvc-76fb08f4-2195-4678-b6b8-286c2f722cc9   1Gi        RWO            Delete           Bound    default/www-web-1   rook-ceph-block            4m16s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;8-共享文件系统的使用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#8-共享文件系统的使用&#34;&gt;#&lt;/a&gt; 8. 共享文件系统的使用&lt;/h4&gt;
+&lt;p&gt;共享文件系统一般用于多个 Pod 共享一个存储&lt;/p&gt;
+&lt;h5 id=&#34;81-创建共享类型的文件系统&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#81-创建共享类型的文件系统&#34;&gt;#&lt;/a&gt; 8.1 创建共享类型的文件系统&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cd /root/rook/deploy/examples/
+[root@k8s-master01 examples]# kubectl apply -f filesystem.yaml
+[root@k8s-master01 examples]# kubectl get pod -l app=rook-ceph-mds -n rook-ceph
+NAME                                    READY   STATUS    RESTARTS   AGE
+rook-ceph-mds-myfs-a-7d76cb5988-9nz9p   2/2     Running   0          36s
+rook-ceph-mds-myfs-b-76ff7c784c-vs8nm   2/2     Running   0          33s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;82-创建共享类型文件系统的-storageclass&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#82-创建共享类型文件系统的-storageclass&#34;&gt;#&lt;/a&gt; 8.2 创建共享类型文件系统的 StorageClass&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 examples]# cd csi/cephfs
+[root@k8s-master01 cephfs]# kubectl create -f storageclass.yaml
+[root@k8s-master01 cephfs]# kubectl get sc
+NAME              PROVISIONER                     RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+nfs-storage       nfzl.com/nfs                    Delete          Immediate           false                  17h
+rook-ceph-block   rook-ceph.rbd.csi.ceph.com      Delete          Immediate           true                   82m
+rook-cephfs       rook-ceph.cephfs.csi.ceph.com   Delete          Immediate           true                   13s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;83-挂载测试&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#83-挂载测试&#34;&gt;#&lt;/a&gt; 8.3 挂载测试&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cat cephfs-pvc-deploy.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+  selector:
+    app: nginx
+  type: ClusterIP
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nginx-share-pvc
+spec:
+  storageClassName: rook-cephfs 
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: nginx # has to match .spec.template.metadata.labels
+  replicas: 3 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: nginx # has to match .spec.selector.matchLabels
+    spec:
+      containers:
+      - name: nginx
+        image: nginx 
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+      volumes:
+        - name: www
+          persistentVolumeClaim:
+            claimName: nginx-share-pvc
+			
+[root@k8s-master01 ~]# kubectl apply -f cephfs-pvc-deploy.yaml
+[root@k8s-master01 ~]# kubectl get pods
+NAME                                      READY   STATUS    RESTARTS        AGE
+cluster-test-84dfc9c68b-5q4ng             1/1     Running   84 (4m2s ago)   16d
+nfs-client-provisioner-5dbbd8d796-lhdgw   1/1     Running   5 (123m ago)    18h
+web-6c59f8559-g5xzb                       1/1     Running   0               46s
+web-6c59f8559-ns77q                       1/1     Running   0               46s
+web-6c59f8559-qxb5f                       1/1     Running   0               46s
+
+[root@k8s-master01 ~]# kubectl get pvc
+NAME              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nginx-share-pvc   Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   2Gi        RWX            rook-cephfs    52s
+
+[root@k8s-master01 ~]# kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                     STORAGECLASS   REASON   AGE
+pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   2Gi        RWX            Delete           Bound    default/nginx-share-pvc   rook-cephfs             53s
+
+[root@k8s-master01 ~]# kubectl exec -it web-6c59f8559-g5xzb -- bash
+root@web-6c59f8559-g5xzb:/# cd /usr/share/nginx/html/
+root@web-6c59f8559-g5xzb:/usr/share/nginx/html# echo &amp;quot;hello cephfs&amp;quot; &amp;gt;&amp;gt; index.html
+
+[root@k8s-master01 ~]# kubectl get svc
+NAME                 TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)    AGE
+kubernetes           ClusterIP   10.96.0.1     &amp;lt;none&amp;gt;        443/TCP    16d
+mysql-svc-external   ClusterIP   None          &amp;lt;none&amp;gt;        3306/TCP   9d
+nginx                ClusterIP   10.96.58.17   &amp;lt;none&amp;gt;        80/TCP     4m34s
+[root@k8s-master01 ~]# curl 10.96.58.17
+hello cephfs
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;9pvc-扩容&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#9pvc-扩容&#34;&gt;#&lt;/a&gt; 9.PVC 扩容&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl get sc
+NAME              PROVISIONER                     RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+nfs-storage       nfzl.com/nfs                    Delete          Immediate           false                  18h
+rook-ceph-block   rook-ceph.rbd.csi.ceph.com      Delete          Immediate           true                   104m     #true允许扩容
+rook-cephfs       rook-ceph.cephfs.csi.ceph.com   Delete          Immediate           true                   22m      #true允许扩容
+
+[root@k8s-master01 ~]# kubectl get pvc
+NAME              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nginx-share-pvc   Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   2Gi        RWX            rook-cephfs    13m
+[root@k8s-master01 ~]# kubectl edit pvc nginx-share-pvc
+...
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi         #更改pvc大小
+  storageClassName: rook-cephfs
+...
+
+[root@k8s-master01 ~]# kubectl get pvc       #查看PVC是否扩容
+NAME              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nginx-share-pvc   Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   5Gi        RWX            rook-cephfs    15m
+
+[root@k8s-master01 ~]# kubectl get pv         #查看PV是否扩容
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                     STORAGECLASS   REASON   AGE
+pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   5Gi        RWX            Delete           Bound    default/nginx-share-pvc   rook-cephfs             15m
+
+[root@k8s-master01 ~]# kubectl exec -it web-6c59f8559-g5xzb -- bash       #进入容器，查看pod是否扩容  
+root@web-6c59f8559-g5xzb:/# df -h 
+Filesystem                                                                                                                                             Size  Used Avail Use% Mounted on
+overlay                                                                                                                                                 17G   13G  4.1G  76% /
+tmpfs                                                                                                                                                   64M     0   64M   0% /dev
+tmpfs                                                                                                                                                  2.0G     0  2.0G   0% /sys/fs/cgroup
+/dev/sda3                                                                                                                                               17G   13G  4.1G  76% /etc/hosts
+shm                                                                                                                                                     64M     0   64M   0% /dev/shm
+10.96.121.140:6789,10.96.131.130:6789,10.96.62.64:6789:/volumes/csi/csi-vol-3b645a11-58f4-475a-9404-5d84964f5291/e4bdf743-eb18-42c8-b04f-41964f76de4f  5.0G     0  5.0G   0% /usr/share/nginx/html
+tmpfs                                                                                                                                                  3.8G   12K  3.8G   1% /run/secrets/kubernetes.io/serviceaccount
+tmpfs                                                                                                                                                  2.0G     0  2.0G   0% /proc/asound
+tmpfs                                                                                                                                                  2.0G     0  2.0G   0% /proc/acpi
+tmpfs                                                                                                                                                  2.0G     0  2.0G   0% /proc/scsi
+tmpfs                                                                                                                                                  2.0G     0  2.0G   0% /sys/firmware
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;10-pvc-快照&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#10-pvc-快照&#34;&gt;#&lt;/a&gt; 10. PVC 快照&lt;/h4&gt;
+&lt;h5 id=&#34;101-文件共享类型快照&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#101-文件共享类型快照&#34;&gt;#&lt;/a&gt; 10.1 文件共享类型快照&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cd rook/deploy/examples
+[root@k8s-master01 examples]# kubectl create -f csi/cephfs/snapshotclass.yaml 
+
+[root@k8s-master01 examples]# kubectl get volumesnapshotclass
+NAME                         DRIVER                          DELETIONPOLICY   AGE
+csi-cephfsplugin-snapclass   rook-ceph.cephfs.csi.ceph.com   Delete           25s
+
+
+#拍摄快照	
+[root@k8s-master01 examples]# kubectl exec -it web-6c59f8559-g5xzb -- bash         #pvc新增数据
+root@web-6c59f8559-g5xzb:/# cd /usr/share/nginx/html/
+root@web-6c59f8559-g5xzb:/usr/share/nginx/html# touch &amp;#123;1..10&amp;#125;
+root@web-6c59f8559-g5xzb:/usr/share/nginx/html# ls
+1  10  2  3  4	5  6  7  8  9  index.html
+
+[root@k8s-master01 examples]# kubectl get pvc       #查看pvs并对nginx-share-pvc拍摄快照
+NAME              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nginx-share-pvc   Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   5Gi        RWX            rook-cephfs    4h23m
+
+[root@k8s-master01 examples]# cat csi/cephfs/snapshot.yaml         #拍摄快照
+---
+# 1.17 &amp;lt;= K8s &amp;lt;= v1.19
+# apiVersion: snapshot.storage.k8s.io/v1beta1
+# K8s &amp;gt;= v1.20
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: cephfs-pvc-snapshot
+spec:
+  volumeSnapshotClassName: csi-cephfsplugin-snapclass
+  source:
+    persistentVolumeClaimName: nginx-share-pvc         #基于那个PVC拍摄快照
+	
+[root@k8s-master01 examples]# kubectl apply -f csi/cephfs/snapshot.yaml
+[root@k8s-master01 examples]# kubectl get volumesnapshot
+NAME                  READYTOUSE   SOURCEPVC         SOURCESNAPSHOTCONTENT   RESTORESIZE   SNAPSHOTCLASS                SNAPSHOTCONTENT                                    CREATIONTIME   AGE
+cephfs-pvc-snapshot   true         nginx-share-pvc                           5Gi           csi-cephfsplugin-snapclass   snapcontent-bdaddb97-debe-4f42-9423-13bf1c5b5402   4m6s           4m8s
+
+#删除pvc数据
+[root@k8s-master01 examples]# kubectl exec -it web-6c59f8559-g5xzb -- bash
+root@web-6c59f8559-g5xzb:/# cd /usr/share/nginx/html/
+root@web-6c59f8559-g5xzb:/usr/share/nginx/html# ls
+1  10  2  3  4	5  6  7  8  9  index.html
+root@web-6c59f8559-g5xzb:/usr/share/nginx/html# rm -rf &amp;#123;1..10&amp;#125;
+root@web-6c59f8559-g5xzb:/usr/share/nginx/html# ls
+index.html
+
+#pvc回滚数据
+[root@k8s-master01 examples]# kubectl get volumesnapshot
+NAME                  READYTOUSE   SOURCEPVC         SOURCESNAPSHOTCONTENT   RESTORESIZE   SNAPSHOTCLASS                SNAPSHOTCONTENT                                    CREATIONTIME   AGE
+cephfs-pvc-snapshot   true         nginx-share-pvc                           5Gi           csi-cephfsplugin-snapclass   snapcontent-bdaddb97-debe-4f42-9423-13bf1c5b5402   7m39s          7m41s
+	
+[root@k8s-master01 examples]# cat csi/cephfs/pvc-restore.yaml 
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cephfs-pvc-restore
+spec:
+  storageClassName: rook-cephfs       #创建pv的storageclass名称相同
+  dataSource:
+    name: cephfs-pvc-snapshot         #volumesnapshot数据源
+    kind: VolumeSnapshot
+    apiGroup: snapshot.storage.k8s.io
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi      #大小等于snapshot大小
+
+[root@k8s-master01 examples]# kubectl apply -f csi/cephfs/pvc-restore.yaml
+
+[root@k8s-master01 examples]# kubectl get pvc
+NAME                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+cephfs-pvc-restore   Bound    pvc-9e845f2b-df1f-450d-8aa2-f9a46db6adb6   5Gi        RWX            rook-cephfs    54s          
+nginx-share-pvc      Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   5Gi        RWX            rook-cephfs    4h50m
+
+#挂载PVC测试数据是否恢复
+[root@k8s-master01 examples]# cat csi/cephfs/pod.yaml 
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: csicephfs-demo-pod
+spec:
+  containers:
+    - name: web-server
+      image: nginx
+      volumeMounts:
+        - name: mypvc
+          mountPath: /var/lib/www/html
+  volumes:
+    - name: mypvc
+      persistentVolumeClaim:
+        claimName: cephfs-pvc-restore        #挂载恢复pvc
+        readOnly: false
+
+[root@k8s-master01 examples]# kubectl apply -f csi/cephfs/pod.yaml
+[root@k8s-master01 examples]# kubectl get pods
+NAME                                      READY   STATUS    RESTARTS        AGE
+cluster-test-84dfc9c68b-5q4ng             1/1     Running   88 (57m ago)    16d
+csicephfs-demo-pod                        1/1     Running   0               24s
+nfs-client-provisioner-5dbbd8d796-lhdgw   1/1     Running   5 (6h57m ago)   23h
+web-6c59f8559-g5xzb                       1/1     Running   0               4h54m
+web-6c59f8559-ns77q                       1/1     Running   0               4h54m
+web-6c59f8559-qxb5f                       1/1     Running   0               4h54m
+[root@k8s-master01 examples]# kubectl exec -it csicephfs-demo-pod -- bash
+root@csicephfs-demo-pod:/# ls /var/lib/www/html/               #s删除数据已经恢复
+1  10  2  3  4	5  6  7  8  9  index.html
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;102-pvc-克隆&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#102-pvc-克隆&#34;&gt;#&lt;/a&gt; 10.2 PVC 克隆&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 examples]# kubectl get pvc
+NAME                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+cephfs-pvc-restore   Bound    pvc-9e845f2b-df1f-450d-8aa2-f9a46db6adb6   5Gi        RWX            rook-cephfs    11m
+nginx-share-pvc      Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   5Gi        RWX            rook-cephfs    5h1m
+
+
+[root@k8s-master01 examples]# cat csi/cephfs/pvc-clone.yaml 
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cephfs-pvc-clone
+spec:
+  storageClassName: rook-cephfs      # pvc 的 storageClass 名称
+  dataSource:
+    name: nginx-share-pvc          #克隆的PVC名称
+    kind: PersistentVolumeClaim
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi                 #大小等于所克隆的PVC大小
+
+[root@k8s-master01 examples]# kubectl apply -f csi/cephfs/pvc-clone.yaml
+
+[root@k8s-master01 examples]# kubectl get pvc
+NAME                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+cephfs-pvc-clone     Bound    pvc-0a19b65e-cb5e-4379-a7f7-e0783fcf8ddf   5Gi        RWX            rook-cephfs    22s
+cephfs-pvc-restore   Bound    pvc-9e845f2b-df1f-450d-8aa2-f9a46db6adb6   5Gi        RWX            rook-cephfs    15m
+nginx-share-pvc      Bound    pvc-4de733fe-c2fb-437b-baff-aaeba0235d54   5Gi        RWX            rook-cephfs    5h4m
+
+#挂载克隆PVC测试
+[root@k8s-master01 examples]# cat csi/cephfs/pod.yaml 
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: csicephfs-demo-pod
+spec:
+  containers:
+    - name: web-server
+      image: nginx
+      volumeMounts:
+        - name: mypvc
+          mountPath: /var/lib/www/html
+  volumes:
+    - name: mypvc
+      persistentVolumeClaim:
+        claimName: cephfs-pvc-clone      #挂载克隆的pvc
+        readOnly: false
+
+[root@k8s-master01 examples]# kubectl apply -f csi/cephfs/pod.yaml          
+[root@k8s-master01 examples]# kubectl get pods
+NAME                                      READY   STATUS    RESTARTS         AGE
+cluster-test-84dfc9c68b-5q4ng             1/1     Running   89 (9m54s ago)   16d
+csicephfs-demo-pod                        1/1     Running   0                17s
+nfs-client-provisioner-5dbbd8d796-lhdgw   1/1     Running   5 (7h9m ago)     23h
+web-6c59f8559-g5xzb                       1/1     Running   0                5h6m
+web-6c59f8559-ns77q                       1/1     Running   0                5h6m
+web-6c59f8559-qxb5f                       1/1     Running   0                5h6m
+
+[root@k8s-master01 examples]# kubectl exec -it csicephfs-demo-pod -- bash
+root@csicephfs-demo-pod:/# cat /var/lib/www/html/index.html 
+hello cephfs
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;11-测试数据清理&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-测试数据清理&#34;&gt;#&lt;/a&gt; 11. 测试数据清理&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;参考文档：https://rook.io/docs/rook/v1.11/Getting-Started/ceph-teardown/#delete-the-cephcluster-crd
+[root@k8s-master01 ~]# kubectl delete deploy web
+
+[root@k8s-master01 ~]# kubectl delete pods csicephfs-demo-pod
+
+[root@k8s-master01 ~]# kubectl delete pvc --all
+[root@k8s-master01 ~]# kubectl get pvc
+No resources found in default namespace.
+[root@k8s-master01 ~]# kubectl get pv
+No resources found
+
+
+[root@k8s-master01 ~]# kubectl get volumesnapshot
+NAME                  READYTOUSE   SOURCEPVC         SOURCESNAPSHOTCONTENT   RESTORESIZE   SNAPSHOTCLASS                SNAPSHOTCONTENT                                    CREATIONTIME   AGE
+cephfs-pvc-snapshot   true         nginx-share-pvc                           5Gi           csi-cephfsplugin-snapclass   snapcontent-bdaddb97-debe-4f42-9423-13bf1c5b5402   61m            61m
+[root@k8s-master01 ~]# kubectl delete volumesnapshot cephfs-pvc-snapshot
+volumesnapshot.snapshot.storage.k8s.io &amp;quot;cephfs-pvc-snapshot&amp;quot; deleted
+
+kubectl delete -n rook-ceph cephblockpool replicapool
+kubectl delete -n rook-ceph cephfilesystem myfs
+
+kubectl delete storageclass rook-ceph-block
+kubectl delete storageclass rook-cephfs
+kubectl delete -f csi/cephfs/kube-registry.yaml
+kubectl delete storageclass csi-cephfs
+
+kubectl -n rook-ceph delete cephcluster rook-ceph
+
+kubectl delete -f operator.yaml
+kubectl delete -f common.yaml
+kubectl delete -f crds.yaml
+&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;em&gt;本文出自于：&lt;a href=&#34;https://edu.51cto.com/course/23845.html&#34;&gt;https://edu.51cto.com/course/23845.html&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
  ]]></description>
         </item>

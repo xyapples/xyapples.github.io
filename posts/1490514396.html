@@ -1,0 +1,521 @@
+<!-- build time:Mon May 12 2025 21:23:58 GMT+0800 (中国标准时间) --><!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2"><meta name="theme-color" content="#222"><meta http-equiv="X-UA-COMPATIBLE" content="IE=edge,chrome=1"><meta name="renderer" content="webkit"><link rel="icon" type="image/ico" sizes="32x32" href="/assets/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon.ico"><link rel="alternate" href="/rss.xml" title="LinuxSre云原生" type="application/rss+xml"><link rel="alternate" href="/atom.xml" title="LinuxSre云原生" type="application/atom+xml"><link rel="alternate" type="application/json" title="LinuxSre云原生" href="http://ixuyong.cn/feed.json"><link rel="preconnect" href="https://s4.zstatic.net"><link rel="preconnect" href="https://at.alicdn.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic%7CFredericka%20the%20Great:400,400italic,700,700italic%7CNoto%20Serif%20JP:400,400italic,700,700italic%7CNoto%20Serif%20SC:400,400italic,700,700italic%7CInconsolata:400,400italic,700,700italic&display=swap&subset=latin,latin-ext" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/app.css?v=0.4.17"><link rel="modulepreload" href="/js/chunk-GV364XSK.js"><link rel="modulepreload" href="/js/chunk-NYSE5UKM.js"><link rel="modulepreload" href="/js/chunk-RONCYO2S.js"><link rel="modulepreload" href="/js/chunk-THHXCRSX.js"><link rel="modulepreload" href="/js/chunk-WIQECBEN.js"><link rel="modulepreload" href="/js/comments-DL2IYMPZ.js"><link rel="modulepreload" href="/js/copy-tex-NADCTXPG.js"><link rel="modulepreload" href="/js/post-DA635IH6.js"><link rel="modulepreload" href="/js/quicklink-WEDHL4BA.js"><link rel="modulepreload" href="/js/search-VCZRKTM5.js"><link rel="modulepreload" href="/js/siteInit.js"><link rel="modulepreload" href="/js/waline-NNBYRQEE.js"><link rel="stylesheet" href="/css/comments-F4ZGS7LD.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/siteInit.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/waline-IDNZKML2.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="preload" href="https://s21.ax1x.com/2025/03/29/pEsS0hD.png" as="image" fetchpriority="high"><meta name="keywords" content="Redis"><meta name="description" content="专注于 Linux 运维、云计算、云原⽣等技术"><link rel="canonical" href="http://ixuyong.cn/posts/1490514396.html"><title>Redis Cluster集群部署</title><meta name="generator" content="Hexo 7.3.0"></head><body itemscope itemtype="http://schema.org/WebPage"><div id="loading"><div class="cat"><div class="body"></div><div class="head"><div class="face"></div></div><div class="foot"><div class="tummy-end"></div><div class="bottom"></div><div class="legs left"></div><div class="legs right"></div></div><div class="paw"><div class="hands left"></div><div class="hands right"></div></div></div></div><div id="container"><header id="header" itemscope itemtype="http://schema.org/WPHeader"><div class="inner"><div id="brand"><div class="pjax"><h1 itemprop="name headline">Redis Cluster集群部署</h1><div class="meta"><span class="item" title="创建时间：2025-05-12 21:21:44"><span class="icon"><i class="ic i-calendar"></i></span><span class="text">发表于</span><time itemprop="dateCreated datePublished" datetime="2025-05-12T21:21:44+08:00">2025-05-12</time></span><span class="item" title="本文字数"><span class="icon"><i class="ic i-pen"></i></span><span class="text">本文字数</span><span>17k</span><span class="text">字</span></span><span class="item" title="阅读时长"><span class="icon"><i class="ic i-clock"></i></span><span class="text">阅读时长</span><span>15 分钟</span></span></div></div></div><nav id="nav"><div class="inner"><div class="toggle"><div class="lines" aria-label="切换导航栏"><span class="line"></span><span class="line"></span><span class="line"></span></div></div><ul class="menu"><li class="item title"><a href="/" rel="start">LinuxSre云原生</a></li></ul><ul class="right" id="rightNav"><li class="item theme"><i class="ic i-sun"></i></li><li class="item search"><i class="ic i-search"></i></li></ul></div></nav></div><div class="pjax" id="imgs"><img src="https://s21.ax1x.com/2025/03/29/pEsS0hD.png" loading="eager" decoding="async" fetchpriority="high" alt="LinuxSre云原生"></div></header><div id="waves"><svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path></defs><g class="parallax"><use xlink:href="#gentle-wave" x="48" y="0"></use><use xlink:href="#gentle-wave" x="48" y="3"></use><use xlink:href="#gentle-wave" x="48" y="5"></use><use xlink:href="#gentle-wave" x="48" y="7"></use></g></svg></div><main><div class="inner"><div class="pjax" id="main"><div class="article wrap"><div class="breadcrumb" itemlistelement itemscope itemtype="https://schema.org/BreadcrumbList"><i class="ic i-home"></i><span><a href="/">首页</a></span><i class="ic i-angle-right"></i><span class="current" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a href="/categories/Redis/" itemprop="item" rel="index" title="分类于Redis"><span itemprop="name">Redis<meta itemprop="position" content="0"></span></a></span></div><article class="post block" itemscope itemtype="http://schema.org/Article" lang="zh-CN"><link itemprop="mainEntityOfPage" href="http://ixuyong.cn/posts/1490514396.html"><span hidden itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="image" content="/assets/avatar.png"><meta itemprop="name" content="Xu Yong"><meta itemprop="description" content="致力于技术布道、普及前沿技术、打造云原生系列标杆博客, 专注于 Linux 运维、云计算、云原⽣等技术"></span><span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="LinuxSre云原生"></span><div class="body md" itemprop="articleBody"><h3 id="redis-cluster集群部署"><a class="anchor" href="#redis-cluster集群部署">#</a> Redis Cluster 集群部署</h3><h4 id="1-环境配置"><a class="anchor" href="#1-环境配置">#</a> 1、环境配置</h4><h5 id="11-关闭防火墙-selinux"><a class="anchor" href="#11-关闭防火墙-selinux">#</a> 1.1 关闭防火墙、Selinux</h5><pre><code>systemctl disable --now firewalld 
+setenforce 0
+sed -i 's#SELINUX=enforcing#SELINUX=disabled#g' /etc/sysconfig/selinux
+sed -i 's#SELINUX=enforcing#SELINUX=disabled#g' /etc/selinux/config
+</code></pre><h5 id="11-配置yum源"><a class="anchor" href="#11-配置yum源">#</a> 1.1 配置 yum 源</h5><pre><code>#rocky linux配置
+sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+    -e 's|^#baseurl=http://dl.rockylinux.org/$contentdir|baseurl=https://mirrors.aliyun.com/rockylinux|g' \
+    -i.bak \
+    /etc/yum.repos.d/rocky-*.repo
+yum clean all &amp;&amp; yum makecache
+mkdir /soft /data /scripts /backup
+</code></pre><h5 id="13-配置文件描述符"><a class="anchor" href="#13-配置文件描述符">#</a> 1.3 配置文件描述符</h5><pre><code>ulimit -SHn 65535
+vim /etc/security/limits.conf
+# 末尾添加如下内容
+* soft nofile 65536
+* hard nofile 131072
+* soft nproc 65535
+* hard nproc 655350
+* soft memlock unlimited
+* hard memlock unlimited
+</code></pre><h5 id="14-系统内核参数调优"><a class="anchor" href="#14-系统内核参数调优">#</a> 1.4 系统内核参数调优</h5><pre><code># 修改/etc/sysctl.conf文件
+cat &gt;&gt; /etc/sysctl.conf &lt;&lt;EOF
+vm.max_map_count = 262144
+vm.swappiness=1
+
+net.ipv4.tcp_fin_timeout=2
+net.ipv4.tcp_tw_reuse=1
+#net.ipv4.tcp_tw_recycle=1
+net.ipv4.tcp_syncookies=1
+net.ipv4.tcp_keepalive_time=600
+net.ipv4.ip_local_port_range=4000 65000
+net.ipv4.tcp_max_syn_backlog=16384
+net.ipv4.route.gc_timeout=100
+net.ipv4.tcp_max_tw_buckets= 5000
+
+net.ipv4.tcp_syn_retries=1
+net.ipv4.tcp_synack_retries=1
+net.core.somaxconn=16384
+net.core.netdev_max_backlog=16384
+net.ipv4.tcp_max_orphans=16384
+
+# 设置最大内存共享段大小bytes
+kernel.shmmax=15461882265
+kernel.shmall=3774873
+# 修改消息队列长度
+kernel.msgmax=65535
+kernel.msgmnb=65535
+EOF
+</code></pre><h5 id="15-修改默认限制内存"><a class="anchor" href="#15-修改默认限制内存">#</a> 1.5 修改默认限制内存</h5><pre><code>cat &gt;&gt;/etc/systemd/system.conf&lt;&lt; EOF
+DefaultLimitNOFILE=65536
+DefaultLimitNPROC=32000
+DefaultLimitMEMLOCK=infinity
+EOF
+</code></pre><h5 id="16-执行命令生效状态"><a class="anchor" href="#16-执行命令生效状态">#</a> 1.6 执行命令生效状态</h5><pre><code>sysctl -p
+</code></pre><h5 id="17-安装基础软件包"><a class="anchor" href="#17-安装基础软件包">#</a> 1.7 安装基础软件包</h5><pre><code>yum install wget jq psmisc vim unzip net-tools telnet tree yum-utils device-mapper-persistent-data \
+lvm2 git ntpdate nfs-utils iotop httpd-tools dos2unix lrzsz -y
+</code></pre><h5 id="18-升级系统"><a class="anchor" href="#18-升级系统">#</a> 1.8 升级系统</h5><pre><code>yum update -y --exclude=kernel* &amp;&amp; reboot
+</code></pre><h4 id="2-redis-cluster部署"><a class="anchor" href="#2-redis-cluster部署">#</a> 2、Redis cluster 部署</h4><table><thead><tr><th style="text-align:center">192.168.1.135</th><th style="text-align:center">192.168.1.136</th><th style="text-align:center">192.168.1.137</th></tr></thead><tbody><tr><td style="text-align:center">node1：7001</td><td style="text-align:center">node1：7001</td><td style="text-align:center">node1：7001</td></tr><tr><td style="text-align:center">node2：7002</td><td style="text-align:center">node2：7002</td><td style="text-align:center">node2：7002</td></tr><tr><td style="text-align:center">node3：7003</td><td style="text-align:center">node3：7003</td><td style="text-align:center">node3：7003</td></tr></tbody></table><h5 id="21-安装包下载"><a class="anchor" href="#21-安装包下载">#</a> 2.1 安装包下载</h5><pre><code>wget https://download.redis.io/releases/redis-7.2.1.tar.gz
+</code></pre><h5 id="22-安装-redis"><a class="anchor" href="#22-安装-redis">#</a> 2.2 安装 redis</h5><pre><code>yum install gcc-c++ -y
+mkdir /soft
+tar -xzvf redis-7.2.1.tar.gz -C /soft
+ln -s /soft/redis-7.2.1 /soft/redis
+cd /soft/redis
+make
+make install prefix=/soft/redis
+</code></pre><h5 id="23-生成集群配置文件"><a class="anchor" href="#23-生成集群配置文件">#</a> 2.3 生成集群配置文件</h5><pre><code>mkdir -p /soft/redis/data/7001
+mkdir -p /soft/redis/data/7002
+mkdir -p /soft/redis/data/7003
+mkdir -p /soft/redis/log
+cd /soft/redis
+</code></pre><p><strong>redis_7001.conf 配置文件</strong></p><pre><code>cat &gt; /soft/redis/redis_7001.conf &lt;&lt;EOF
+protected-mode yes
+port 7001
+requirepass admin123
+masterauth admin123
+cluster-enabled yes
+cluster-config-file nodes-7001.conf
+cluster-node-timeout 5000
+maxmemory 2GB
+maxmemory-policy volatile-lru
+tcp-backlog 511
+timeout 0
+tcp-keepalive 300
+daemonize yes
+pidfile /soft/redis/data/redis7001.pid
+loglevel notice
+logfile &quot;/soft/redis/log/redis7001.log&quot;
+#databases 16
+always-show-logo no
+set-proc-title yes
+proc-title-template &quot;&#123;title&#125; &#123;listen-addr&#125; &#123;server-mode&#125;&quot;
+locale-collate &quot;&quot;
+stop-writes-on-bgsave-error yes
+rdbcompression yes
+rdbchecksum yes
+dbfilename dump.rdb
+rdb-del-sync-files no
+dir /soft/redis/data/7001
+replica-serve-stale-data yes
+replica-read-only yes
+repl-diskless-sync yes
+repl-diskless-sync-delay 5
+repl-diskless-sync-max-replicas 0
+repl-diskless-load disabled
+repl-disable-tcp-nodelay no
+replica-priority 100
+acllog-max-len 128
+lazyfree-lazy-eviction no
+lazyfree-lazy-expire no
+lazyfree-lazy-server-del no
+replica-lazy-flush no
+lazyfree-lazy-user-del no
+lazyfree-lazy-user-flush no
+oom-score-adj no
+oom-score-adj-values 0 200 800
+disable-thp yes
+appendonly no
+appendfilename &quot;appendonly.aof&quot;
+appenddirname &quot;appendonlydir&quot;
+appendfsync everysec
+no-appendfsync-on-rewrite no
+auto-aof-rewrite-percentage 100
+auto-aof-rewrite-min-size 64mb
+aof-load-truncated yes
+aof-use-rdb-preamble yes
+aof-timestamp-enabled no
+slowlog-log-slower-than 10000
+slowlog-max-len 128
+latency-monitor-threshold 0
+notify-keyspace-events &quot;&quot;
+hash-max-listpack-entries 512
+hash-max-listpack-value 64
+list-max-listpack-size -2
+list-compress-depth 0
+set-max-intset-entries 512
+set-max-listpack-entries 128
+set-max-listpack-value 64
+zset-max-listpack-entries 128
+zset-max-listpack-value 64
+hll-sparse-max-bytes 3000
+stream-node-max-bytes 4096
+stream-node-max-entries 100
+activerehashing yes
+client-output-buffer-limit normal 0 0 0
+client-output-buffer-limit replica 256mb 64mb 60
+client-output-buffer-limit pubsub 32mb 8mb 60
+hz 10
+dynamic-hz yes
+aof-rewrite-incremental-fsync yes
+rdb-save-incremental-fsync yes
+jemalloc-bg-thread yes
+EOF
+</code></pre><p><strong>redis_7002.conf 配置文件</strong></p><pre><code>cat &gt; /soft/redis/redis_7002.conf &lt;&lt;EOF
+protected-mode yes
+port 7002
+requirepass admin123
+masterauth admin123
+cluster-enabled yes
+cluster-config-file nodes-7002.conf
+cluster-node-timeout 5000
+maxmemory 2GB
+maxmemory-policy  volatile-lru
+tcp-backlog 511
+timeout 0
+tcp-keepalive 300
+daemonize yes
+pidfile /soft/redis/data/redis7002.pid
+loglevel notice
+logfile &quot;/soft/redis/log/redis7002.log&quot;
+#databases 16
+always-show-logo no
+set-proc-title yes
+proc-title-template &quot;&#123;title&#125; &#123;listen-addr&#125; &#123;server-mode&#125;&quot;
+locale-collate &quot;&quot;
+stop-writes-on-bgsave-error yes
+rdbcompression yes
+rdbchecksum yes
+dbfilename dump.rdb
+rdb-del-sync-files no
+dir /soft/redis/data/7002
+replica-serve-stale-data yes
+replica-read-only yes
+repl-diskless-sync yes
+repl-diskless-sync-delay 5
+repl-diskless-sync-max-replicas 0
+repl-diskless-load disabled
+repl-disable-tcp-nodelay no
+replica-priority 100
+acllog-max-len 128
+lazyfree-lazy-eviction no
+lazyfree-lazy-expire no
+lazyfree-lazy-server-del no
+replica-lazy-flush no
+lazyfree-lazy-user-del no
+lazyfree-lazy-user-flush no
+oom-score-adj no
+oom-score-adj-values 0 200 800
+disable-thp yes
+appendonly no
+appendfilename &quot;appendonly.aof&quot;
+appenddirname &quot;appendonlydir&quot;
+appendfsync everysec
+no-appendfsync-on-rewrite no
+auto-aof-rewrite-percentage 100
+auto-aof-rewrite-min-size 64mb
+aof-load-truncated yes
+aof-use-rdb-preamble yes
+aof-timestamp-enabled no
+slowlog-log-slower-than 10000
+slowlog-max-len 128
+latency-monitor-threshold 0
+notify-keyspace-events &quot;&quot;
+hash-max-listpack-entries 512
+hash-max-listpack-value 64
+list-max-listpack-size -2
+list-compress-depth 0
+set-max-intset-entries 512
+set-max-listpack-entries 128
+set-max-listpack-value 64
+zset-max-listpack-entries 128
+zset-max-listpack-value 64
+hll-sparse-max-bytes 3000
+stream-node-max-bytes 4096
+stream-node-max-entries 100
+activerehashing yes
+client-output-buffer-limit normal 0 0 0
+client-output-buffer-limit replica 256mb 64mb 60
+client-output-buffer-limit pubsub 32mb 8mb 60
+hz 10
+dynamic-hz yes
+aof-rewrite-incremental-fsync yes
+rdb-save-incremental-fsync yes
+jemalloc-bg-thread yes
+EOF
+</code></pre><p><strong>redis_7003.conf 配置文件</strong></p><pre><code>cat &gt; /soft/redis/redis_7003.conf &lt;&lt;EOF
+protected-mode yes
+port 7003
+requirepass admin123
+masterauth admin123
+cluster-enabled yes
+cluster-config-file nodes-7003.conf
+cluster-node-timeout 5000
+maxmemory 2GB
+maxmemory-policy  volatile-lru
+tcp-backlog 511
+timeout 0
+tcp-keepalive 300
+daemonize yes
+pidfile /soft/redis/data/redis7003.pid
+loglevel notice
+logfile &quot;/soft/redis/log/redis7003.log&quot;
+#databases 16
+always-show-logo no
+set-proc-title yes
+proc-title-template &quot;&#123;title&#125; &#123;listen-addr&#125; &#123;server-mode&#125;&quot;
+locale-collate &quot;&quot;
+stop-writes-on-bgsave-error yes
+rdbcompression yes
+rdbchecksum yes
+dbfilename dump.rdb
+rdb-del-sync-files no
+dir /soft/redis/data/7003
+replica-serve-stale-data yes
+replica-read-only yes
+repl-diskless-sync yes
+repl-diskless-sync-delay 5
+repl-diskless-sync-max-replicas 0
+repl-diskless-load disabled
+repl-disable-tcp-nodelay no
+replica-priority 100
+acllog-max-len 128
+lazyfree-lazy-eviction no
+lazyfree-lazy-expire no
+lazyfree-lazy-server-del no
+replica-lazy-flush no
+lazyfree-lazy-user-del no
+lazyfree-lazy-user-flush no
+oom-score-adj no
+oom-score-adj-values 0 200 800
+disable-thp yes
+appendonly no
+appendfilename &quot;appendonly.aof&quot;
+appenddirname &quot;appendonlydir&quot;
+appendfsync everysec
+no-appendfsync-on-rewrite no
+auto-aof-rewrite-percentage 100
+auto-aof-rewrite-min-size 64mb
+aof-load-truncated yes
+aof-use-rdb-preamble yes
+aof-timestamp-enabled no
+slowlog-log-slower-than 10000
+slowlog-max-len 128
+latency-monitor-threshold 0
+notify-keyspace-events &quot;&quot;
+hash-max-listpack-entries 512
+hash-max-listpack-value 64
+list-max-listpack-size -2
+list-compress-depth 0
+set-max-intset-entries 512
+set-max-listpack-entries 128
+set-max-listpack-value 64
+zset-max-listpack-entries 128
+zset-max-listpack-value 64
+hll-sparse-max-bytes 3000
+stream-node-max-bytes 4096
+stream-node-max-entries 100
+activerehashing yes
+client-output-buffer-limit normal 0 0 0
+client-output-buffer-limit replica 256mb 64mb 60
+client-output-buffer-limit pubsub 32mb 8mb 60
+hz 10
+dynamic-hz yes
+aof-rewrite-incremental-fsync yes
+rdb-save-incremental-fsync yes
+jemalloc-bg-thread yes
+EOF
+</code></pre><h5 id="24-redis开机自启"><a class="anchor" href="#24-redis开机自启">#</a> 2.4 Redis 开机自启</h5><p><strong>redis_7001.service</strong></p><pre><code>cat &lt;&lt; &quot;EOF&quot; &gt; /usr/lib/systemd/system/redis_7001.service
+[Unit]
+Description=Redis 7001 service
+Documentation=https://redis.io/documentation
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=forking
+LimitNOFILE=10032
+User=root
+Group=root
+ExecStart=/soft/redis/src/redis-server /soft/redis/redis_7001.conf
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target
+EOF
+</code></pre><p><strong>redis_7002.service</strong></p><pre><code>cat &lt;&lt; &quot;EOF&quot; &gt; /usr/lib/systemd/system/redis_7002.service
+[Unit]
+Description=Redis 7002 service
+Documentation=https://redis.io/documentation
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=forking
+LimitNOFILE=10032
+User=root
+Group=root
+ExecStart=/soft/redis/src/redis-server /soft/redis/redis_7002.conf
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target
+EOF
+</code></pre><p><strong>redis_7003.service</strong></p><pre><code>cat &lt;&lt; &quot;EOF&quot; &gt; /usr/lib/systemd/system/redis_7003.service
+[Unit]
+Description=Redis 7003 service
+Documentation=https://redis.io/documentation
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=forking
+LimitNOFILE=10032
+User=root
+Group=root
+ExecStart=/soft/redis/src/redis-server /soft/redis/redis_7003.conf
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target
+EOF
+</code></pre><p><strong>设置开机自启</strong></p><pre><code>chown -R root.root /soft/redis
+systemctl daemon-reload
+systemctl enable redis_7001.service
+systemctl enable redis_7002.service
+systemctl enable redis_7003.service
+systemctl start redis_7001.service
+systemctl start redis_7002.service
+systemctl start redis_7003.service
+systemctl status redis_7001.service
+systemctl status redis_7002.service
+systemctl status redis_7003.service
+</code></pre><h5 id="25-启动redis集群服务"><a class="anchor" href="#25-启动redis集群服务">#</a> 2.5 启动 redis 集群服务</h5><p>--cluster-replicas 2 表示为集群中的每个主节点创建 2 个从节点</p><pre><code>cd /soft/redis/src
+./redis-cli --cluster create \  
+192.168.1.135:7001 192.168.1.135:7002 192.168.1.135:7003 \  
+192.168.1.136:7001 192.168.1.136:7002 192.168.1.136:7003 \ 
+192.168.1.137:7001 192.168.1.137:7002 192.168.1.137:7003 \ 
+--cluster-replicas 2 -a admin123 
+</code></pre><p>输入创建集群的命令后会出现以下提示，注意 Can I set the above configuration? (type 'yes' to accept): yes，该处请输入 yes</p><pre><code>[root@qnyp_node01 src]# ./redis-cli --cluster create \
+&gt; 192.168.1.135:7001 192.168.1.135:7002 192.168.1.135:7003 \
+&gt; 192.168.1.136:7001 192.168.1.136:7002 192.168.1.136:7003 \
+&gt; 192.168.1.137:7001 192.168.1.137:7002 192.168.1.137:7003 \
+&gt; --cluster-replicas 2 -a admin123
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+&gt;&gt;&gt; Performing hash slots allocation on 9 nodes...
+Master[0] -&gt; Slots 0 - 5460
+Master[1] -&gt; Slots 5461 - 10922
+Master[2] -&gt; Slots 10923 - 16383
+Adding replica 192.168.1.136:7002 to 192.168.1.135:7001
+Adding replica 192.168.1.137:7002 to 192.168.1.135:7001
+Adding replica 192.168.1.135:7003 to 192.168.1.136:7001
+Adding replica 192.168.1.137:7003 to 192.168.1.136:7001
+Adding replica 192.168.1.136:7003 to 192.168.1.137:7001
+Adding replica 192.168.1.135:7002 to 192.168.1.137:7001
+M: 928637d72deb6a2e7935f8a7bb5ebd9455cf64a7 192.168.1.135:7001
+   slots:[0-5460] (5461 slots) master
+S: 4508bee0c33784e0d5be25b64e4c7e677cd9d396 192.168.1.135:7002
+   replicates f9133541e2175958117753ef4e206ea43a21f07c
+S: a0e13083fcc1d6e96398f3bb2ea5581b7a64e05e 192.168.1.135:7003
+   replicates 06ea827f8d328d9d776c9643109317b0100727a6
+M: 06ea827f8d328d9d776c9643109317b0100727a6 192.168.1.136:7001
+   slots:[5461-10922] (5462 slots) master
+S: 1d1b9817e39ee8987a3518f62a9b91c3ab666eff 192.168.1.136:7002
+   replicates 928637d72deb6a2e7935f8a7bb5ebd9455cf64a7
+S: a73c099dcc63f5d46a11d0f61c91270ef61290ff 192.168.1.136:7003
+   replicates f9133541e2175958117753ef4e206ea43a21f07c
+M: f9133541e2175958117753ef4e206ea43a21f07c 192.168.1.137:7001
+   slots:[10923-16383] (5461 slots) master
+S: 626dc659bb1059ec40039869241f7de88a49cd87 192.168.1.137:7002
+   replicates 928637d72deb6a2e7935f8a7bb5ebd9455cf64a7
+S: 622f73cd06c5658f8d02056925ac708750f12c1a 192.168.1.137:7003
+   replicates 06ea827f8d328d9d776c9643109317b0100727a6
+Can I set the above configuration? (type 'yes' to accept):
+</code></pre><p>输完 yes 后，会出现如下提示，[OK] All 16384 slots covered. 说明成功啦</p><pre><code>Can I set the above configuration? (type 'yes' to accept): yes
+&gt;&gt;&gt; Nodes configuration updated
+&gt;&gt;&gt; Assign a different config epoch to each node
+&gt;&gt;&gt; Sending CLUSTER MEET messages to join the cluster
+Waiting for the cluster to join
+..
+&gt;&gt;&gt; Performing Cluster Check (using node 192.168.1.135:7001)
+M: 928637d72deb6a2e7935f8a7bb5ebd9455cf64a7 192.168.1.135:7001
+   slots:[0-5460] (5461 slots) master
+   2 additional replica(s)
+M: 06ea827f8d328d9d776c9643109317b0100727a6 192.168.1.136:7001
+   slots:[5461-10922] (5462 slots) master
+   2 additional replica(s)
+S: 622f73cd06c5658f8d02056925ac708750f12c1a 192.168.1.137:7003
+   slots: (0 slots) slave
+   replicates 06ea827f8d328d9d776c9643109317b0100727a6
+S: 1d1b9817e39ee8987a3518f62a9b91c3ab666eff 192.168.1.136:7002
+   slots: (0 slots) slave
+   replicates 928637d72deb6a2e7935f8a7bb5ebd9455cf64a7
+S: a73c099dcc63f5d46a11d0f61c91270ef61290ff 192.168.1.136:7003
+   slots: (0 slots) slave
+   replicates f9133541e2175958117753ef4e206ea43a21f07c
+S: a0e13083fcc1d6e96398f3bb2ea5581b7a64e05e 192.168.1.135:7003
+   slots: (0 slots) slave
+   replicates 06ea827f8d328d9d776c9643109317b0100727a6
+M: f9133541e2175958117753ef4e206ea43a21f07c 192.168.1.137:7001
+   slots:[10923-16383] (5461 slots) master
+   2 additional replica(s)
+S: 626dc659bb1059ec40039869241f7de88a49cd87 192.168.1.137:7002
+   slots: (0 slots) slave
+   replicates 928637d72deb6a2e7935f8a7bb5ebd9455cf64a7
+S: 4508bee0c33784e0d5be25b64e4c7e677cd9d396 192.168.1.135:7002
+   slots: (0 slots) slave
+   replicates f9133541e2175958117753ef4e206ea43a21f07c
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check for open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All 16384 slots covered.
+</code></pre><h5 id="26-访问reids集群并验证"><a class="anchor" href="#26-访问reids集群并验证">#</a> 2.6 访问 reids 集群并验证</h5><pre><code>cd /data/redis/src
+./redis-cli -h 192.168.1.135 -p 7001 -c -a admin123
+#列出当前节点的信息：cluster info
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+192.168.1.135:7001&gt; cluster info
+cluster_state:ok
+cluster_slots_assigned:16384
+cluster_slots_ok:16384
+cluster_slots_pfail:0
+cluster_slots_fail:0
+cluster_known_nodes:9
+cluster_size:3
+cluster_current_epoch:9
+cluster_my_epoch:1
+cluster_stats_messages_ping_sent:344
+cluster_stats_messages_pong_sent:354
+cluster_stats_messages_sent:698
+cluster_stats_messages_ping_received:346
+cluster_stats_messages_pong_received:344
+cluster_stats_messages_meet_received:8
+cluster_stats_messages_received:698
+total_cluster_links_buffer_limit_exceeded:0
+列出集群的节点的信息：cluster nodes
+192.168.1.135:7001&gt; cluster nodes
+06ea827f8d328d9d776c9643109317b0100727a6 192.168.1.136:7001@17001 master - 0 1747034145581 4 connected 5461-10922
+622f73cd06c5658f8d02056925ac708750f12c1a 192.168.1.137:7003@17003 slave 06ea827f8d328d9d776c9643109317b0100727a6 0 1747034145581 4 connected
+1d1b9817e39ee8987a3518f62a9b91c3ab666eff 192.168.1.136:7002@17002 slave 928637d72deb6a2e7935f8a7bb5ebd9455cf64a7 0 1747034145581 1 connected
+a73c099dcc63f5d46a11d0f61c91270ef61290ff 192.168.1.136:7003@17003 slave f9133541e2175958117753ef4e206ea43a21f07c 0 1747034145581 7 connected
+a0e13083fcc1d6e96398f3bb2ea5581b7a64e05e 192.168.1.135:7003@17003 slave 06ea827f8d328d9d776c9643109317b0100727a6 0 1747034144077 4 connected
+f9133541e2175958117753ef4e206ea43a21f07c 192.168.1.137:7001@17001 master - 0 1747034145079 7 connected 10923-16383
+626dc659bb1059ec40039869241f7de88a49cd87 192.168.1.137:7002@17002 slave 928637d72deb6a2e7935f8a7bb5ebd9455cf64a7 0 1747034144000 1 connected
+928637d72deb6a2e7935f8a7bb5ebd9455cf64a7 192.168.1.135:7001@17001 myself,master - 0 1747034144000 1 connected 0-5460
+4508bee0c33784e0d5be25b64e4c7e677cd9d396 192.168.1.135:7002@17002 slave f9133541e2175958117753ef4e206ea43a21f07c 0 1747034144578 7 connected
+</code></pre><div class="tags"><a href="/tags/Redis/" rel="tag"><i class="ic i-tag"></i>Redis</a></div></div><footer><div class="meta"><span class="icon"><i class="ic i-eye"></i></span><span>此文章已被阅读次数:</span><span class="waline-pageview-count" id="twikoo_visitors" data-path="/posts/1490514396.html">正在加载...</span><span class="item"><span class="icon"><i class="ic i-calendar-check"></i></span><span class="text">更新于</span><time title="修改时间：2025-05-12 21:23:21" itemprop="dateModified" datetime="2025-05-12T21:23:21+08:00">2025-05-12</time></span></div><div class="reward"><button><i class="ic i-heartbeat"></i>赞赏</button><p>请我喝[茶]~(￣▽￣)~*</p><div id="qr"><div><img loading="lazy" data-src="/assets/wechatpay.png" alt="Xu Yong 微信支付"><p>微信支付</p></div><div><img loading="lazy" data-src="/assets/alipay.png" alt="Xu Yong 支付宝"><p>支付宝</p></div></div></div><div id="copyright"><ul><li class="author"><strong>本文作者：</strong>Xu Yong<i class="ic i-at"><em>@</em></i>LinuxSre云原生</li><li class="link"><strong>本文链接：</strong><a href="http://ixuyong.cn/posts/1490514396.html" title="Redis Cluster集群部署">http://ixuyong.cn/posts/1490514396.html</a></li><li class="license"><strong>版权声明：</strong>本站所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh"><i class="ic i-creative-commons"><em>(CC)</em></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li></ul></div></footer></article></div><div class="post-nav"><div class="item left"><a href="/posts/170573601.html" rel="prev" itemprop="url" data-background-image="https:&#x2F;&#x2F;wp-cdn.4ce.cn&#x2F;v2&#x2F;3wj3hd5.jpeg" title="K8s服务发布Ingress"><span class="type">上一篇</span><span class="category"><i class="ic i-flag"></i>Kubernetes</span><h3>K8s服务发布Ingress</h3></a></div><div class="item right"></div></div><div class="wrap" id="comments"></div></div><div id="sidebar"><div class="inner"><div class="panels"><div class="inner"><div class="contents panel pjax" data-title="文章目录"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#redis-cluster%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2"><span class="toc-number">1.</span> <span class="toc-text">Redis Cluster 集群部署</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.</span> <span class="toc-text">1、环境配置</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#11-%E5%85%B3%E9%97%AD%E9%98%B2%E7%81%AB%E5%A2%99-selinux"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 关闭防火墙、Selinux</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#11-%E9%85%8D%E7%BD%AEyum%E6%BA%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.1 配置 yum 源</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#13-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.3 配置文件描述符</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#14-%E7%B3%BB%E7%BB%9F%E5%86%85%E6%A0%B8%E5%8F%82%E6%95%B0%E8%B0%83%E4%BC%98"><span class="toc-number">1.1.4.</span> <span class="toc-text">1.4 系统内核参数调优</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#15-%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E9%99%90%E5%88%B6%E5%86%85%E5%AD%98"><span class="toc-number">1.1.5.</span> <span class="toc-text">1.5 修改默认限制内存</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#16-%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%E7%94%9F%E6%95%88%E7%8A%B6%E6%80%81"><span class="toc-number">1.1.6.</span> <span class="toc-text">1.6 执行命令生效状态</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#17-%E5%AE%89%E8%A3%85%E5%9F%BA%E7%A1%80%E8%BD%AF%E4%BB%B6%E5%8C%85"><span class="toc-number">1.1.7.</span> <span class="toc-text">1.7 安装基础软件包</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#18-%E5%8D%87%E7%BA%A7%E7%B3%BB%E7%BB%9F"><span class="toc-number">1.1.8.</span> <span class="toc-text">1.8 升级系统</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-redis-cluster%E9%83%A8%E7%BD%B2"><span class="toc-number">1.2.</span> <span class="toc-text">2、Redis cluster 部署</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#21-%E5%AE%89%E8%A3%85%E5%8C%85%E4%B8%8B%E8%BD%BD"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 安装包下载</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#22-%E5%AE%89%E8%A3%85-redis"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 安装 redis</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#23-%E7%94%9F%E6%88%90%E9%9B%86%E7%BE%A4%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 生成集群配置文件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#24-redis%E5%BC%80%E6%9C%BA%E8%87%AA%E5%90%AF"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.4 Redis 开机自启</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#25-%E5%90%AF%E5%8A%A8redis%E9%9B%86%E7%BE%A4%E6%9C%8D%E5%8A%A1"><span class="toc-number">1.2.5.</span> <span class="toc-text">2.5 启动 redis 集群服务</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#26-%E8%AE%BF%E9%97%AEreids%E9%9B%86%E7%BE%A4%E5%B9%B6%E9%AA%8C%E8%AF%81"><span class="toc-number">1.2.6.</span> <span class="toc-text">2.6 访问 reids 集群并验证</span></a></li></ol></li></ol></li></ol></div><div class="related panel pjax" data-title="系列文章"><ul><li><a href="/posts/1414180692.html" rel="bookmark" title="Redis集群（主从+哨兵）模式">Redis集群（主从+哨兵）模式</a></li><li class="active"><a href="/posts/1490514396.html" rel="bookmark" title="Redis Cluster集群部署">Redis Cluster集群部署</a></li></ul></div><div class="overview panel" data-title="站点概览"><div class="author" itemprop="author" itemscope itemtype="http://schema.org/Person"><img class="image" loading="lazy" decoding="async" itemprop="image" alt="Xu Yong" src="/assets/avatar.png"><p class="name" itemprop="name">Xu Yong</p><div class="description" itemprop="description">专注于 Linux 运维、云计算、云原⽣等技术</div></div><nav class="state"><div class="item posts"><a href="/archives/"><span class="count">24</span><span class="name">文章</span></a></div><div class="item categories"><a href="/categories/"><span class="count">7</span><span class="name">分类</span></a></div><div class="item tags"><a href="/tags/"><span class="count">7</span><span class="name">标签</span></a></div></nav><div class="social"><a target="_blank" rel="noopener" href="https://github.com/xyapples" class="item github" title="https:&#x2F;&#x2F;github.com&#x2F;xyapples"><i class="ic i-github"></i></a><a target="_blank" rel="noopener" href="https://gitee.com/chinagei" class="item gitee" title="https:&#x2F;&#x2F;gitee.com&#x2F;chinagei"><i class="ic i-gitee"></i></a><a href="mailto:373370405@qq.com" class="item email" title="mailto:373370405@qq.com"><i class="ic i-envelope"></i></a></div><div class="menu"><li class="item"><a href="/" rel="section"><i class="ic i-home"></i>首页</a></li><li class="item"><a href="/categories/" rel="section"><i class="ic i-th"></i>分类</a></li><li class="item"><a href="/archives/" rel="section"><i class="ic i-list-alt"></i>归档</a></li><li class="item"><a href="/tags/" rel="section"><i class="ic i-tags"></i>标签</a></li><li class="item"><a href="/about/" rel="section"><i class="ic i-about"></i>关于</a></li><li class="item"><a href="/friends/" rel="section"><i class="ic i-heart"></i>友链</a></li></div></div></div></div><ul id="quick"><li class="prev pjax"></li><li class="up"><i class="ic i-arrow-up"></i></li><li class="down"><i class="ic i-arrow-down"></i></li><li class="next pjax"><a href="/posts/170573601.html" rel="next" title="下一篇"><i class="ic i-chevron-right"></i></a></li><li class="percent"></li></ul></div></div><div class="dimmer"></div></div></main><footer id="footer"><div class="inner"><div class="widgets"><div class="rpost pjax"><h2>随机文章</h2><ul><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/108692210.html">K8s资源调度deployment、statefulset、daemonset</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/1771242682.html">K8s零宕机服务发布-探针</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/MySQL/" title="分类于MySQL">MySQL</a></div><span><a href="/posts/2628187572.html">MySQL运维DBA应用与实践</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/3254599477.html">K8s容忍和污点</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Docker/" title="分类于Docker">Docker</a></div><span><a href="/posts/3364424907.html">阿里云+Github构建镜像仓库</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Harbor/" title="分类于Harbor">Harbor</a></div><span><a href="/posts/3071070978.html">企业级私有仓库Harbor搭建</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/170573601.html">K8s服务发布Ingress</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/985149017.html">二进制高可用安装K8S集群</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Redis/" title="分类于Redis">Redis</a></div><span><a href="/posts/1414180692.html">Redis集群（主从+哨兵）模式</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/3142072607.html">K8s初始化容器、临时容器</a></span></li></ul></div><div class="rpost pjax"><h2>最新评论</h2><ul class="leancloud-recent-comment" id="new-comment"></ul></div></div><div class="status"><div class="copyright">&copy; 2022 -<span itemprop="copyrightYear">2025</span><span class="with-love"><i class="ic i-sakura rotate"></i></span><span class="author" itemprop="copyrightHolder">Xu Yong @ LinuxSre云原生</span></div><div class="count"><span class="post-meta-item-icon"><i class="ic i-chart-area"></i></span><span title="站点总字数">388k 字</span><span class="post-meta-divider"> | </span><span class="post-meta-item-icon"><i class="ic i-coffee"></i></span><span title="站点阅读时长">5:53</span></div><div class="powered-by">基于 <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & Theme.<a target="_blank" rel="noopener" href="https://github.com/theme-shoka-x/hexo-theme-shokaX/">ShokaX</a></div></div></div></footer></div><script data-config type="text/javascript">var LOCAL = {
+    ispost: true,
+        path: `posts/1490514396.html`,
+        favicon: {
+        show: `（●´3｀●）やれやれだぜ`,
+        hide: `(´Д｀)大変だ！`
+    },
+    search: {
+        placeholder: "文章搜索",
+        empty: "关于 「 ${query} 」，什么也没搜到",
+        stats: "${time} ms 内找到 ${hits} 条结果"
+    },
+    copy_tex: false,
+    katex: false,
+    mermaid: false,
+    audio: undefined,
+    fancybox: true,
+    nocopy: false,
+    outime: true,
+    template: `<div class="note warning"><p><span class="label warning">文章时效性提示</span><br>这是一篇发布于 {{publish}} 天前，最后一次更新在 {{updated}} 天前的文章，部分信息可能已经发生改变，请注意甄别。</p></div>`,
+    quiz: {
+        choice: `单选题`,
+        multiple: `多选题`,
+        true_false: `判断题`,
+        essay: `问答题`,
+        gap_fill: `填空题`,
+        mistake: `错题备注`
+    },
+    ignores: [
+        (uri) => uri.includes('#'),
+        (uri) => new RegExp(LOCAL.path + '$').test(uri),
+            []
+    ]
+};</script><script src="https://s4.zstatic.net/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous" fetchpriority="high"></script><script src="https://s4.zstatic.net/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha384-ZvpUoO&#x2F;+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn&#x2F;6Z&#x2F;hRTt8+pR6L4N2" crossorigin="anonymous" fetchpriority="high"></script><script src="/js/siteInit.js?v=0.4.17" type="module" fetchpriority="high" defer></script></body></html><!-- rebuild by hrmmi -->
