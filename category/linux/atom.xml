@@ -7,10 +7,10 @@
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
-    <category term="MySQL" />
-    <category term="Windows" />
-    <category term="Docker" />
     <category term="rsync" />
+    <category term="Windows" />
+    <category term="MySQL" />
+    <category term="Docker" />
     <entry>
         <id>http://ixuyong.cn/posts/1922841233.html</id>
         <title>Rsync服务实践</title>

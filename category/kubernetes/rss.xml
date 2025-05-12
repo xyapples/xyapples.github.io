@@ -10,10 +10,10 @@
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>Redis</category>
-        <category>MySQL</category>
-        <category>Windows</category>
-        <category>Docker</category>
         <category>rsync</category>
+        <category>Windows</category>
+        <category>MySQL</category>
+        <category>Docker</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/170573601.html</guid>
             <title>K8s服务发布Ingress</title>
@@ -1535,7 +1535,7 @@ proxy_max_temp_file_size 10240k;
 [root@k8s-master01 ~]# vim operator.yaml
   ROOK_CSI_CEPH_IMAGE: &amp;quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/cephcsi:v3.14.0&amp;quot;
   ROOK_CSI_REGISTRAR_IMAGE: &amp;quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-node-driver-registrar:v2.13.0&amp;quot;
-  ROOK_CSI_RESIZER_IMAGE: &amp;quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-resizer:csi-resizer:v1.13.1&amp;quot;
+  ROOK_CSI_RESIZER_IMAGE: &amp;quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-resizer:v1.13.1&amp;quot;
   ROOK_CSI_PROVISIONER_IMAGE: &amp;quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-provisioner:v5.1.0&amp;quot;
   ROOK_CSI_SNAPSHOTTER_IMAGE: &amp;quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-snapshotter:v8.2.0&amp;quot;
   ROOK_CSI_ATTACHER_IMAGE: &amp;quot;registry.cn-hangzhou.aliyuncs.com/kubernetes_public/csi-attacher:v4.8.0&amp;quot;
@@ -1558,7 +1558,7 @@ rook-discover-rj4t7                   1/1     Running   0          82m
 &lt;h5 id=&#34;41-配置更改&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#41-配置更改&#34;&gt;#&lt;/a&gt; 4.1 配置更改&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;[root@k8s-master01 examples]# vim cluster.yaml
 ...
-    image: registry.cn-hangzhou.aliyuncs.com/old_xu/cephv17.2.5:v17.2.5
+    image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/cephv19.2.2:v19.2.2
 ...
   skipUpgradeChecks: true     #改为true，跳过升级
 ....
@@ -1591,47 +1591,52 @@ rook-discover-rj4t7                   1/1     Running   0          82m
 &lt;p&gt;注意：新版必须采用裸盘，即未格式化的磁盘。其中 k8s-master03、 k8s-node01、  k8s-node02 有新加的一个磁盘，可以通过 lsblk -f 查看新添加的磁盘名称。建议最少三个节点，否则后面的试验可能会出现问题&lt;/p&gt;
 &lt;h5 id=&#34;42-创建-ceph-集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#42-创建-ceph-集群&#34;&gt;#&lt;/a&gt; 4.2 创建 Ceph 集群&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;[root@k8s-master01 examples]# kubectl create -f cluster.yaml
-[root@k8s-master01 examples]#  kubectl get pods -n rook-ceph  
+[root@k8s-master01 examples]# kubectl get pods -n rook-ceph
 NAME                                                     READY   STATUS      RESTARTS        AGE
-csi-cephfsplugin-87dqj                                   2/2     Running     0               55m
-csi-cephfsplugin-9mtd9                                   2/2     Running     0               55m
-csi-cephfsplugin-l7crk                                   2/2     Running     0               55m
-csi-cephfsplugin-ls85p                                   2/2     Running     0               55m
-csi-cephfsplugin-provisioner-c95769646-l6vxb             5/5     Running     0               55m
-csi-cephfsplugin-provisioner-c95769646-x697s             5/5     Running     0               55m
-csi-cephfsplugin-r5687                                   2/2     Running     0               55m
-csi-rbdplugin-4s562                                      2/2     Running     0               55m
-csi-rbdplugin-8mhs7                                      2/2     Running     0               55m
-csi-rbdplugin-9whfd                                      2/2     Running     0               55m
-csi-rbdplugin-d6j92                                      2/2     Running     0               55m
-csi-rbdplugin-mcm8t                                      2/2     Running     0               55m
-csi-rbdplugin-provisioner-68d9c8f455-hdksw               5/5     Running     0               55m
-csi-rbdplugin-provisioner-68d9c8f455-lthm9               5/5     Running     0               55m
-rook-ceph-crashcollector-k8s-master01-78bcb685d8-b5b7j   1/1     Running     0               34m
-rook-ceph-crashcollector-k8s-master03-6db7c77d4b-57g4k   1/1     Running     0               30m
-rook-ceph-crashcollector-k8s-node01-6758596958-g86zk     1/1     Running     0               33m
-rook-ceph-crashcollector-k8s-node02-764d875747-2b8jm     1/1     Running     0               33m
-rook-ceph-mgr-a-7764dfcdd-jx7fr                          2/2     Running     0               34m
-rook-ceph-mgr-b-768bdbd495-hbvm8                         1/2     Running     0               34m
-rook-ceph-mon-a-f89c955b5-zjccx                          2/2     Running     4 (92s ago)     50m
-rook-ceph-mon-b-7d54c89dff-xp9dx                         2/2     Running     3 (8m21s ago)   44m
-rook-ceph-mon-c-85fcbdc7f8-kvbrj                         2/2     Running     0               39m
-rook-ceph-operator-84ff77778b-7ww2w                      1/1     Running     3 (73m ago)     22h
-rook-ceph-osd-0-ccfb66b79-5dx6t                          2/2     Running     0               33m
-rook-ceph-osd-1-67fc6d854b-t92m8                         2/2     Running     0               33m
-rook-ceph-osd-2-6649d4d67c-vmmbk                         2/2     Running     0               30m
-rook-ceph-osd-prepare-k8s-master03-w7hh7                 0/1     Completed   0               33m
-rook-ceph-osd-prepare-k8s-node01-9z5ls                   0/1     Completed   0               33m
-rook-ceph-osd-prepare-k8s-node02-v6jnw                   0/1     Completed   0               33m
-rook-discover-6j68f                                      1/1     Running     1 (79m ago)     22h
-rook-discover-9w4kt                                      1/1     Running     1 (79m ago)     22h
-rook-discover-h2zfm                                      1/1     Running     2 (73m ago)     22h
-rook-discover-hsz8b                                      1/1     Running     2 (73m ago)     21h
-rook-discover-rj4t7                                      1/1     Running     1 (79m ago)     22h
+csi-cephfsplugin-5nmnl                                   3/3     Running     1 (60m ago)     62m
+csi-cephfsplugin-6b6ct                                   3/3     Running     1 (60m ago)     62m
+csi-cephfsplugin-8xlnl                                   3/3     Running     1 (60m ago)     62m
+csi-cephfsplugin-fh9w5                                   3/3     Running     1 (60m ago)     62m
+csi-cephfsplugin-mslst                                   3/3     Running     1 (60m ago)     62m
+csi-cephfsplugin-provisioner-59bd447c6d-5zwj2            6/6     Running     0               61s
+csi-cephfsplugin-provisioner-59bd447c6d-7t2kg            6/6     Running     2 (20s ago)     61s
+csi-rbdplugin-5gvmp                                      3/3     Running     1 (60m ago)     62m
+csi-rbdplugin-dzcs4                                      3/3     Running     1 (60m ago)     62m
+csi-rbdplugin-n82b5                                      3/3     Running     1 (60m ago)     62m
+csi-rbdplugin-provisioner-6856fb8b86-86hw8               6/6     Running     0               19s
+csi-rbdplugin-provisioner-6856fb8b86-lj9s4               6/6     Running     0               19s
+csi-rbdplugin-vh8j2                                      3/3     Running     1 (60m ago)     62m
+csi-rbdplugin-xfgwr                                      3/3     Running     1 (60m ago)     62m
+rook-ceph-crashcollector-k8s-master01-bbc78d496-bzjk8    1/1     Running     0               8m26s
+rook-ceph-crashcollector-k8s-master03-765ff964bb-95wmt   1/1     Running     0               28m
+rook-ceph-crashcollector-k8s-node01-7cf4c4b6b6-r4n84     1/1     Running     0               20m
+rook-ceph-crashcollector-k8s-node02-f887f8cf9-jz2l8      1/1     Running     0               28m
+rook-ceph-detect-version-nsrwj                           0/1     Init:0/1    0               3s
+rook-ceph-exporter-k8s-master01-5cd4577b79-ckd4m         1/1     Running     0               8m26s
+rook-ceph-exporter-k8s-master03-75f4cf6f7-hc9zb          1/1     Running     0               28m
+rook-ceph-exporter-k8s-node01-96fc7cf49-d2r24            1/1     Running     0               20m
+rook-ceph-exporter-k8s-node02-777b9f555b-7j6cz           1/1     Running     0               27m
+rook-ceph-mgr-a-6f46b4b945-q6cjb                         3/3     Running     3 (14m ago)     35m
+rook-ceph-mgr-b-5d4cc5465b-8dfh6                         3/3     Running     0               35m
+rook-ceph-mon-a-7c7b7555c7-nlhwg                         2/2     Running     2 (6m14s ago)   51m
+rook-ceph-mon-c-559bcf95fd-cl62w                         2/2     Running     0               8m27s
+rook-ceph-mon-d-7dbc6b8f5c-8264t                         2/2     Running     0               28m
+rook-ceph-operator-645478ff5b-jdcrp                      1/1     Running     0               102m
+rook-ceph-osd-0-6d9cf78f76-4zhx8                         2/2     Running     0               12m
+rook-ceph-osd-1-88c78bbcb-cn48c                          2/2     Running     0               5m15s
+rook-ceph-osd-2-b464c9fc6-458hv                          2/2     Running     0               4m29s
+rook-ceph-osd-prepare-k8s-master03-pwnrc                 0/1     Completed   0               86s
+rook-ceph-osd-prepare-k8s-node01-xxp2j                   0/1     Completed   0               83s
+rook-ceph-osd-prepare-k8s-node02-8nz7x                   0/1     Completed   0               78s
+rook-discover-jzmkr                                      1/1     Running     0               91m
+rook-discover-k7pxt                                      1/1     Running     0               91m
+rook-discover-vqjh5                                      1/1     Running     0               91m
+rook-discover-wk8jq                                      1/1     Running     0               91m
+rook-discover-x8rsn                                      1/1     Running     0               91m
 
 [root@k8s-master01 examples]# kubectl get cephcluster -n rook-ceph
-NAME        DATADIRHOSTPATH   MONCOUNT   AGE    PHASE   MESSAGE                        HEALTH        EXTERNAL
-rook-ceph   /var/lib/rook     3          4h2m   Ready   Cluster created successfully   HEALTH_WARN 
+NAME        DATADIRHOSTPATH   MONCOUNT   AGE   PHASE   MESSAGE                        HEALTH        EXTERNAL   FSID
+rook-ceph   /var/lib/rook     3          63m   Ready   Cluster created successfully   HEALTH_WARN              ca429602-66f4-4a1e-9d5c-a5773a0f594f
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h5 id=&#34;43-安装-ceph-snapshot-控制器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#43-安装-ceph-snapshot-控制器&#34;&gt;#&lt;/a&gt; 4.3 安装 ceph snapshot 控制器&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cd /root/k8s-ha-install/
@@ -1639,15 +1644,15 @@ rook-ceph   /var/lib/rook     3          4h2m   Ready   Cluster created successf
 [root@k8s-master01 k8s-ha-install]# kubectl create -f snapshotter/ -n kube-system
 [root@k8s-master01 k8s-ha-install]# kubectl get po -n kube-system -l app=snapshot-controller
 NAME                    READY   STATUS    RESTARTS   AGE
-snapshot-controller-0   1/1     Running   0          2m2s
+snapshot-controller-0   1/1     Running   0          67s
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h4 id=&#34;5-安装-ceph-客户端工具&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#5-安装-ceph-客户端工具&#34;&gt;#&lt;/a&gt; 5. 安装 ceph 客户端工具&lt;/h4&gt;
 &lt;pre&gt;&lt;code&gt;[root@k8s-master01 k8s-ha-install]# cd /root/rook/deploy/examples/
 [root@k8s-master01 examples]# kubectl create -f toolbox.yaml -n rook-ceph
 [root@k8s-master01 examples]# kubectl get po -n rook-ceph -l app=rook-ceph-tools
 NAME                               READY   STATUS    RESTARTS   AGE
-rook-ceph-tools-7b75b967db-clqzg   1/1     Running   0          58s
-[root@k8s-master01 examples]# kubectl exec -it rook-ceph-tools-7b75b967db-clqzg -n rook-ceph -- bash
+rook-ceph-tools-7b75b967db-sqddk   1/1     Running   0          8s
+[root@k8s-master01 examples]# kubectl exec -it rook-ceph-tools-7b75b967db-sqddk -n rook-ceph -- bash
 bash-5.1$ ceph status
   cluster:
     id:     87b85368-9487-4967-a4e4-5970d2e0ec94

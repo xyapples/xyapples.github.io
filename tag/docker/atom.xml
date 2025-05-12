@@ -7,10 +7,10 @@
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
-    <category term="MySQL" />
-    <category term="Windows" />
-    <category term="Docker" />
     <category term="rsync" />
+    <category term="Windows" />
+    <category term="MySQL" />
+    <category term="Docker" />
     <entry>
         <id>http://ixuyong.cn/posts/3364424907.html</id>
         <title>阿里云+Github构建镜像仓库</title>
