@@ -6,9 +6,9 @@
     <updated>2025-05-14T12:29:07.000Z</updated>
     <category term="Docker" />
     <category term="Harbor" />
-    <category term="rsync" />
     <category term="Kubernetes" />
     <category term="Redis" />
+    <category term="rsync" />
     <category term="MySQL" />
     <category term="Windows" />
     <entry>
@@ -16,54 +16,54 @@
         <title>Containerd常用命令</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/1888662579.html"/>
         <content type="html">&lt;h3 id=&#34;containerd常用命令&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#containerd常用命令&#34;&gt;#&lt;/a&gt; Containerd 常用命令&lt;/h3&gt;
-&lt;h4 id=&#34;1-安装containerd&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-安装containerd&#34;&gt;#&lt;/a&gt; 1. 安装 Containerd&lt;/h4&gt;
-&lt;p&gt;&lt;strong&gt;1.1 配置安装源&lt;/strong&gt;&lt;/p&gt;
+&lt;h4 id=&#34;安装containerd&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#安装containerd&#34;&gt;#&lt;/a&gt; 安装 Containerd&lt;/h4&gt;
+&lt;p&gt;&lt;strong&gt;配置安装源&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;yum install wget jq psmisc vim net-tools telnet yum-utils device-mapper-persistent-data lvm2 git -y
 yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;strong&gt;1.2 安装 docker-ce、containerd&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;安装 docker-ce、containerd&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;yum install docker-ce containerd -y
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;em&gt;可以无需启动 Docker，只需要配置和启动 Containerd 即可。&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;1.3 配置 Containerd 所需的模块&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;配置 Containerd 所需的模块&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;# cat &amp;lt;&amp;lt;EOF | sudo tee /etc/modules-load.d/containerd.conf
 overlay
 br_netfilter
 EOF
 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;strong&gt;1.4 加载模块&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;加载模块&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;# cat &amp;lt;&amp;lt;EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
 net.bridge.bridge-nf-call-iptables  = 1
 net.ipv4.ip_forward                 = 1
 net.bridge.bridge-nf-call-ip6tables = 1
 EOF
 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;strong&gt;1.5 配置 Containerd 所需的内核&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;配置 Containerd 所需的内核&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;# cat &amp;lt;&amp;lt;EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
 net.bridge.bridge-nf-call-iptables  = 1
 net.ipv4.ip_forward                 = 1
 net.bridge.bridge-nf-call-ip6tables = 1
 EOF
 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;strong&gt;1.6 加载内核&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;加载内核&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;sysctl --system
 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;strong&gt;1.7 生成 Containerd 的配置文件&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;生成 Containerd 的配置文件&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;mkdir -p /etc/containerd
 containerd config default | tee /etc/containerd/config.toml
 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;strong&gt;1.8 更改 Containerd 的 Cgroup 和 Pause 镜像&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;更改 Containerd 的 Cgroup 和 Pause 镜像&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;sed -i &#39;s#SystemdCgroup = false#SystemdCgroup = true#g&#39; /etc/containerd/config.toml
 sed -i &#39;s#k8s.gcr.io/pause#registry.cn-hangzhou.aliyuncs.com/google_containers/pause#g&#39;  /etc/containerd/config.toml
 sed -i &#39;s#registry.gcr.io/pause#registry.cn-hangzhou.aliyuncs.com/google_containers/pause#g&#39;  /etc/containerd/config.toml
 sed -i &#39;s#registry.k8s.io/pause#registry.cn-hangzhou.aliyuncs.com/google_containers/pause#g&#39;  /etc/containerd/config.toml
 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;strong&gt;1.9 启动 Containerd，并配置开机自启动&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;启动 Containerd，并配置开机自启动&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;systemctl daemon-reload
 systemctl enable --now containerd
 systemctl status  containerd 
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;2-containerd-配置镜像加速&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-containerd-配置镜像加速&#34;&gt;#&lt;/a&gt; 2. Containerd 配置镜像加速&lt;/h4&gt;
+&lt;h4 id=&#34;containerd-配置镜像加速&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#containerd-配置镜像加速&#34;&gt;#&lt;/a&gt; Containerd 配置镜像加速&lt;/h4&gt;
 &lt;p&gt;打开 /etc/containerd/config.toml 文件，找到 [plugins.&amp;quot;io.containerd.grpc.v1.cri&amp;quot;.registry.mirrors] 部分，添加所需的镜像源配置&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;# vim /etc/containerd/config.toml
 #添加以下配置镜像加速服务
@@ -86,8 +86,8 @@ systemctl status  containerd
 &lt;pre&gt;&lt;code&gt;systemctl daemon-reload
 systemctl restart containerd
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;3-containerd常用操作命令实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-containerd常用操作命令实践&#34;&gt;#&lt;/a&gt; 3. Containerd 常用操作命令实践&lt;/h4&gt;
-&lt;h5 id=&#34;31-查看containerd命名空间&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#31-查看containerd命名空间&#34;&gt;#&lt;/a&gt; &lt;strong&gt;3.1 查看 Containerd 命名空间&lt;/strong&gt;&lt;/h5&gt;
+&lt;h4 id=&#34;containerd常用操作命令实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#containerd常用操作命令实践&#34;&gt;#&lt;/a&gt; Containerd 常用操作命令实践&lt;/h4&gt;
+&lt;h5 id=&#34;查看containerd命名空间&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#查看containerd命名空间&#34;&gt;#&lt;/a&gt; &lt;strong&gt;查看 Containerd 命名空间&lt;/strong&gt;&lt;/h5&gt;
 &lt;p&gt;namespace 来于指定类似于工作空间的隔离区域&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;[root@k8s-node02 ~]# ctr namespace ls 
 NAME    LABELS 
@@ -95,54 +95,54 @@ default
 k8s.io         
 moby 
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;32-查看containerd镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#32-查看containerd镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;3.2 查看 Containerd 镜像&lt;/strong&gt;&lt;/h5&gt;
+&lt;h5 id=&#34;查看containerd镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#查看containerd镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;查看 Containerd 镜像&lt;/strong&gt;&lt;/h5&gt;
 &lt;p&gt;因为没有指定 namespace，所以查看的是默认命名空间下的镜像&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;ctr images ls
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;查看指定命名空间 k8s.io 下的镜像&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io images ls
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;33-拉取containerd镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#33-拉取containerd镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;3.3 拉取 Containerd 镜像&lt;/strong&gt;&lt;/h5&gt;
+&lt;h5 id=&#34;拉取containerd镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#拉取containerd镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;拉取 Containerd 镜像&lt;/strong&gt;&lt;/h5&gt;
 &lt;p&gt;拉取指定命名空间 k8s.io 镜像 pause-amd64:3.2&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt; ctr -n k8s.io images pull registry.aliyuncs.com/google_containers/pause-amd64:3.2
  ctr -n k8s.io images pull docker.io/library/nginx:1.21
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;34-删除containerd镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#34-删除containerd镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;3.4 删除 containerd 镜像&lt;/strong&gt;&lt;/h5&gt;
+&lt;h5 id=&#34;删除containerd镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#删除containerd镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;删除 containerd 镜像&lt;/strong&gt;&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io images rm registry.aliyuncs.com/google_containers/pause-amd64:3.2
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;35-导出containerd镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#35-导出containerd镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;3.5 导出 Containerd 镜像&lt;/strong&gt;&lt;/h5&gt;
+&lt;h5 id=&#34;导出containerd镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#导出containerd镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;导出 Containerd 镜像&lt;/strong&gt;&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io images export pause.tar.gz registry.aliyuncs.com/google_containers/pause-amd64:3.2
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;36-导入containerd镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#36-导入containerd镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;3.6 导入 Containerd 镜像&lt;/strong&gt;&lt;/h5&gt;
+&lt;h5 id=&#34;导入containerd镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#导入containerd镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;导入 Containerd 镜像&lt;/strong&gt;&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io image import pause.tar.gz
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;em&gt;docker save -o 命令导出来的镜像可以用 ctr images import 导出，同理 ctr images export 导出来的镜像也可以有 docker load 还原。&lt;/em&gt;&lt;/p&gt;
-&lt;h5 id=&#34;37-标记containerd镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#37-标记containerd镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;3.7 标记 Containerd 镜像&lt;/strong&gt;&lt;/h5&gt;
+&lt;h5 id=&#34;标记containerd镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#标记containerd镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;标记 Containerd 镜像&lt;/strong&gt;&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io images tag registry.aliyuncs.com/google_containers/pause-amd64:3.2 pause:3.2
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;38-运行containerd容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#38-运行containerd容器&#34;&gt;#&lt;/a&gt; &lt;strong&gt;3.8 运行 Containerd 容器&lt;/strong&gt;&lt;/h5&gt;
+&lt;h5 id=&#34;运行containerd容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#运行containerd容器&#34;&gt;#&lt;/a&gt; ** 运行 Containerd 容器 **&lt;/h5&gt;
 &lt;p&gt;在后台运行一个 centos 镜像的容器，名称叫做 centos_k8s&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt; ctr -n k8s.io  run -d  docker.io/library/nginx:1.21 web
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;39-查看运行容器的task&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#39-查看运行容器的task&#34;&gt;#&lt;/a&gt; &lt;strong&gt;3.9 查看运行容器的 task&lt;/strong&gt;&lt;/h5&gt;
+&lt;h5 id=&#34;查看运行容器的task&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#查看运行容器的task&#34;&gt;#&lt;/a&gt; &lt;strong&gt;查看运行容器的 task&lt;/strong&gt;&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io task ls
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;310-启动指定容器task&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#310-启动指定容器task&#34;&gt;#&lt;/a&gt; 3.10 启动指定容器 task&lt;/h5&gt;
+&lt;h5 id=&#34;启动指定容器task&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#启动指定容器task&#34;&gt;#&lt;/a&gt; 启动指定容器 task&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io task start -d centos_k8s
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;311-进入指定容器task&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#311-进入指定容器task&#34;&gt;#&lt;/a&gt; 3.11 进入指定容器 task&lt;/h5&gt;
+&lt;h5 id=&#34;进入指定容器task&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#进入指定容器task&#34;&gt;#&lt;/a&gt; 进入指定容器 task&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io task exec --exec-id 3118 -t web /bin/bash
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;312-删除指定容器task&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#312-删除指定容器task&#34;&gt;#&lt;/a&gt; 3.12 删除指定容器 task&lt;/h5&gt;
+&lt;h5 id=&#34;删除指定容器task&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#删除指定容器task&#34;&gt;#&lt;/a&gt; 删除指定容器 task&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io task rm -f web
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;313-停止指定容器task&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#313-停止指定容器task&#34;&gt;#&lt;/a&gt; 3.13 停止指定容器 task&lt;/h5&gt;
+&lt;h5 id=&#34;停止指定容器task&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#停止指定容器task&#34;&gt;#&lt;/a&gt; 停止指定容器 task&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io task kill --signal 9 centos_k8s
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h5 id=&#34;314-查看容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#314-查看容器&#34;&gt;#&lt;/a&gt; 3.14 查看容器&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io c list
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;315-删除容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#315-删除容器&#34;&gt;#&lt;/a&gt; 3.15 删除容器&lt;/h5&gt;
+&lt;h5 id=&#34;删除容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#删除容器&#34;&gt;#&lt;/a&gt; 删除容器&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io c rm centos
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;删除容器以前需要将 task 删除，不然会报以下错误&lt;/p&gt;
@@ -150,7 +150,7 @@ moby
 ERRO[0000] failed to delete container &amp;quot;web&amp;quot;              error=&amp;quot;cannot delete a non stopped container: &amp;#123;running 0 0001-01-01 00:00:00 +0000 UTC&amp;#125;&amp;quot;
 ctr: cannot delete a non stopped container: &amp;#123;running 0 0001-01-01 00:00:00 +0000 UTC&amp;#125;
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;4-docker与containerd常用命令对比&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-docker与containerd常用命令对比&#34;&gt;#&lt;/a&gt; 4. Docker 与 Containerd 常用命令对比&lt;/h4&gt;
+&lt;h4 id=&#34;docker与containerd常用命令对比&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#docker与containerd常用命令对比&#34;&gt;#&lt;/a&gt; Docker 与 Containerd 常用命令对比&lt;/h4&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
