@@ -9,10 +9,10 @@
         <lastBuildDate>Thu, 10 Apr 2025 21:32:09 +0800</lastBuildDate>
         <category>Docker</category>
         <category>Harbor</category>
+        <category>rsync</category>
         <category>Kubernetes</category>
         <category>Redis</category>
         <category>MySQL</category>
-        <category>rsync</category>
         <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/3071070979.html</guid>

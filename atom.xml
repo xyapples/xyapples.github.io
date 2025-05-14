@@ -6,10 +6,10 @@
     <updated>2025-05-14T12:29:07.000Z</updated>
     <category term="Docker" />
     <category term="Harbor" />
+    <category term="rsync" />
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="MySQL" />
-    <category term="rsync" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/1888662579.html</id>
