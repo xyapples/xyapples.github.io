@@ -8,9 +8,9 @@
         <pubDate>Wed, 14 May 2025 20:29:07 +0800</pubDate>
         <lastBuildDate>Wed, 14 May 2025 20:29:07 +0800</lastBuildDate>
         <category>Docker</category>
-        <category>Harbor</category>
         <category>Kubernetes</category>
         <category>Redis</category>
+        <category>Harbor</category>
         <category>rsync</category>
         <category>MySQL</category>
         <category>Windows</category>
@@ -144,7 +144,7 @@ moby
 &lt;h5 id=&#34;停止指定容器task&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#停止指定容器task&#34;&gt;#&lt;/a&gt; 停止指定容器 task&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io task kill --signal 9 centos_k8s
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;314-查看容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#314-查看容器&#34;&gt;#&lt;/a&gt; 3.14 查看容器&lt;/h5&gt;
+&lt;h5 id=&#34;查看容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#查看容器&#34;&gt;#&lt;/a&gt; 查看容器&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;ctr -n k8s.io c list
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h5 id=&#34;删除容器&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#删除容器&#34;&gt;#&lt;/a&gt; 删除容器&lt;/h5&gt;
