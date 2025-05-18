@@ -16,7 +16,7 @@
         <title>消费租赁系统微服务应用交付实践</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/626047790.html"/>
         <content type="html">&lt;h3 id=&#34;消费租赁系统微服务应用交付实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#消费租赁系统微服务应用交付实践&#34;&gt;#&lt;/a&gt; 消费租赁系统微服务应用交付实践&lt;/h3&gt;
-&lt;h4 id=&#34;一-部署中间件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-部署中间件&#34;&gt;#&lt;/a&gt; 一。部署中间件&lt;/h4&gt;
+&lt;h4 id=&#34;一-部署中间件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-部署中间件&#34;&gt;#&lt;/a&gt; 一、部署中间件&lt;/h4&gt;
 &lt;h5 id=&#34;11-部署mysql&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-部署mysql&#34;&gt;#&lt;/a&gt; 1.1 部署 MySQL&lt;/h5&gt;
 &lt;h6 id=&#34;111-mysql-configmap&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#111-mysql-configmap&#34;&gt;#&lt;/a&gt; 1.1.1 MySQL-ConfigMap&lt;/h6&gt;
 &lt;pre&gt;&lt;code&gt;[root@k8s-master01 01-nf-flms-mysql]# cat 01-mysql-cm.yaml 
@@ -1391,7 +1391,7 @@ spec:
         persistentVolumeClaim:
           claimName: rabbitmq-single-data
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;二-部署微服务应用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#二-部署微服务应用&#34;&gt;#&lt;/a&gt; 二。部署微服务应用&lt;/h4&gt;
+&lt;h4 id=&#34;二-部署微服务应用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#二-部署微服务应用&#34;&gt;#&lt;/a&gt; 二、部署微服务应用&lt;/h4&gt;
 </content>
         <category term="Kubernetes" />
         <updated>2025-05-18T13:42:46.000Z</updated>
