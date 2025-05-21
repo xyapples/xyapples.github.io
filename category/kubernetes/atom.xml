@@ -4,13 +4,13 @@
     <title>LinuxSre云原生 • Posts by &#34;kubernetes&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-05-18T13:42:46.000Z</updated>
-    <category term="Docker" />
-    <category term="Harbor" />
     <category term="Kubernetes" />
+    <category term="Harbor" />
     <category term="Redis" />
-    <category term="rsync" />
-    <category term="MySQL" />
     <category term="Windows" />
+    <category term="MySQL" />
+    <category term="rsync" />
+    <category term="Docker" />
     <entry>
         <id>http://ixuyong.cn/posts/626047790.html</id>
         <title>消费租赁系统微服务应用交付实践</title>
@@ -519,7 +519,7 @@ spec:
       initContainers:
       - name: peer-finder-plugin-install
         image: nacos/nacos-peer-finder-plugin:1.1
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent 
         volumeMounts:
           - name: data
             mountPath: /home/nacos/plugins/peer-finder
@@ -544,29 +544,13 @@ spec:
         - name: old-raft-rpc
           containerPort: 7848
         env:
-        - name: NACOS_AUTH_ENABLE
-          value: &amp;quot;false&amp;quot;
-        - name: MODE  
-          value: &amp;quot;cluster&amp;quot;
-        - name: NACOS_SERVERS
-          value: &amp;quot;nacos-0.nacos-svc.prod.svc.cluster.local:8848  nacos-1.nacos-svc.prod.svc.cluster.local:8848 nacos-2.nacos-svc.prod.svc.cluster.local:8848&amp;quot;
-        - name: NACOS_VERSION
-          value: 2.4.3
-        - name: SPRING_DATASOURCE_PLATFORM
-          value: &amp;quot;mysql&amp;quot;
         - name: NACOS_REPLICAS
           value: &amp;quot;3&amp;quot;
-        - name: SERVICE_NAME 
+        - name: SERVICE_NAME
           value: &amp;quot;nacos-svc&amp;quot;
-        - name: DOMAIN_NAME 
+        - name: DOMAIN_NAME
           value: &amp;quot;cluster.local&amp;quot;
-        - name: NACOS_SERVER_PORT   
-          value: &amp;quot;8848&amp;quot;
-        - name: NACOS_APPLICATION_PORT
-          value: &amp;quot;8848&amp;quot;
-        - name: PREFER_HOST_MODE
-          value: &amp;quot;hostname&amp;quot;
-        - name: POD_NAMESPACE      
+        - name: POD_NAMESPACE
           valueFrom:
             fieldRef:
               apiVersion: v1
@@ -596,6 +580,24 @@ spec:
             configMapKeyRef:
               name: nacos-cm
               key: mysql.password
+        - name: SPRING_DATASOURCE_PLATFORM
+          value: &amp;quot;mysql&amp;quot;
+        - name: NACOS_SERVER_PORT
+          value: &amp;quot;8848&amp;quot;
+        - name: NACOS_APPLICATION_PORT
+          value: &amp;quot;8848&amp;quot;
+        - name: PREFER_HOST_MODE
+          value: &amp;quot;hostname&amp;quot;
+        - name: NACOS_AUTH_ENABLE
+          value: &amp;quot;true&amp;quot;
+        - name: NACOS_AUTH_IDENTITY_KEY
+          value: &amp;quot;nacosAuthKey&amp;quot;
+        - name: NACOS_AUTH_IDENTITY_VALUE
+          value: &amp;quot;nacosSecurtyValue&amp;quot;
+        - name: NACOS_AUTH_TOKEN
+          value: &amp;quot;SecretKey012345678901234567890123456789012345678901234567890123456789&amp;quot;
+        - name: NACOS_AUTH_TOKEN_EXPIRE_SECONDS
+          value: &amp;quot;18000&amp;quot;
         volumeMounts:
         - name: data
           mountPath: /home/nacos/plugins/peer-finder
@@ -655,6 +657,23 @@ spec:
 &lt;h6 id=&#34;146-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#146-更新资源清单&#34;&gt;#&lt;/a&gt; &lt;strong&gt;1.4.6 更新资源清单&lt;/strong&gt;&lt;/h6&gt;
 &lt;pre&gt;&lt;code&gt;[root@k8s-master01 03-nacos]# sed -i &amp;quot;s#dev#prod#g&amp;quot; *.yaml
 [root@k8s-master01 03-nacos]# kubectl apply -f .
+
+#检查cluster是否一致
+[root@k8s-master01 03-nacos]# for i in &amp;#123;0..2&amp;#125;; do echo nacos-$i; kubectl exec nacos-$i -c nacos -n prod -- cat conf/cluster.conf; donenacos-0
+#2025-05-21T10:43:12.668
+nacos-0.nacos-svc.prod.svc.cluster.local:8848
+nacos-1.nacos-svc.prod.svc.cluster.local:8848
+nacos-2.nacos-svc.prod.svc.cluster.local:8848
+nacos-1
+#2025-05-21T10:43:14.879
+nacos-0.nacos-svc.prod.svc.cluster.local:8848
+nacos-1.nacos-svc.prod.svc.cluster.local:8848
+nacos-2.nacos-svc.prod.svc.cluster.local:8848
+nacos-2
+#2025-05-21T10:43:17.299
+nacos-0.nacos-svc.prod.svc.cluster.local:8848
+nacos-1.nacos-svc.prod.svc.cluster.local:8848
+nacos-2.nacos-svc.prod.svc.cluster.local:8848
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h6 id=&#34;147-web访问nacos&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#147-web访问nacos&#34;&gt;#&lt;/a&gt; &lt;strong&gt;1.4.7 Web 访问 nacos&lt;/strong&gt;&lt;/h6&gt;
 &lt;pre&gt;&lt;code&gt;Url：http://nacos.hmallleasing.com/nacos 
