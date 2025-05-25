@@ -13,8 +13,8 @@
         <category>Kubernetes</category>
         <category>Redis</category>
         <category>rsync</category>
-        <category>MySQL</category>
         <category>Windows</category>
+        <category>MySQL</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2628187572.html</guid>
             <title>MySQL运维DBA应用与实践</title>

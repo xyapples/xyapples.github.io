@@ -10,11 +10,11 @@
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="rsync" />
-    <category term="MySQL" />
     <category term="Windows" />
+    <category term="MySQL" />
     <entry>
         <id>http://ixuyong.cn/posts/3071070978.html</id>
-        <title>企业级私有仓库Harbor搭建</title>
+        <title>消费租赁项目Kubernetes基于ELK日志分析与实践</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/3071070978.html"/>
         <content type="html">&lt;h3 id=&#34;消费租赁项目kubernetes基于elk日志分析与实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#消费租赁项目kubernetes基于elk日志分析与实践&#34;&gt;#&lt;/a&gt; 消费租赁项目 Kubernetes 基于 ELK 日志分析与实践&lt;/h3&gt;
 &lt;h6 id=&#34;snipaste_2025-05-25_13-43-46jpg&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#snipaste_2025-05-25_13-43-46jpg&#34;&gt;#&lt;/a&gt; &lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Og7liF6.jpeg&#34; alt=&#34;Snipaste_2025-05-25_13-43-46.jpg&#34; /&gt;&lt;/h6&gt;

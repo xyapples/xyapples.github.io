@@ -13,8 +13,8 @@
         <category>Kubernetes</category>
         <category>Redis</category>
         <category>rsync</category>
-        <category>MySQL</category>
         <category>Windows</category>
+        <category>MySQL</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1888662579.html</guid>
             <title>Containerd常用命令</title>

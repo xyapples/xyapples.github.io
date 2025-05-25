@@ -13,11 +13,11 @@
         <category>Kubernetes</category>
         <category>Redis</category>
         <category>rsync</category>
-        <category>MySQL</category>
         <category>Windows</category>
+        <category>MySQL</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/3071070978.html</guid>
-            <title>企业级私有仓库Harbor搭建</title>
+            <title>消费租赁项目Kubernetes基于ELK日志分析与实践</title>
             <link>http://ixuyong.cn/posts/3071070978.html</link>
             <category>ELKStack</category>
             <pubDate>Sun, 25 May 2025 14:35:21 +0800</pubDate>
