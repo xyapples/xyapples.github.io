@@ -10,8 +10,8 @@
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="rsync" />
-    <category term="Windows" />
     <category term="MySQL" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/1888662579.html</id>
         <title>Containerd常用命令</title>
