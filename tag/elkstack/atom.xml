@@ -1,0 +1,258 @@
+<?xml version="1.0"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>http://ixuyong.cn</id>
+    <title>LinuxSre云原生 • Posts by &#34;elkstack&#34; tag</title>
+    <link href="http://ixuyong.cn" />
+    <updated>2025-05-25T06:35:21.000Z</updated>
+    <category term="Docker" />
+    <category term="ELKStack" />
+    <category term="Harbor" />
+    <category term="Kubernetes" />
+    <category term="Redis" />
+    <category term="rsync" />
+    <category term="MySQL" />
+    <category term="Windows" />
+    <entry>
+        <id>http://ixuyong.cn/posts/3071070978.html</id>
+        <title>企业级私有仓库Harbor搭建</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/3071070978.html"/>
+        <content type="html">&lt;h3 id=&#34;消费租赁项目kubernetes基于elk日志分析与实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#消费租赁项目kubernetes基于elk日志分析与实践&#34;&gt;#&lt;/a&gt; 消费租赁项目 Kubernetes 基于 ELK 日志分析与实践&lt;/h3&gt;
+&lt;h6 id=&#34;snipaste_2025-05-25_13-43-46jpg&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#snipaste_2025-05-25_13-43-46jpg&#34;&gt;#&lt;/a&gt; &lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Og7liF6.jpeg&#34; alt=&#34;Snipaste_2025-05-25_13-43-46.jpg&#34; /&gt;&lt;/h6&gt;
+&lt;h4 id=&#34;1-elk创建namespace和secrets&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-elk创建namespace和secrets&#34;&gt;#&lt;/a&gt; 1. ELK 创建 Namespace 和 Secrets&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl create ns logging
+# kubectl create secret docker-registry harbor-admin -n logging --docker-server=registry.cn-hangzhou.aliyuncs.com --docker-username=xyapples@163.com --docker-password=passwd
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;2-交付zookeeper集群至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-交付zookeeper集群至k8s&#34;&gt;#&lt;/a&gt; 2. 交付 Zookeeper 集群至 K8S&lt;/h4&gt;
+&lt;h5 id=&#34;21-制作zk集群镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-制作zk集群镜像&#34;&gt;#&lt;/a&gt; 2.1 制作 ZK 集群镜像&lt;/h5&gt;
+&lt;h6 id=&#34;211-dockerfile&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#211-dockerfile&#34;&gt;#&lt;/a&gt; 2.1.1 Dockerfile&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat Dockerfile 
+FROM openjdk:8-jre
+
+# 1、拷贝Zookeeper压缩包和配置文件
+ENV VERSION=3.8.4
+ADD ./apache-zookeeper-$&amp;#123;VERSION&amp;#125;-bin.tar.gz /
+ADD ./zoo.cfg /apache-zookeeper-$&amp;#123;VERSION&amp;#125;-bin/conf
+
+# 2、对Zookeeper文件夹名称重新命名
+RUN mv /apache-zookeeper-$&amp;#123;VERSION&amp;#125;-bin /zookeeper
+
+# 3、拷贝eentrpoint的启动脚本文件
+ADD ./entrypoint.sh /entrypoint.sh
+
+# 4、暴露Zookeeper端口
+EXPOSE 2181 2888 3888
+
+# 5、执行启动脚本
+CMD [&amp;quot;/bin/bash&amp;quot;,&amp;quot;/entrypoint.sh&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;212-zoocfg&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#212-zoocfg&#34;&gt;#&lt;/a&gt; 2.1.2 zoo.cfg&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat zoo.cfg 
+# 服务器之间或客户端与服务器之间维持心跳的时间间隔 tickTime以毫秒为单位。
+tickTime=&amp;#123;ZOOK_TICKTIME&amp;#125;
+
+# 集群中的follower服务器(F)与leader服务器(L)之间的初始连接心跳数 10* tickTime
+initLimit=&amp;#123;ZOOK_INIT_LIMIT&amp;#125;
+
+# 集群中的follower服务器与leader服务器之间请求和应答之间能容忍的最多心跳数 5 * tickTime
+syncLimit=&amp;#123;ZOOK_SYNC_LIMIT&amp;#125;
+ 
+# 数据保存目录
+dataDir=&amp;#123;ZOOK_DATA_DIR&amp;#125;
+
+# 日志保存目录
+dataLogDir=&amp;#123;ZOOK_LOG_DIR&amp;#125;
+
+# 客户端连接端口
+clientPort=&amp;#123;ZOOK_CLIENT_PORT&amp;#125;
+
+# 客户端最大连接数。# 根据自己实际情况设置，默认为60个
+maxClientCnxns=&amp;#123;ZOOK_MAX_CLIENT_CNXNS&amp;#125;
+
+# 客户端获取 zookeeper 服务的当前状态及相关信息
+4lw.commands.whitelist=*
+
+# 三个接点配置，格式为： server.服务编号=服务地址、LF通信端口、选举端口
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;213-entrypoint&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#213-entrypoint&#34;&gt;#&lt;/a&gt; 2.1.3 entrypoint&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat entrypoint.sh 
+#设定变量
+ZOOK_BIN_DIR=/zookeeper/bin
+ZOOK_CONF_DIR=/zookeeper/conf/zoo.cfg
+
+# 2、对配置文件中的字符串进行变量替换
+sed -i s@&amp;#123;ZOOK_TICKTIME&amp;#125;@$&amp;#123;ZOOK_TICKTIME:-2000&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+sed -i s@&amp;#123;ZOOK_INIT_LIMIT&amp;#125;@$&amp;#123;ZOOK_INIT_LIMIT:-10&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+sed -i s@&amp;#123;ZOOK_SYNC_LIMIT&amp;#125;@$&amp;#123;ZOOK_SYNC_LIMIT:-5&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+sed -i s@&amp;#123;ZOOK_DATA_DIR&amp;#125;@$&amp;#123;ZOOK_DATA_DIR:-/data&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+sed -i s@&amp;#123;ZOOK_LOG_DIR&amp;#125;@$&amp;#123;ZOOK_LOG_DIR:-/logs&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+sed -i s@&amp;#123;ZOOK_CLIENT_PORT&amp;#125;@$&amp;#123;ZOOK_CLIENT_PORT:-2181&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+sed -i s@&amp;#123;ZOOK_MAX_CLIENT_CNXNS&amp;#125;@$&amp;#123;ZOOK_MAX_CLIENT_CNXNS:-60&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+
+# 3、准备ZK的集群节点地址，后期肯定是需要通过ENV的方式注入进来
+for server in $&amp;#123;ZOOK_SERVERS&amp;#125;
+do
+	echo $&amp;#123;server&amp;#125; &amp;gt;&amp;gt; $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+done
+
+# 4、在datadir目录中创建myid的文件，并填入对应的编号
+ZOOK_MYID=$(( $(hostname | sed &#39;s#.*-##g&#39;) + 1 ))
+echo $&amp;#123;ZOOK_MYID:-99&amp;#125; &amp;gt; $&amp;#123;ZOOK_DATA_DIR:-/data&amp;#125;/myid
+
+#5、前台运行Zookeeper
+cd $&amp;#123;ZOOK_BIN_DIR&amp;#125;
+./zkServer.sh start-foreground
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;214-构建镜像并推送仓库&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#214-构建镜像并推送仓库&#34;&gt;#&lt;/a&gt; 2.1.4 构建镜像并推送仓库&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# wget https://dlcdn.apache.org/zookeeper/zookeeper-3.8.4/apache-zookeeper-3.8.4-bin.tar.gz
+# docker build -t registry.cn-hangzhou.aliyuncs.com/kubernetes_public/zookeeper:3.8.4 .
+# docker push  registry.cn-hangzhou.aliyuncs.com/kubernetes_public/zookeeper:3.8.4
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;22-迁移zookeeper至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-迁移zookeeper至k8s&#34;&gt;#&lt;/a&gt; 2.2  迁移 zookeeper 至 K8S&lt;/h5&gt;
+&lt;h6 id=&#34;221-zookeeper-headless&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#221-zookeeper-headless&#34;&gt;#&lt;/a&gt; 2.2.1 zookeeper-headless&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 01-zookeeper-headless.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-svc
+  namespace: logging
+spec:
+  clusterIP: None
+  selector:
+    app: zookeeper
+  ports:
+  - name: client
+    port: 2181
+    targetPort: 2181
+  - name: leader-follwer
+    port: 2888
+    targetPort: 2888
+  - name: selection
+    port: 3888
+    targetPort: 3888
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;222-zookeeper-sts&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#222-zookeeper-sts&#34;&gt;#&lt;/a&gt; 2.2.2 zookeeper-sts&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 01-zookeeper]# vim 02-zookeeper-sts.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zookeeper               
+  namespace: logging
+spec:
+  serviceName: &amp;quot;zookeeper-svc&amp;quot;
+  replicas: 3
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values: [&amp;quot;zookeeper&amp;quot;]
+              topologyKey: &amp;quot;kubernetes.io/hostname&amp;quot;
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: zookeeper
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/zookeeper:3.8.4           
+        imagePullPolicy: Always
+        ports:
+        - name: client
+          containerPort: 2181
+        - name: leader-follwer
+          containerPort: 2888
+        - name: selection
+          containerPort: 3888
+        env:
+        - name: ZOOK_SERVERS
+          value: &amp;quot;server.1=zookeeper-0.zookeeper-svc.logging.svc.cluster.local:2888:3888 server.2=zookeeper-1.zookeeper-svc.logging.svc.cluster.local:2888:3888 server.3=zookeeper-2.zookeeper-svc.logging.svc.cluster.local:2888:3888&amp;quot;
+        readinessProbe:         # 就绪探针，不就绪则不介入流量
+          exec:
+            command:
+            - &amp;quot;/bin/bash&amp;quot;
+            - &amp;quot;-c&amp;quot;
+            - &#39;[[ &amp;quot;$(/zookeeper/bin/zkServer.sh status 2&amp;gt;/dev/null|grep 2181)&amp;quot; ]] &amp;amp;&amp;amp; exit 0 || exit 1&#39;
+          initialDelaySeconds: 5
+        livenessProbe:         # 存活探针。如果不存活则根据重启策略进行重启
+          exec:
+            command:
+            - &amp;quot;/bin/bash&amp;quot;
+            - &amp;quot;-c&amp;quot;
+            - &#39;[[ &amp;quot;$(/zookeeper/bin/zkServer.sh status 2&amp;gt;/dev/null|grep 2181)&amp;quot; ]] &amp;amp;&amp;amp; exit 0 || exit 1&#39;
+          initialDelaySeconds: 5
+        volumeMounts:
+        - name: data
+          mountPath: /data
+          subPath: data
+        - name: data
+          mountPath: /logs
+          subPath: logs
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&amp;quot;ReadWriteMany&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;223-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#223-更新资源清单&#34;&gt;#&lt;/a&gt; 2.2.3 更新资源清单&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 01-zookeeper]# kubectl apply -f 01-zookeeper-headless.yaml 
+[root@k8s-master01 01-zookeeper]# kubectl apply -f 02-zookeeper-sts.yaml
+[root@k8s-master01 01-zookeeper]# kubectl get pods -n logging
+NAME          READY   STATUS    RESTARTS   AGE
+zookeeper-0   1/1     Running   0          17m
+zookeeper-1   1/1     Running   0          14m
+zookeeper-2   1/1     Running   0          11m
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;224-检查zookeeper集群状态&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#224-检查zookeeper集群状态&#34;&gt;#&lt;/a&gt; 2.2.4 检查 zookeeper 集群状态&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# for i in 0 1 2 ; do kubectl exec zookeeper-$i -n logging -- /zookeeper/bin/zkServer.sh status; done
+ZooKeeper JMX enabled by default
+Using config: /zookeeper/bin/../conf/zoo.cfg
+Client port found: 2181. Client address: localhost. Client SSL: false.
+Mode: follower
+ZooKeeper JMX enabled by default
+Using config: /zookeeper/bin/../conf/zoo.cfg
+Client port found: 2181. Client address: localhost. Client SSL: false.
+Mode: leader
+ZooKeeper JMX enabled by default
+Using config: /zookeeper/bin/../conf/zoo.cfg
+Client port found: 2181. Client address: localhost. Client SSL: false.
+Mode: follower
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;225-连接zookeeper集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#225-连接zookeeper集群&#34;&gt;#&lt;/a&gt; 2.2.5 连接 Zookeeper 集群&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 01-zookeeper]# kubectl exec -it zookeeper-0 -n logging -- /bin/sh
+# /zookeeper/bin/zkCli.sh -server zookeeper-svc
+[zk: zookeeper-svc(CONNECTED) 0]  create /hello oldxu
+Created /hello
+[zk: zookeeper-svc(CONNECTED) 1] get /hello
+oldxu
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+        <category term="ELKStack" />
+        <updated>2025-05-25T06:35:21.000Z</updated>
+    </entry>
+</feed>
