@@ -5,12 +5,12 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-05-25T06:35:21.000Z</updated>
     <category term="Docker" />
-    <category term="ELKStack" />
     <category term="Harbor" />
-    <category term="Kubernetes" />
-    <category term="Redis" />
+    <category term="ELKStack" />
     <category term="rsync" />
     <category term="MySQL" />
+    <category term="Kubernetes" />
+    <category term="Redis" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/170066797.html</id>
@@ -250,6 +250,229 @@ Mode: follower
 Created /hello
 [zk: zookeeper-svc(CONNECTED) 1] get /hello
 oldxu
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;3-交付kafka集群至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-交付kafka集群至k8s&#34;&gt;#&lt;/a&gt; 3. 交付 Kafka 集群至 K8S&lt;/h4&gt;
+&lt;h5 id=&#34;31-制作kafka集群镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#31-制作kafka集群镜像&#34;&gt;#&lt;/a&gt; 3.1 制作 Kafka 集群镜像&lt;/h5&gt;
+&lt;h6 id=&#34;311-dockerfile&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#311-dockerfile&#34;&gt;#&lt;/a&gt; 3.1.1 Dockerfile&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat Dockerfile 
+FROM openjdk:8-jre
+
+# 1、调整时区
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime &amp;amp;&amp;amp; \
+    echo &#39;Asia/Shanghai&#39; &amp;gt; /etc/timezone
+
+# 2、拷贝kafka软件以及kafka的配置
+ENV VERSION=2.12-2.2.0
+ADD ./kafka_$&amp;#123;VERSION&amp;#125;.tgz /
+ADD ./server.properties /kafka_$&amp;#123;VERSION&amp;#125;/config/server.properties
+
+# 3、修改kafka的名称
+RUN mv /kafka_$&amp;#123;VERSION&amp;#125; /kafka
+
+# 4、启动脚本（修改kafka配置）
+ADD ./entrypoint.sh /entrypoint.sh
+
+# 5、暴露kafka端口 9999是jmx的端口
+EXPOSE 9092 9999
+
+# 6、运行启动脚本
+CMD [&amp;quot;/bin/bash&amp;quot;,&amp;quot;/entrypoint.sh&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;312-serverproperties&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#312-serverproperties&#34;&gt;#&lt;/a&gt; 3.1.2 server.properties&lt;/h6&gt;
+&lt;pre&gt;&lt;code class=&#34;language-&#39;&#34;&gt;# cat server.properties 
+############################# Server Basics ############################# 
+# broker的id，值为整数，且必须唯一，在一个集群中不能重复
+broker.id=&amp;#123;BROKER_ID&amp;#125;
+
+############################# Socket Server Settings ############################# 
+# kafka监听端口，默认9092
+listeners=PLAINTEXT://&amp;#123;LISTENERS&amp;#125;:9092
+
+# 处理网络请求的线程数量，默认为3个
+num.network.threads=3
+
+# 执行磁盘IO操作的线程数量，默认为8个 
+num.io.threads=8
+
+# socket服务发送数据的缓冲区大小，默认100KB
+socket.send.buffer.bytes=102400
+
+# socket服务接受数据的缓冲区大小，默认100KB
+socket.receive.buffer.bytes=102400
+
+# socket服务所能接受的一个请求的最大大小，默认为100M
+socket.request.max.bytes=104857600
+
+############################# Log Basics ############################# 
+# kafka存储消息数据的目录
+log.dirs=&amp;#123;KAFKA_DATA_DIR&amp;#125;
+
+# 每个topic默认的partition
+num.partitions=1
+
+# 设置副本数量为3,当Leader的Replication故障，会进行故障自动转移。
+default.replication.factor=3
+
+# 在启动时恢复数据和关闭时刷新数据时每个数据目录的线程数量
+num.recovery.threads.per.data.dir=1
+
+############################# Log Flush Policy ############################# 
+# 消息刷新到磁盘中的消息条数阈值
+log.flush.interval.messages=10000
+
+# 消息刷新到磁盘中的最大时间间隔,1s
+log.flush.interval.ms=1000
+
+############################# Log Retention Policy ############################# 
+# 日志保留小时数，超时会自动删除，默认为7天
+log.retention.hours=168
+
+# 日志保留大小，超出大小会自动删除，默认为1G
+#log.retention.bytes=1073741824
+
+# 日志分片策略，单个日志文件的大小最大为1G，超出后则创建一个新的日志文件
+log.segment.bytes=1073741824
+
+# 每隔多长时间检测数据是否达到删除条件,300s
+log.retention.check.interval.ms=300000
+
+############################# Zookeeper ############################# 
+# Zookeeper连接信息，如果是zookeeper集群，则以逗号隔开
+zookeeper.connect=&amp;#123;ZOOK_SERVERS&amp;#125;
+
+# 连接zookeeper的超时时间,6s
+zookeeper.connection.timeout.ms=6000
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;313-entrypoint&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#313-entrypoint&#34;&gt;#&lt;/a&gt; 3.1.3 entrypoint&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat entrypoint.sh 
+# 变量
+KAFKA_DIR=/kafka
+KAFKA_CONF=/kafka/config/server.properties
+
+# 1、基于主机名 + 1 获取Broker_id  这个是用来标识集群节点 在整个集群中必须唯一
+BROKER_ID=$(( $(hostname | sed &#39;s#.*-##g&#39;) + 1 ))
+LISTENERS=$(hostname -i)
+
+# 2、替换配置文件内容，后期ZK集群的地址通过ENV传递
+sed -i s@&amp;#123;BROKER_ID&amp;#125;@$&amp;#123;BROKER_ID&amp;#125;@g  $&amp;#123;KAFKA_CONF&amp;#125;
+sed -i s@&amp;#123;LISTENERS&amp;#125;@$&amp;#123;LISTENERS&amp;#125;@g  $&amp;#123;KAFKA_CONF&amp;#125;
+sed -i s@&amp;#123;KAFKA_DATA_DIR&amp;#125;@$&amp;#123;KAFKA_DATA_DIR:-/data&amp;#125;@g  $&amp;#123;KAFKA_CONF&amp;#125;
+sed -i s@&amp;#123;ZOOK_SERVERS&amp;#125;@$&amp;#123;ZOOK_SERVERS&amp;#125;@g  $&amp;#123;KAFKA_CONF&amp;#125;
+
+# 3、启动Kafka
+cd $&amp;#123;KAFKA_DIR&amp;#125;/bin
+sed -i &#39;/export KAFKA_HEAP_OPTS/a export JMX_PORT=&amp;quot;9999&amp;quot;&#39; kafka-server-start.sh
+./kafka-server-start.sh ../config/server.properties
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;314-构建镜像并推送仓库&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#314-构建镜像并推送仓库&#34;&gt;#&lt;/a&gt; 3.1.4 构建镜像并推送仓库&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# wget https://archive.apache.org/dist/kafka/2.2.0/kafka_2.12-2.2.0.tgz
+# docker build -t registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kafka:2.12.2 .
+# docker push registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kafka:2.12.2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;32-迁移kafka集群至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#32-迁移kafka集群至k8s&#34;&gt;#&lt;/a&gt; 3.2 迁移 Kafka 集群至 K8S&lt;/h5&gt;
+&lt;h6 id=&#34;321-kafka-headless&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#321-kafka-headless&#34;&gt;#&lt;/a&gt; 3.2.1 kafka-headless&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 01-kafka-headless.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-svc
+  namespace: logging
+spec:
+  clusterIP: None
+  selector:
+    app: kafka
+  ports:
+  - name: client
+    port: 9092
+    targetPort: 9092
+  - name: jmx
+    port: 9999
+    targetPort: 9999
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;322-kafka-sts&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#322-kafka-sts&#34;&gt;#&lt;/a&gt; 3.2.2 kafka-sts&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 02-kafka-sts.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+  namespace: logging
+spec:
+  serviceName: &amp;quot;kafka-svc&amp;quot;
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values: [&amp;quot;kafka&amp;quot;]
+              topologyKey: &amp;quot;kubernetes.io/hostname&amp;quot;
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: kafka
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kafka:2.12.2 
+        imagePullPolicy: Always
+        ports:
+        - name: client
+          containerPort: 9092
+        - name: jmxport
+          containerPort: 9999
+        env:
+        - name: ZOOK_SERVERS
+          value: &amp;quot;zookeeper-0.zookeeper-svc:2181,zookeeper-1.zookeeper-svc:2181,zookeeper-2.zookeeper-svc:2181&amp;quot;
+        readinessProbe:         # 就绪探针，不就绪则不介入流量
+          tcpSocket:
+            port: 9092
+          initialDelaySeconds: 5
+        livenessProbe:         # 存活探针。如果不存活则根据重启策略进行重启
+          tcpSocket:
+            port: 9092
+          initialDelaySeconds: 5
+        volumeMounts:
+        - name: data
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&amp;quot;ReadWriteMany&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;323-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#323-更新资源清单&#34;&gt;#&lt;/a&gt; 3.2.3 更新资源清单&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 02-kafka]# kubectl apply -f 01-kafka-headless.yaml 
+[root@k8s-master01 02-kafka]# kubectl apply -f 02-kafka-sts.yaml
+[root@k8s-master01 02-kafka]# kubectl get pods -n logging 
+NAME          READY   STATUS    RESTARTS       AGE
+kafka-0       1/1     Running   0              5m49s
+kafka-1       1/1     Running   0              4m43s
+kafka-2       1/1     Running   0              3m40s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;324-检查kafka集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#324-检查kafka集群&#34;&gt;#&lt;/a&gt; 3.2.4 检查 Kafka 集群&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;1.创建一个topic
+root@kafka-0:/# /kafka/bin/kafka-topics.sh --create --zookeeper zookeeper-0.zookeeper-svc:2181,zookeeper-1.zookeeper-svc:2181,zookeeper-2.zookeeper-svc:2181 --partitions 1 --replication-factor 3 --topic oldxu
+
+2.模拟消息发布
+root@kafka-1:/# /kafka/bin/kafka-console-producer.sh --broker-list kafka-0.kafka-svc:9092,kafka-1.kafka-svc:9092,kafka-2.kafka-svc:9092 --topic oldxu
+&amp;gt;hello kubernetes
+&amp;gt;hello world
+
+3.模拟消息订阅
+root@kafka-2:/# /kafka/bin/kafka-console-consumer.sh  --bootstrap-server kafka-0.kafka-svc:9092,kafka-1.kafka-svc:9092,kafka-2.kafka-svc:9092 --topic oldxu --from-beginning
+hello kubernetes
+hello world
 &lt;/code&gt;&lt;/pre&gt;
 </content>
         <category term="ELKStack" />
