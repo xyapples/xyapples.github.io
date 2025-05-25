@@ -1,0 +1,244 @@
+<!-- build time:Sun May 25 2025 14:47:20 GMT+0800 (中国标准时间) --><!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2"><meta name="theme-color" content="#222"><meta http-equiv="X-UA-COMPATIBLE" content="IE=edge,chrome=1"><meta name="renderer" content="webkit"><link rel="icon" type="image/ico" sizes="32x32" href="/assets/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon.ico"><link rel="alternate" href="/rss.xml" title="LinuxSre云原生" type="application/rss+xml"><link rel="alternate" href="/atom.xml" title="LinuxSre云原生" type="application/atom+xml"><link rel="alternate" type="application/json" title="LinuxSre云原生" href="http://ixuyong.cn/feed.json"><link rel="preconnect" href="https://s4.zstatic.net"><link rel="preconnect" href="https://at.alicdn.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic%7CFredericka%20the%20Great:400,400italic,700,700italic%7CNoto%20Serif%20JP:400,400italic,700,700italic%7CNoto%20Serif%20SC:400,400italic,700,700italic%7CInconsolata:400,400italic,700,700italic&display=swap&subset=latin,latin-ext" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/app.css?v=0.4.17"><link rel="modulepreload" href="/js/chunk-GV364XSK.js"><link rel="modulepreload" href="/js/chunk-NYSE5UKM.js"><link rel="modulepreload" href="/js/chunk-RONCYO2S.js"><link rel="modulepreload" href="/js/chunk-THHXCRSX.js"><link rel="modulepreload" href="/js/chunk-WIQECBEN.js"><link rel="modulepreload" href="/js/comments-DL2IYMPZ.js"><link rel="modulepreload" href="/js/copy-tex-NADCTXPG.js"><link rel="modulepreload" href="/js/post-DA635IH6.js"><link rel="modulepreload" href="/js/quicklink-WEDHL4BA.js"><link rel="modulepreload" href="/js/search-VCZRKTM5.js"><link rel="modulepreload" href="/js/siteInit.js"><link rel="modulepreload" href="/js/waline-NNBYRQEE.js"><link rel="stylesheet" href="/css/comments-F4ZGS7LD.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/siteInit.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/waline-IDNZKML2.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="preload" href="https://s21.ax1x.com/2025/03/29/pEsS0hD.png" as="image" fetchpriority="high"><meta name="keywords" content="ELKStack"><meta name="description" content="专注于 Linux 运维、云计算、云原⽣等技术"><link rel="canonical" href="http://ixuyong.cn/posts/170066797.html"><title>消费租赁项目Kubernetes基于ELK日志分析与实践</title><meta name="generator" content="Hexo 7.3.0"></head><body itemscope itemtype="http://schema.org/WebPage"><div id="loading"><div class="cat"><div class="body"></div><div class="head"><div class="face"></div></div><div class="foot"><div class="tummy-end"></div><div class="bottom"></div><div class="legs left"></div><div class="legs right"></div></div><div class="paw"><div class="hands left"></div><div class="hands right"></div></div></div></div><div id="container"><header id="header" itemscope itemtype="http://schema.org/WPHeader"><div class="inner"><div id="brand"><div class="pjax"><h1 itemprop="name headline">消费租赁项目Kubernetes基于ELK日志分析与实践</h1><div class="meta"><span class="item" title="创建时间：2025-05-25 14:35:21"><span class="icon"><i class="ic i-calendar"></i></span><span class="text">发表于</span><time itemprop="dateCreated datePublished" datetime="2025-05-25T14:35:21+08:00">2025-05-25</time></span><span class="item" title="本文字数"><span class="icon"><i class="ic i-pen"></i></span><span class="text">本文字数</span><span>7.1k</span><span class="text">字</span></span><span class="item" title="阅读时长"><span class="icon"><i class="ic i-clock"></i></span><span class="text">阅读时长</span><span>6 分钟</span></span></div></div></div><nav id="nav"><div class="inner"><div class="toggle"><div class="lines" aria-label="切换导航栏"><span class="line"></span><span class="line"></span><span class="line"></span></div></div><ul class="menu"><li class="item title"><a href="/" rel="start">LinuxSre云原生</a></li></ul><ul class="right" id="rightNav"><li class="item theme"><i class="ic i-sun"></i></li><li class="item search"><i class="ic i-search"></i></li></ul></div></nav></div><div class="pjax" id="imgs"><img src="https://s21.ax1x.com/2025/03/29/pEsS0hD.png" loading="eager" decoding="async" fetchpriority="high" alt="LinuxSre云原生"></div></header><div id="waves"><svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path></defs><g class="parallax"><use xlink:href="#gentle-wave" x="48" y="0"></use><use xlink:href="#gentle-wave" x="48" y="3"></use><use xlink:href="#gentle-wave" x="48" y="5"></use><use xlink:href="#gentle-wave" x="48" y="7"></use></g></svg></div><main><div class="inner"><div class="pjax" id="main"><div class="article wrap"><div class="breadcrumb" itemlistelement itemscope itemtype="https://schema.org/BreadcrumbList"><i class="ic i-home"></i><span><a href="/">首页</a></span><i class="ic i-angle-right"></i><span class="current" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a href="/categories/ELKStack/" itemprop="item" rel="index" title="分类于ELKStack"><span itemprop="name">ELKStack<meta itemprop="position" content="0"></span></a></span></div><article class="post block" itemscope itemtype="http://schema.org/Article" lang="zh-CN"><link itemprop="mainEntityOfPage" href="http://ixuyong.cn/posts/170066797.html"><span hidden itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="image" content="/assets/avatar.png"><meta itemprop="name" content="Xu Yong"><meta itemprop="description" content="致力于技术布道、普及前沿技术、打造云原生系列标杆博客, 专注于 Linux 运维、云计算、云原⽣等技术"></span><span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="LinuxSre云原生"></span><div class="body md" itemprop="articleBody"><h3 id="消费租赁项目kubernetes基于elk日志分析与实践"><a class="anchor" href="#消费租赁项目kubernetes基于elk日志分析与实践">#</a> 消费租赁项目 Kubernetes 基于 ELK 日志分析与实践</h3><h6 id="snipaste_2025-05-25_13-43-46jpg"><a class="anchor" href="#snipaste_2025-05-25_13-43-46jpg">#</a> <img loading="lazy" data-src="https://wp-cdn.4ce.cn/v2/Og7liF6.jpeg" alt="Snipaste_2025-05-25_13-43-46.jpg"></h6><h4 id="1-elk创建namespace和secrets"><a class="anchor" href="#1-elk创建namespace和secrets">#</a> 1. ELK 创建 Namespace 和 Secrets</h4><pre><code># kubectl create ns logging
+# kubectl create secret docker-registry harbor-admin -n logging --docker-server=registry.cn-hangzhou.aliyuncs.com --docker-username=xyapples@163.com --docker-password=passwd
+</code></pre><h4 id="2-交付zookeeper集群至k8s"><a class="anchor" href="#2-交付zookeeper集群至k8s">#</a> 2. 交付 Zookeeper 集群至 K8S</h4><h5 id="21-制作zk集群镜像"><a class="anchor" href="#21-制作zk集群镜像">#</a> 2.1 制作 ZK 集群镜像</h5><h6 id="211-dockerfile"><a class="anchor" href="#211-dockerfile">#</a> 2.1.1 Dockerfile</h6><pre><code># cat Dockerfile 
+FROM openjdk:8-jre
+
+# 1、拷贝Zookeeper压缩包和配置文件
+ENV VERSION=3.8.4
+ADD ./apache-zookeeper-$&#123;VERSION&#125;-bin.tar.gz /
+ADD ./zoo.cfg /apache-zookeeper-$&#123;VERSION&#125;-bin/conf
+
+# 2、对Zookeeper文件夹名称重新命名
+RUN mv /apache-zookeeper-$&#123;VERSION&#125;-bin /zookeeper
+
+# 3、拷贝eentrpoint的启动脚本文件
+ADD ./entrypoint.sh /entrypoint.sh
+
+# 4、暴露Zookeeper端口
+EXPOSE 2181 2888 3888
+
+# 5、执行启动脚本
+CMD [&quot;/bin/bash&quot;,&quot;/entrypoint.sh&quot;]
+</code></pre><h6 id="212-zoocfg"><a class="anchor" href="#212-zoocfg">#</a> 2.1.2 zoo.cfg</h6><pre><code># cat zoo.cfg 
+# 服务器之间或客户端与服务器之间维持心跳的时间间隔 tickTime以毫秒为单位。
+tickTime=&#123;ZOOK_TICKTIME&#125;
+
+# 集群中的follower服务器(F)与leader服务器(L)之间的初始连接心跳数 10* tickTime
+initLimit=&#123;ZOOK_INIT_LIMIT&#125;
+
+# 集群中的follower服务器与leader服务器之间请求和应答之间能容忍的最多心跳数 5 * tickTime
+syncLimit=&#123;ZOOK_SYNC_LIMIT&#125;
+ 
+# 数据保存目录
+dataDir=&#123;ZOOK_DATA_DIR&#125;
+
+# 日志保存目录
+dataLogDir=&#123;ZOOK_LOG_DIR&#125;
+
+# 客户端连接端口
+clientPort=&#123;ZOOK_CLIENT_PORT&#125;
+
+# 客户端最大连接数。# 根据自己实际情况设置，默认为60个
+maxClientCnxns=&#123;ZOOK_MAX_CLIENT_CNXNS&#125;
+
+# 客户端获取 zookeeper 服务的当前状态及相关信息
+4lw.commands.whitelist=*
+
+# 三个接点配置，格式为： server.服务编号=服务地址、LF通信端口、选举端口
+</code></pre><h6 id="213-entrypoint"><a class="anchor" href="#213-entrypoint">#</a> 2.1.3 entrypoint</h6><pre><code># cat entrypoint.sh 
+#设定变量
+ZOOK_BIN_DIR=/zookeeper/bin
+ZOOK_CONF_DIR=/zookeeper/conf/zoo.cfg
+
+# 2、对配置文件中的字符串进行变量替换
+sed -i s@&#123;ZOOK_TICKTIME&#125;@$&#123;ZOOK_TICKTIME:-2000&#125;@g $&#123;ZOOK_CONF_DIR&#125;
+sed -i s@&#123;ZOOK_INIT_LIMIT&#125;@$&#123;ZOOK_INIT_LIMIT:-10&#125;@g $&#123;ZOOK_CONF_DIR&#125;
+sed -i s@&#123;ZOOK_SYNC_LIMIT&#125;@$&#123;ZOOK_SYNC_LIMIT:-5&#125;@g $&#123;ZOOK_CONF_DIR&#125;
+sed -i s@&#123;ZOOK_DATA_DIR&#125;@$&#123;ZOOK_DATA_DIR:-/data&#125;@g $&#123;ZOOK_CONF_DIR&#125;
+sed -i s@&#123;ZOOK_LOG_DIR&#125;@$&#123;ZOOK_LOG_DIR:-/logs&#125;@g $&#123;ZOOK_CONF_DIR&#125;
+sed -i s@&#123;ZOOK_CLIENT_PORT&#125;@$&#123;ZOOK_CLIENT_PORT:-2181&#125;@g $&#123;ZOOK_CONF_DIR&#125;
+sed -i s@&#123;ZOOK_MAX_CLIENT_CNXNS&#125;@$&#123;ZOOK_MAX_CLIENT_CNXNS:-60&#125;@g $&#123;ZOOK_CONF_DIR&#125;
+
+# 3、准备ZK的集群节点地址，后期肯定是需要通过ENV的方式注入进来
+for server in $&#123;ZOOK_SERVERS&#125;
+do
+	echo $&#123;server&#125; &gt;&gt; $&#123;ZOOK_CONF_DIR&#125;
+done
+
+# 4、在datadir目录中创建myid的文件，并填入对应的编号
+ZOOK_MYID=$(( $(hostname | sed 's#.*-##g') + 1 ))
+echo $&#123;ZOOK_MYID:-99&#125; &gt; $&#123;ZOOK_DATA_DIR:-/data&#125;/myid
+
+#5、前台运行Zookeeper
+cd $&#123;ZOOK_BIN_DIR&#125;
+./zkServer.sh start-foreground
+</code></pre><h6 id="214-构建镜像并推送仓库"><a class="anchor" href="#214-构建镜像并推送仓库">#</a> 2.1.4 构建镜像并推送仓库</h6><pre><code># wget https://dlcdn.apache.org/zookeeper/zookeeper-3.8.4/apache-zookeeper-3.8.4-bin.tar.gz
+# docker build -t registry.cn-hangzhou.aliyuncs.com/kubernetes_public/zookeeper:3.8.4 .
+# docker push  registry.cn-hangzhou.aliyuncs.com/kubernetes_public/zookeeper:3.8.4
+</code></pre><h5 id="22-迁移zookeeper至k8s"><a class="anchor" href="#22-迁移zookeeper至k8s">#</a> 2.2 迁移 zookeeper 至 K8S</h5><h6 id="221-zookeeper-headless"><a class="anchor" href="#221-zookeeper-headless">#</a> 2.2.1 zookeeper-headless</h6><pre><code># cat 01-zookeeper-headless.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-svc
+  namespace: logging
+spec:
+  clusterIP: None
+  selector:
+    app: zookeeper
+  ports:
+  - name: client
+    port: 2181
+    targetPort: 2181
+  - name: leader-follwer
+    port: 2888
+    targetPort: 2888
+  - name: selection
+    port: 3888
+    targetPort: 3888
+</code></pre><h6 id="222-zookeeper-sts"><a class="anchor" href="#222-zookeeper-sts">#</a> 2.2.2 zookeeper-sts</h6><pre><code>[root@k8s-master01 01-zookeeper]# vim 02-zookeeper-sts.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zookeeper               
+  namespace: logging
+spec:
+  serviceName: &quot;zookeeper-svc&quot;
+  replicas: 3
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values: [&quot;zookeeper&quot;]
+              topologyKey: &quot;kubernetes.io/hostname&quot;
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: zookeeper
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/zookeeper:3.8.4           
+        imagePullPolicy: Always
+        ports:
+        - name: client
+          containerPort: 2181
+        - name: leader-follwer
+          containerPort: 2888
+        - name: selection
+          containerPort: 3888
+        env:
+        - name: ZOOK_SERVERS
+          value: &quot;server.1=zookeeper-0.zookeeper-svc.logging.svc.cluster.local:2888:3888 server.2=zookeeper-1.zookeeper-svc.logging.svc.cluster.local:2888:3888 server.3=zookeeper-2.zookeeper-svc.logging.svc.cluster.local:2888:3888&quot;
+        readinessProbe:         # 就绪探针，不就绪则不介入流量
+          exec:
+            command:
+            - &quot;/bin/bash&quot;
+            - &quot;-c&quot;
+            - '[[ &quot;$(/zookeeper/bin/zkServer.sh status 2&gt;/dev/null|grep 2181)&quot; ]] &amp;&amp; exit 0 || exit 1'
+          initialDelaySeconds: 5
+        livenessProbe:         # 存活探针。如果不存活则根据重启策略进行重启
+          exec:
+            command:
+            - &quot;/bin/bash&quot;
+            - &quot;-c&quot;
+            - '[[ &quot;$(/zookeeper/bin/zkServer.sh status 2&gt;/dev/null|grep 2181)&quot; ]] &amp;&amp; exit 0 || exit 1'
+          initialDelaySeconds: 5
+        volumeMounts:
+        - name: data
+          mountPath: /data
+          subPath: data
+        - name: data
+          mountPath: /logs
+          subPath: logs
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &quot;&quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &quot;&quot;
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&quot;ReadWriteMany&quot;]
+      storageClassName: &quot;nfs-storage&quot;
+      resources:
+        requests:
+          storage: 5Gi
+</code></pre><h6 id="223-更新资源清单"><a class="anchor" href="#223-更新资源清单">#</a> 2.2.3 更新资源清单</h6><pre><code>[root@k8s-master01 01-zookeeper]# kubectl apply -f 01-zookeeper-headless.yaml 
+[root@k8s-master01 01-zookeeper]# kubectl apply -f 02-zookeeper-sts.yaml
+[root@k8s-master01 01-zookeeper]# kubectl get pods -n logging
+NAME          READY   STATUS    RESTARTS   AGE
+zookeeper-0   1/1     Running   0          17m
+zookeeper-1   1/1     Running   0          14m
+zookeeper-2   1/1     Running   0          11m
+</code></pre><h6 id="224-检查zookeeper集群状态"><a class="anchor" href="#224-检查zookeeper集群状态">#</a> 2.2.4 检查 zookeeper 集群状态</h6><pre><code># for i in 0 1 2 ; do kubectl exec zookeeper-$i -n logging -- /zookeeper/bin/zkServer.sh status; done
+ZooKeeper JMX enabled by default
+Using config: /zookeeper/bin/../conf/zoo.cfg
+Client port found: 2181. Client address: localhost. Client SSL: false.
+Mode: follower
+ZooKeeper JMX enabled by default
+Using config: /zookeeper/bin/../conf/zoo.cfg
+Client port found: 2181. Client address: localhost. Client SSL: false.
+Mode: leader
+ZooKeeper JMX enabled by default
+Using config: /zookeeper/bin/../conf/zoo.cfg
+Client port found: 2181. Client address: localhost. Client SSL: false.
+Mode: follower
+</code></pre><h6 id="225-连接zookeeper集群"><a class="anchor" href="#225-连接zookeeper集群">#</a> 2.2.5 连接 Zookeeper 集群</h6><pre><code>[root@k8s-master01 01-zookeeper]# kubectl exec -it zookeeper-0 -n logging -- /bin/sh
+# /zookeeper/bin/zkCli.sh -server zookeeper-svc
+[zk: zookeeper-svc(CONNECTED) 0]  create /hello oldxu
+Created /hello
+[zk: zookeeper-svc(CONNECTED) 1] get /hello
+oldxu
+</code></pre><div class="tags"><a href="/tags/ELKStack/" rel="tag"><i class="ic i-tag"></i>ELKStack</a></div></div><footer><div class="meta"><span class="icon"><i class="ic i-eye"></i></span><span>此文章已被阅读次数:</span><span class="waline-pageview-count" id="twikoo_visitors" data-path="/posts/170066797.html">正在加载...</span><span class="item"><span class="icon"><i class="ic i-calendar-check"></i></span><span class="text">更新于</span><time title="修改时间：2025-05-25 14:47:05" itemprop="dateModified" datetime="2025-05-25T14:47:05+08:00">2025-05-25</time></span></div><div class="reward"><button><i class="ic i-heartbeat"></i>赞赏</button><p>请我喝[茶]~(￣▽￣)~*</p><div id="qr"><div><img loading="lazy" data-src="/assets/wechatpay.png" alt="Xu Yong 微信支付"><p>微信支付</p></div><div><img loading="lazy" data-src="/assets/alipay.png" alt="Xu Yong 支付宝"><p>支付宝</p></div></div></div><div id="copyright"><ul><li class="author"><strong>本文作者：</strong>Xu Yong<i class="ic i-at"><em>@</em></i>LinuxSre云原生</li><li class="link"><strong>本文链接：</strong><a href="http://ixuyong.cn/posts/170066797.html" title="消费租赁项目Kubernetes基于ELK日志分析与实践">http://ixuyong.cn/posts/170066797.html</a></li><li class="license"><strong>版权声明：</strong>本站所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh"><i class="ic i-creative-commons"><em>(CC)</em></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li></ul></div></footer></article></div><div class="post-nav"><div class="item left"><a href="/posts/626047790.html" rel="prev" itemprop="url" data-background-image="https:&#x2F;&#x2F;wp-cdn.4ce.cn&#x2F;v2&#x2F;er1zpXS.jpeg" title="消费租赁系统微服务应用交付实践"><span class="type">上一篇</span><span class="category"><i class="ic i-flag"></i>Kubernetes</span><h3>消费租赁系统微服务应用交付实践</h3></a></div><div class="item right"></div></div><div class="wrap" id="comments"></div></div><div id="sidebar"><div class="inner"><div class="panels"><div class="inner"><div class="contents panel pjax" data-title="文章目录"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E7%A7%9F%E8%B5%81%E9%A1%B9%E7%9B%AEkubernetes%E5%9F%BA%E4%BA%8Eelk%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.</span> <span class="toc-text">消费租赁项目 Kubernetes 基于 ELK 日志分析与实践</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#snipaste_2025-05-25_13-43-46jpg"><span class="toc-number">1.0.0.1.</span> <span class="toc-text"></span></a></li></ol></li></ol><li class="toc-item toc-level-4"><a class="toc-link" href="#1-elk%E5%88%9B%E5%BB%BAnamespace%E5%92%8Csecrets"><span class="toc-number">1.1.</span> <span class="toc-text">1. ELK 创建 Namespace 和 Secrets</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E4%BA%A4%E4%BB%98zookeeper%E9%9B%86%E7%BE%A4%E8%87%B3k8s"><span class="toc-number">1.2.</span> <span class="toc-text">2. 交付 Zookeeper 集群至 K8S</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#21-%E5%88%B6%E4%BD%9Czk%E9%9B%86%E7%BE%A4%E9%95%9C%E5%83%8F"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 制作 ZK 集群镜像</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#211-dockerfile"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">2.1.1 Dockerfile</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#212-zoocfg"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">2.1.2 zoo.cfg</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#213-entrypoint"><span class="toc-number">1.2.1.3.</span> <span class="toc-text">2.1.3 entrypoint</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#214-%E6%9E%84%E5%BB%BA%E9%95%9C%E5%83%8F%E5%B9%B6%E6%8E%A8%E9%80%81%E4%BB%93%E5%BA%93"><span class="toc-number">1.2.1.4.</span> <span class="toc-text">2.1.4 构建镜像并推送仓库</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#22-%E8%BF%81%E7%A7%BBzookeeper%E8%87%B3k8s"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 迁移 zookeeper 至 K8S</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#221-zookeeper-headless"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">2.2.1 zookeeper-headless</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#222-zookeeper-sts"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">2.2.2 zookeeper-sts</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#223-%E6%9B%B4%E6%96%B0%E8%B5%84%E6%BA%90%E6%B8%85%E5%8D%95"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">2.2.3 更新资源清单</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#224-%E6%A3%80%E6%9F%A5zookeeper%E9%9B%86%E7%BE%A4%E7%8A%B6%E6%80%81"><span class="toc-number">1.2.2.4.</span> <span class="toc-text">2.2.4 检查 zookeeper 集群状态</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#225-%E8%BF%9E%E6%8E%A5zookeeper%E9%9B%86%E7%BE%A4"><span class="toc-number">1.2.2.5.</span> <span class="toc-text">2.2.5 连接 Zookeeper 集群</span></a></li></ol></li></ol></li></div><div class="related panel pjax" data-title="系列文章"><ul><li class="active"><a href="/posts/170066797.html" rel="bookmark" title="消费租赁项目Kubernetes基于ELK日志分析与实践">消费租赁项目Kubernetes基于ELK日志分析与实践</a></li></ul></div><div class="overview panel" data-title="站点概览"><div class="author" itemprop="author" itemscope itemtype="http://schema.org/Person"><img class="image" loading="lazy" decoding="async" itemprop="image" alt="Xu Yong" src="/assets/avatar.png"><p class="name" itemprop="name">Xu Yong</p><div class="description" itemprop="description">专注于 Linux 运维、云计算、云原⽣等技术</div></div><nav class="state"><div class="item posts"><a href="/archives/"><span class="count">27</span><span class="name">文章</span></a></div><div class="item categories"><a href="/categories/"><span class="count">8</span><span class="name">分类</span></a></div><div class="item tags"><a href="/tags/"><span class="count">8</span><span class="name">标签</span></a></div></nav><div class="social"><a target="_blank" rel="noopener" href="https://github.com/xyapples" class="item github" title="https:&#x2F;&#x2F;github.com&#x2F;xyapples"><i class="ic i-github"></i></a><a target="_blank" rel="noopener" href="https://gitee.com/chinagei" class="item gitee" title="https:&#x2F;&#x2F;gitee.com&#x2F;chinagei"><i class="ic i-gitee"></i></a><a href="mailto:373370405@qq.com" class="item email" title="mailto:373370405@qq.com"><i class="ic i-envelope"></i></a></div><div class="menu"><li class="item"><a href="/" rel="section"><i class="ic i-home"></i>首页</a></li><li class="item"><a href="/categories/" rel="section"><i class="ic i-th"></i>分类</a></li><li class="item"><a href="/archives/" rel="section"><i class="ic i-list-alt"></i>归档</a></li><li class="item"><a href="/tags/" rel="section"><i class="ic i-tags"></i>标签</a></li><li class="item"><a href="/about/" rel="section"><i class="ic i-about"></i>关于</a></li><li class="item"><a href="/friends/" rel="section"><i class="ic i-heart"></i>友链</a></li></div></div></div></div><ul id="quick"><li class="prev pjax"></li><li class="up"><i class="ic i-arrow-up"></i></li><li class="down"><i class="ic i-arrow-down"></i></li><li class="next pjax"><a href="/posts/626047790.html" rel="next" title="下一篇"><i class="ic i-chevron-right"></i></a></li><li class="percent"></li></ul></div></div><div class="dimmer"></div></div></main><footer id="footer"><div class="inner"><div class="widgets"><div class="rpost pjax"><h2>随机文章</h2><ul><li class="item"><div class="breadcrumb"><a href="/categories/Redis/" title="分类于Redis">Redis</a></div><span><a href="/posts/1490514396.html">Redis Cluster集群部署</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/3890389502.html">K8S持久化存储NFS+StorageClass</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Docker/" title="分类于Docker">Docker</a></div><span><a href="/posts/1888662579.html">Containerd常用命令</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/312010518.html">K8s亲和力Affinity</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/MySQL/" title="分类于MySQL">MySQL</a></div><span><a href="/posts/2628187572.html">MySQL运维DBA应用与实践</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/169153047.html">K8s持久化存储</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/1771242682.html">K8s零宕机服务发布-探针</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Docker/" title="分类于Docker">Docker</a></div><span><a href="/posts/3364424907.html">阿里云+Github构建镜像仓库</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/170573601.html">K8s服务发布Ingress</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/3254599477.html">K8s容忍和污点</a></span></li></ul></div><div class="rpost pjax"><h2>最新评论</h2><ul class="leancloud-recent-comment" id="new-comment"></ul></div></div><div class="status"><div class="copyright">&copy; 2022 -<span itemprop="copyrightYear">2025</span><span class="with-love"><i class="ic i-sakura rotate"></i></span><span class="author" itemprop="copyrightHolder">Xu Yong @ LinuxSre云原生</span></div><div class="count"><span class="post-meta-item-icon"><i class="ic i-chart-area"></i></span><span title="站点总字数">439k 字</span><span class="post-meta-divider"> | </span><span class="post-meta-item-icon"><i class="ic i-coffee"></i></span><span title="站点阅读时长">6:39</span></div><div class="powered-by">基于 <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & Theme.<a target="_blank" rel="noopener" href="https://github.com/theme-shoka-x/hexo-theme-shokaX/">ShokaX</a></div></div></div></footer></div><script data-config type="text/javascript">var LOCAL = {
+    ispost: true,
+        path: `posts/170066797.html`,
+        favicon: {
+        show: `（●´3｀●）やれやれだぜ`,
+        hide: `(´Д｀)大変だ！`
+    },
+    search: {
+        placeholder: "文章搜索",
+        empty: "关于 「 ${query} 」，什么也没搜到",
+        stats: "${time} ms 内找到 ${hits} 条结果"
+    },
+    copy_tex: false,
+    katex: false,
+    mermaid: false,
+    audio: undefined,
+    fancybox: true,
+    nocopy: false,
+    outime: true,
+    template: `<div class="note warning"><p><span class="label warning">文章时效性提示</span><br>这是一篇发布于 {{publish}} 天前，最后一次更新在 {{updated}} 天前的文章，部分信息可能已经发生改变，请注意甄别。</p></div>`,
+    quiz: {
+        choice: `单选题`,
+        multiple: `多选题`,
+        true_false: `判断题`,
+        essay: `问答题`,
+        gap_fill: `填空题`,
+        mistake: `错题备注`
+    },
+    ignores: [
+        (uri) => uri.includes('#'),
+        (uri) => new RegExp(LOCAL.path + '$').test(uri),
+            []
+    ]
+};</script><script src="https://s4.zstatic.net/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous" fetchpriority="high"></script><script src="https://s4.zstatic.net/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha384-ZvpUoO&#x2F;+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn&#x2F;6Z&#x2F;hRTt8+pR6L4N2" crossorigin="anonymous" fetchpriority="high"></script><script src="/js/siteInit.js?v=0.4.17" type="module" fetchpriority="high" defer></script></body></html><!-- rebuild by hrmmi -->
