@@ -8,12 +8,12 @@
         <pubDate>Sun, 18 May 2025 21:42:46 +0800</pubDate>
         <lastBuildDate>Sun, 18 May 2025 21:42:46 +0800</lastBuildDate>
         <category>Docker</category>
-        <category>Harbor</category>
         <category>ELKStack</category>
         <category>rsync</category>
-        <category>MySQL</category>
+        <category>Harbor</category>
         <category>Kubernetes</category>
         <category>Redis</category>
+        <category>MySQL</category>
         <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/626047790.html</guid>

@@ -5,12 +5,12 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-05-18T13:42:46.000Z</updated>
     <category term="Docker" />
-    <category term="Harbor" />
     <category term="ELKStack" />
     <category term="rsync" />
-    <category term="MySQL" />
+    <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
+    <category term="MySQL" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/626047790.html</id>
