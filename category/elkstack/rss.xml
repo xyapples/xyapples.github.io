@@ -13,8 +13,8 @@
         <category>rsync</category>
         <category>Kubernetes</category>
         <category>Redis</category>
-        <category>MySQL</category>
         <category>Windows</category>
+        <category>MySQL</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/170066797.html</guid>
             <title>消费租赁项目Kubernetes基于ELK日志分析与实践</title>

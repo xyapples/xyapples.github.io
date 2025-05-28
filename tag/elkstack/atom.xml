@@ -10,8 +10,8 @@
     <category term="rsync" />
     <category term="Kubernetes" />
     <category term="Redis" />
-    <category term="MySQL" />
     <category term="Windows" />
+    <category term="MySQL" />
     <entry>
         <id>http://ixuyong.cn/posts/170066797.html</id>
         <title>消费租赁项目Kubernetes基于ELK日志分析与实践</title>
