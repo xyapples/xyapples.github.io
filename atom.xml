@@ -18,11 +18,11 @@
         <link rel="alternate" href="http://ixuyong.cn/posts/170066797.html"/>
         <content type="html">&lt;h3 id=&#34;消费租赁项目kubernetes基于elk日志分析与实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#消费租赁项目kubernetes基于elk日志分析与实践&#34;&gt;#&lt;/a&gt; 消费租赁项目 Kubernetes 基于 ELK 日志分析与实践&lt;/h3&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Og7liF6.jpeg&#34; alt=&#34;Snipaste_2025-05-25_13-43-46.jpg&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;1-elk创建namespace和secrets&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-elk创建namespace和secrets&#34;&gt;#&lt;/a&gt; 1. ELK 创建 Namespace 和 Secrets&lt;/h4&gt;
+&lt;h4 id=&#34;一-elk创建namespace和secrets&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-elk创建namespace和secrets&#34;&gt;#&lt;/a&gt; 一、ELK 创建 Namespace 和 Secrets&lt;/h4&gt;
 &lt;pre&gt;&lt;code&gt;# kubectl create ns logging
-# kubectl create secret docker-registry harbor-admin -n logging --docker-server=registry.cn-hangzhou.aliyuncs.com --docker-username=xyapples@163.com --docker-password=Talent*19871988
+# kubectl create secret docker-registry harbor-admin -n logging --docker-server=registry.cn-hangzhou.aliyuncs.com --docker-username=xyapples@163.com --docker-password=passwd
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;2-交付zookeeper集群至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-交付zookeeper集群至k8s&#34;&gt;#&lt;/a&gt; 2. 交付 Zookeeper 集群至 K8S&lt;/h4&gt;
+&lt;h4 id=&#34;二-交付zookeeper集群至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#二-交付zookeeper集群至k8s&#34;&gt;#&lt;/a&gt; 二、交付 Zookeeper 集群至 K8S&lt;/h4&gt;
 &lt;h5 id=&#34;21-制作zk集群镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-制作zk集群镜像&#34;&gt;#&lt;/a&gt; 2.1 制作 ZK 集群镜像&lt;/h5&gt;
 &lt;h6 id=&#34;211-dockerfile&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#211-dockerfile&#34;&gt;#&lt;/a&gt; 2.1.1 Dockerfile&lt;/h6&gt;
 &lt;pre&gt;&lt;code&gt;# cat Dockerfile 
@@ -251,7 +251,7 @@ Created /hello
 [zk: zookeeper-svc(CONNECTED) 1] get /hello
 oldxu
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;3-交付kafka集群至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-交付kafka集群至k8s&#34;&gt;#&lt;/a&gt; 3. 交付 Kafka 集群至 K8S&lt;/h4&gt;
+&lt;h4 id=&#34;三-交付kafka集群至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#三-交付kafka集群至k8s&#34;&gt;#&lt;/a&gt; 三、 交付 Kafka 集群至 K8S&lt;/h4&gt;
 &lt;h5 id=&#34;31-制作kafka集群镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#31-制作kafka集群镜像&#34;&gt;#&lt;/a&gt; 3.1 制作 Kafka 集群镜像&lt;/h5&gt;
 &lt;h6 id=&#34;311-dockerfile&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#311-dockerfile&#34;&gt;#&lt;/a&gt; 3.1.1 Dockerfile&lt;/h6&gt;
 &lt;pre&gt;&lt;code&gt;# cat Dockerfile 
@@ -484,7 +484,7 @@ root@kafka-2:/# /kafka/bin/kafka-console-consumer.sh  --bootstrap-server kafka-0
 hello kubernetes
 hello world
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;4-交付efak至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-交付efak至k8s&#34;&gt;#&lt;/a&gt; 4. 交付 efak 至 K8S&lt;/h4&gt;
+&lt;h4 id=&#34;四-交付efak至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#四-交付efak至k8s&#34;&gt;#&lt;/a&gt; 四、交付 efak 至 K8S&lt;/h4&gt;
 &lt;h5 id=&#34;41-制作efak镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#41-制作efak镜像&#34;&gt;#&lt;/a&gt; 4.1 制作 efak 镜像&lt;/h5&gt;
 &lt;h6 id=&#34;411-dockerfile&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#411-dockerfile&#34;&gt;#&lt;/a&gt; 4.1.1 Dockerfile&lt;/h6&gt;
 &lt;pre&gt;&lt;code&gt;[root@manager 03-efak]# cat Dockerfile 
@@ -672,7 +672,7 @@ spec:
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/U76YIck.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;4、查看 Zookeeper 集群状态&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/cY5LeWx.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;5-交付elastic集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#5-交付elastic集群&#34;&gt;#&lt;/a&gt; 5. 交付 Elastic 集群&lt;/h4&gt;
+&lt;h4 id=&#34;五-交付elastic集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#五-交付elastic集群&#34;&gt;#&lt;/a&gt; 五、交付 Elastic 集群&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;ES 集群是由多个节点组成的，通过 &lt;a href=&#34;http://cluster.name&#34;&gt;cluster.name&lt;/a&gt; 设置 ES 集群名称，同时用于区分其它的 ES 集群。&lt;/li&gt;
 &lt;li&gt;每个节点通过 &lt;a href=&#34;http://node.name&#34;&gt;node.name&lt;/a&gt; 参数来设定所在集群的节点名称。&lt;/li&gt;
@@ -1102,7 +1102,7 @@ spec:
 172.16.195.21  38 35 19 0.38 0.53 0.36 cdfhilrstw - es-data-1
 172.16.32.164  31 33 12 0.28 0.50 0.59 ilmr       - es-master-0
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;6-交付kibana可视化&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#6-交付kibana可视化&#34;&gt;#&lt;/a&gt; 6. 交付 Kibana 可视化&lt;/h4&gt;
+&lt;h4 id=&#34;六-交付kibana可视化&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#六-交付kibana可视化&#34;&gt;#&lt;/a&gt; 六、交付 Kibana 可视化&lt;/h4&gt;
 &lt;h5 id=&#34;61-下载kibana镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#61-下载kibana镜像&#34;&gt;#&lt;/a&gt; 6.1 下载 kibana 镜像&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;# docker pull kibana:7.17.6
 # docker tag kibana:7.17.6 registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kibana:7.17.6
