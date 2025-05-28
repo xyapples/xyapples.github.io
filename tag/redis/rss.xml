@@ -7,14 +7,14 @@
         <language>zh-CN</language>
         <pubDate>Mon, 12 May 2025 21:21:44 +0800</pubDate>
         <lastBuildDate>Mon, 12 May 2025 21:21:44 +0800</lastBuildDate>
-        <category>Docker</category>
         <category>ELKStack</category>
+        <category>Docker</category>
         <category>Harbor</category>
-        <category>Kubernetes</category>
-        <category>Redis</category>
         <category>rsync</category>
         <category>MySQL</category>
+        <category>Redis</category>
         <category>Windows</category>
+        <category>Kubernetes</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1490514396.html</guid>
             <title>Redis Cluster集群部署</title>
