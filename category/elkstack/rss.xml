@@ -9,10 +9,10 @@
         <lastBuildDate>Sun, 25 May 2025 14:35:21 +0800</lastBuildDate>
         <category>Docker</category>
         <category>ELKStack</category>
-        <category>rsync</category>
-        <category>Harbor</category>
         <category>Kubernetes</category>
         <category>Redis</category>
+        <category>Harbor</category>
+        <category>rsync</category>
         <category>MySQL</category>
         <category>Windows</category>
         <item>
