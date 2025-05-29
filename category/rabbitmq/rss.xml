@@ -5,17 +5,395 @@
         <link>http://ixuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Thu, 29 May 2025 20:35:53 +0800</pubDate>
-        <lastBuildDate>Thu, 29 May 2025 20:35:53 +0800</lastBuildDate>
+        <pubDate>Thu, 29 May 2025 20:48:49 +0800</pubDate>
+        <lastBuildDate>Thu, 29 May 2025 20:48:49 +0800</lastBuildDate>
         <category>Docker</category>
-        <category>ELKStack</category>
         <category>Harbor</category>
+        <category>ELKStack</category>
         <category>Kubernetes</category>
         <category>Redis</category>
         <category>rsync</category>
+        <category>Rabbitmq</category>
         <category>MySQL</category>
         <category>Windows</category>
-        <category>Rabbitmq</category>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/1384812626.html</guid>
+            <title>Kubenetes部署Rabbitmq集群</title>
+            <link>http://ixuyong.cn/posts/1384812626.html</link>
+            <category>Rabbitmq</category>
+            <pubDate>Thu, 29 May 2025 20:48:49 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;kubenetes部署rabbitmq集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#kubenetes部署rabbitmq集群&#34;&gt;#&lt;/a&gt; Kubenetes 部署 Rabbitmq 集群&lt;/h3&gt;
+&lt;h6 id=&#34;1-创建rbac权限&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-创建rbac权限&#34;&gt;#&lt;/a&gt; 1. 创建 RBAC 权限&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 01-rabbitmq-rbac.yaml 
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rabbitmq-cluster
+  namespace: prod
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: rabbitmq-cluster
+  namespace: prod
+rules:
+- apiGroups: [&amp;quot;&amp;quot;]
+  resources: [&amp;quot;endpoints&amp;quot;]
+  verbs: [&amp;quot;get&amp;quot;]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: rabbitmq-cluster
+  namespace: prod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: rabbitmq-cluster
+subjects:
+- kind: ServiceAccount
+  name: rabbitmq-cluster
+  namespace: prod
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;2-创建集群的secret&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-创建集群的secret&#34;&gt;#&lt;/a&gt; 2. 创建集群的 Secret&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 02-rabbitmq-secret.yaml 
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rabbitmq-secret
+  namespace: prod
+stringData:
+  password: talent
+  url: amqp://RABBITMQ_USER:RABBITMQ_PASS@rmq-cluster-balancer
+  username: superman
+type: Opaque
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;3-创建configmap&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-创建configmap&#34;&gt;#&lt;/a&gt; 3. 创建 ConfigMap&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 03-rabbitmq-cm.yaml 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-cluster-config
+  namespace: prod
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
+data:
+    enabled_plugins: |
+      [rabbitmq_management,rabbitmq_peer_discovery_k8s].
+    rabbitmq.conf: |
+      loopback_users.guest = false
+      default_user = RABBITMQ_USER
+      default_pass = RABBITMQ_PASS
+      ## Cluster 
+      cluster_formation.peer_discovery_backend = rabbit_peer_discovery_k8s
+      cluster_formation.k8s.host = kubernetes.default.svc
+      #cluster_formation.k8s.host = kubernetes.default.svc.cluster.local
+      cluster_formation.k8s.address_type = hostname
+      #################################################
+      # prod is rabbitmq-cluster&#39;s namespace#
+      #################################################
+      cluster_formation.k8s.hostname_suffix = .rabbitmq-cluster.prod.svc.cluster.local
+      cluster_formation.node_cleanup.interval = 30
+      cluster_formation.node_cleanup.only_log_warning = true
+      cluster_partition_handling = autoheal
+      ## queue master locator
+      queue_master_locator = min-masters
+      cluster_formation.randomized_startup_delay_range.min = 0
+      cluster_formation.randomized_startup_delay_range.max = 2
+      # memory
+      vm_memory_high_watermark.absolute = 100MB
+      # disk
+      disk_free_limit.absolute = 2GB
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;注：配置文件 cluster_formation.k8s.host 设置为 kubernetes.default.svc.cluster.local，然后就是各种连不上，后来换上 kubernetes.default.svc 就可以了，不知道是不是 k8s 新版本的问题。&lt;/em&gt;&lt;/p&gt;
+&lt;h6 id=&#34;4-创建集群的svc&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-创建集群的svc&#34;&gt;#&lt;/a&gt; 4. 创建集群的 svc&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 04-rabbitmq-cluster-svc.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rabbitmq-cluster
+  name: rabbitmq-cluster
+  namespace: prod
+spec:
+  clusterIP: None
+  ports:
+  - name: rmqport
+    port: 5672
+    targetPort: 5672
+  - name: http
+    port: 15672
+    protocol: TCP
+    targetPort: 15672
+  selector:
+    app: rabbitmq-cluster
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rabbitmq-cluster-balancer
+  name: rabbitmq-cluster-balancer
+  namespace: prod
+spec:
+  ports:
+  - name: rmqport
+    port: 5672
+    targetPort: 5672
+  - name: http
+    port: 15672
+    protocol: TCP
+    targetPort: 15672
+  selector:
+    app: rabbitmq-cluster
+  type: NodePort
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;5-创建statefulset&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#5-创建statefulset&#34;&gt;#&lt;/a&gt; 5. 创建 StatefulSet&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 05-rabbitmq-cluster-sts.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: rabbitmq-cluster
+  name: rabbitmq-cluster
+  namespace: prod
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rabbitmq-cluster
+  serviceName: rabbitmq-cluster
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-cluster
+    spec:
+      affinity:                                                 # 避免Pod运行到同一个节点上了
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values: [&amp;quot;rabbitmq-cluster&amp;quot;]
+              topologyKey: &amp;quot;kubernetes.io/hostname&amp;quot;  
+      containers:
+      - args:
+        - -c
+        - cp -v /etc/rabbitmq/rabbitmq.conf $&amp;#123;RABBITMQ_CONFIG_FILE&amp;#125;; exec docker-entrypoint.sh rabbitmq-server
+        command:
+        - sh
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: rabbitmq-secret
+        - name: RABBITMQ_DEFAULT_PASS 
+          valueFrom:
+            secretKeyRef:
+              key: password 
+              name: rabbitmq-secret
+        - name: TZ
+          value: &#39;Asia/Shanghai&#39;
+        - name: RABBITMQ_ERLANG_COOKIE
+          value: &#39;SWvCP0Hrqv43NG7GybHC95ntCJKoW8UyNFWnBEWG8TY=&#39;
+        - name: K8S_SERVICE_NAME
+          value: rabbitmq-cluster
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: RABBITMQ_USE_LONGNAME
+          value: &amp;quot;true&amp;quot;
+        - name: RABBITMQ_NODENAME
+          value: rabbit@$(POD_NAME).$(K8S_SERVICE_NAME).$(POD_NAMESPACE).svc.cluster.local
+        - name: RABBITMQ_CONFIG_FILE
+          value: /var/lib/rabbitmq/rabbitmq.conf
+        image: rabbitmq:3.9-management
+        imagePullPolicy: IfNotPresent
+        name: rabbitmq
+        ports:
+        - containerPort: 15672
+          name: http
+          protocol: TCP
+        - containerPort: 5672
+          name: amqp
+          protocol: TCP
+        livenessProbe:
+          exec:
+            command: [&amp;quot;rabbitmq-diagnostics&amp;quot;, &amp;quot;status&amp;quot;]
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          failureThreshold: 2
+          timeoutSeconds: 10
+        readinessProbe:
+          exec:
+            command: [&amp;quot;rabbitmq-diagnostics&amp;quot;, &amp;quot;status&amp;quot;]
+          failureThreshold: 2
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 10
+        volumeMounts:
+        - mountPath: /etc/rabbitmq
+          name: config-volume
+          readOnly: false
+        - mountPath: /var/lib/rabbitmq
+          name: rabbitmq-storage
+          readOnly: false
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+      serviceAccountName: rabbitmq-cluster
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: config-volume
+        configMap:
+          items:
+          - key: rabbitmq.conf
+            path: rabbitmq.conf
+          - key: enabled_plugins
+            path: enabled_plugins
+          name: rabbitmq-cluster-config
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+  volumeClaimTemplates:
+  - metadata:
+      name: rabbitmq-storage
+    spec:
+      accessModes:
+      - ReadWriteMany
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;6-创建ingress&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#6-创建ingress&#34;&gt;#&lt;/a&gt; 6. 创建 Ingress&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 04-rabbitmq]# cat 06-rabbitmq-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rabbitmq-ingress
+  namespace: prod
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: rabbitmq.hmallleasing.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: rabbitmq-cluster
+            port:
+              number: 15672
+        path: /
+        pathType: ImplementationSpecific
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;7-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#7-更新资源清单&#34;&gt;#&lt;/a&gt; &lt;strong&gt;7. 更新资源清单&lt;/strong&gt;&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 04-rabbitmq]# sed -i &amp;quot;s#dev#prod#g&amp;quot; *.yaml
+[root@k8s-master01 04-rabbitmq]# kubectl apply -f .
+[root@k8s-master01 04-rabbitmq]# kubectl get pods -n prod
+NAME                 READY   STATUS    RESTARTS   AGE
+rabbitmq-cluster-0   1/1     Running   0          9m53s
+rabbitmq-cluster-1   1/1     Running   0          8m47s
+rabbitmq-cluster-2   1/1     Running   0          7m40s
+
+[root@k8s-master01 04-rabbitmq]# kubectl exec -it rabbitmq-cluster-0 -n prod -- /bin/bash
+root@rabbitmq-cluster-0:/# rabbitmqctl cluster_status
+RABBITMQ_ERLANG_COOKIE env variable support is deprecated and will be REMOVED in a future version. Use the $HOME/.erlang.cookie file or the --erlang-cookie switch instead.
+Cluster status of node rabbit@rabbitmq-cluster-0.rabbitmq-cluster.prod.svc.cluster.local ...
+Basics
+
+Cluster name: rabbit@rabbitmq-cluster-0.rabbitmq-cluster.prod.svc.cluster.local
+
+Disk Nodes
+
+rabbit@rabbitmq-cluster-0.rabbitmq-cluster.prod.svc.cluster.local
+rabbit@rabbitmq-cluster-1.rabbitmq-cluster.prod.svc.cluster.local
+rabbit@rabbitmq-cluster-2.rabbitmq-cluster.prod.svc.cluster.local
+
+Running Nodes
+
+rabbit@rabbitmq-cluster-0.rabbitmq-cluster.prod.svc.cluster.local
+rabbit@rabbitmq-cluster-1.rabbitmq-cluster.prod.svc.cluster.local
+rabbit@rabbitmq-cluster-2.rabbitmq-cluster.prod.svc.cluster.local
+
+Versions
+
+rabbit@rabbitmq-cluster-0.rabbitmq-cluster.prod.svc.cluster.local: RabbitMQ 3.9.29 on Erlang 25.3.2.9
+rabbit@rabbitmq-cluster-1.rabbitmq-cluster.prod.svc.cluster.local: RabbitMQ 3.9.29 on Erlang 25.3.2.9
+rabbit@rabbitmq-cluster-2.rabbitmq-cluster.prod.svc.cluster.local: RabbitMQ 3.9.29 on Erlang 25.3.2.9
+
+Maintenance status
+
+Node: rabbit@rabbitmq-cluster-0.rabbitmq-cluster.prod.svc.cluster.local, status: not under maintenance
+Node: rabbit@rabbitmq-cluster-1.rabbitmq-cluster.prod.svc.cluster.local, status: not under maintenance
+Node: rabbit@rabbitmq-cluster-2.rabbitmq-cluster.prod.svc.cluster.local, status: not under maintenance
+
+Alarms
+
+Memory alarm on node rabbit@rabbitmq-cluster-2.rabbitmq-cluster.prod.svc.cluster.local
+Memory alarm on node rabbit@rabbitmq-cluster-1.rabbitmq-cluster.prod.svc.cluster.local
+Memory alarm on node rabbit@rabbitmq-cluster-0.rabbitmq-cluster.prod.svc.cluster.local
+
+Network Partitions
+
+(none)
+
+Listeners
+
+Node: rabbit@rabbitmq-cluster-0.rabbitmq-cluster.prod.svc.cluster.local, interface: [::], port: 15672, protocol: http, purpose: HTTP API
+Node: rabbit@rabbitmq-cluster-0.rabbitmq-cluster.prod.svc.cluster.local, interface: [::], port: 25672, protocol: clustering, purpose: inter-node and CLI tool communication
+Node: rabbit@rabbitmq-cluster-0.rabbitmq-cluster.prod.svc.cluster.local, interface: [::], port: 5672, protocol: amqp, purpose: AMQP 0-9-1 and AMQP 1.0
+Node: rabbit@rabbitmq-cluster-1.rabbitmq-cluster.prod.svc.cluster.local, interface: [::], port: 15672, protocol: http, purpose: HTTP API
+Node: rabbit@rabbitmq-cluster-1.rabbitmq-cluster.prod.svc.cluster.local, interface: [::], port: 25672, protocol: clustering, purpose: inter-node and CLI tool communication
+Node: rabbit@rabbitmq-cluster-1.rabbitmq-cluster.prod.svc.cluster.local, interface: [::], port: 5672, protocol: amqp, purpose: AMQP 0-9-1 and AMQP 1.0
+Node: rabbit@rabbitmq-cluster-2.rabbitmq-cluster.prod.svc.cluster.local, interface: [::], port: 15672, protocol: http, purpose: HTTP API
+Node: rabbit@rabbitmq-cluster-2.rabbitmq-cluster.prod.svc.cluster.local, interface: [::], port: 25672, protocol: clustering, purpose: inter-node and CLI tool communication
+Node: rabbit@rabbitmq-cluster-2.rabbitmq-cluster.prod.svc.cluster.local, interface: [::], port: 5672, protocol: amqp, purpose: AMQP 0-9-1 and AMQP 1.0
+
+Feature flags
+
+Flag: drop_unroutable_metric, state: enabled
+Flag: empty_basic_get_metric, state: enabled
+Flag: implicit_default_bindings, state: enabled
+Flag: maintenance_mode_status, state: enabled
+Flag: quorum_queue, state: enabled
+Flag: stream_queue, state: enabled
+Flag: user_limits, state: enabled
+Flag: virtual_host_metadata, state: enabled
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/XqURJbg.jpeg&#34; alt=&#34;Snipaste_2025-05-17_17-42-47.jpg&#34; /&gt;&lt;/p&gt;
+&lt;h6 id=&#34;8-web访问rabbitmq&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#8-web访问rabbitmq&#34;&gt;#&lt;/a&gt; &lt;strong&gt;8. Web 访问 rabbitmq&lt;/strong&gt;&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;http://rabbitmq.hmallleasing.com/#/
+user:superman
+pwd:talent
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/7qKxUBf.jpeg&#34; alt=&#34;Snipaste_2025-05-17_17-14-54.jpg&#34; /&gt;&lt;/p&gt;
+&lt;h6 id=&#34;9-rabbitmq全部挂了无法重启解决方案&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#9-rabbitmq全部挂了无法重启解决方案&#34;&gt;#&lt;/a&gt; 9. rabbitMQ 全部挂了，无法重启解决方案&lt;/h6&gt;
+&lt;p&gt;Kubernetes 环境中，遇到 RabbitMQ 集群无法启动的问题。原因是 RabbitMQ 所有实例均失效，需要在每个 Pod 对应的持久化存储路径下创建 force_load 文件来强制启动。通过获取 PV 存储路径，在指定目录创建该文件后，重新启动 RabbitMQ 服务，成功解决了集群启动问题&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-node02 ~# cd /data/dev-rabbitmq-storage-rabbitmq-cluster-0-pvc-3abca920-3c68-44eb-b0fd-406a4358b153/mnesia/rabbit@rabbitmq-cluster-0.rabbitmq-cluster.dev.svc.cluster.local
+[root@k8s-node02 rabbit@rabbitmq-cluster-0.rabbitmq-cluster.dev.svc.cluster.local]# touch force_load
+&lt;/code&gt;&lt;/pre&gt;
+ ]]></description>
+        </item>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2692178654.html</guid>
             <title>Rabbitmq集群部署</title>
@@ -129,9 +507,9 @@ lvm2 git nfs-utils iotop httpd-tools dos2unix lrzsz -y
 &lt;/table&gt;
 &lt;h5 id=&#34;22-修改hosts&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-修改hosts&#34;&gt;#&lt;/a&gt; 2.2 修改 hosts&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;vim /etc/hosts
-192.168.40.101 rabbitmq-01
-192.168.40.102 rabbitmq-02
-192.168.40.103 rabbitmq-03
+192.168.40.101 rabbitmq-01
+192.168.40.102 rabbitmq-02
+192.168.40.103 rabbitmq-03
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h5 id=&#34;23-配置hosts&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#23-配置hosts&#34;&gt;#&lt;/a&gt; 2.3 配置 hosts&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;hostnamectl set-hostname rabbitmq-01

@@ -8,14 +8,14 @@
         <pubDate>Sun, 25 May 2025 14:35:21 +0800</pubDate>
         <lastBuildDate>Sun, 25 May 2025 14:35:21 +0800</lastBuildDate>
         <category>Docker</category>
-        <category>ELKStack</category>
         <category>Harbor</category>
+        <category>ELKStack</category>
         <category>Kubernetes</category>
         <category>Redis</category>
         <category>rsync</category>
+        <category>Rabbitmq</category>
         <category>MySQL</category>
         <category>Windows</category>
-        <category>Rabbitmq</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/170066797.html</guid>
             <title>消费租赁项目Kubernetes基于ELK日志分析与实践</title>

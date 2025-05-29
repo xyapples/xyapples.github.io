@@ -8,14 +8,14 @@
         <pubDate>Sun, 18 May 2025 21:42:46 +0800</pubDate>
         <lastBuildDate>Sun, 18 May 2025 21:42:46 +0800</lastBuildDate>
         <category>Docker</category>
-        <category>ELKStack</category>
         <category>Harbor</category>
+        <category>ELKStack</category>
         <category>Kubernetes</category>
         <category>Redis</category>
         <category>rsync</category>
+        <category>Rabbitmq</category>
         <category>MySQL</category>
         <category>Windows</category>
-        <category>Rabbitmq</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/626047790.html</guid>
             <title>消费租赁系统微服务应用交付实践</title>
