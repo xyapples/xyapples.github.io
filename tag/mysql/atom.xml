@@ -5,14 +5,14 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-04-09T14:02:40.000Z</updated>
     <category term="Docker" />
-    <category term="Harbor" />
     <category term="ELKStack" />
+    <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="rsync" />
-    <category term="Rabbitmq" />
     <category term="MySQL" />
     <category term="Windows" />
+    <category term="Rabbitmq" />
     <entry>
         <id>http://ixuyong.cn/posts/2628187572.html</id>
         <title>MySQL运维DBA应用与实践</title>

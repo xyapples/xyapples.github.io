@@ -5,14 +5,14 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-05-29T12:35:53.000Z</updated>
     <category term="Docker" />
-    <category term="Harbor" />
     <category term="ELKStack" />
+    <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="rsync" />
-    <category term="Rabbitmq" />
     <category term="MySQL" />
     <category term="Windows" />
+    <category term="Rabbitmq" />
     <entry>
         <id>http://ixuyong.cn/posts/2692178654.html</id>
         <title>Rabbitmq集群部署</title>
@@ -189,6 +189,7 @@ rabbitmqctl start_app
 #4.查看集群状态,任意节点执行
 rabbitmqctl cluster_status
 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/gWflncf.jpeg&#34; alt=&#34;Snipaste_2025-05-29_20-40-27.jpg&#34; /&gt;&lt;/p&gt;
 &lt;h5 id=&#34;29-配置rabbitmq权限&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#29-配置rabbitmq权限&#34;&gt;#&lt;/a&gt; 2.9 配置 rabbitmq 权限&lt;/h5&gt;
 &lt;p&gt;rabbitmq 有一个默认的账号密码 guest，但该情况仅限于本机 localhost 进行访问，所以需要添加一个远程登录的用户。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;角色有四种：&lt;/strong&gt;&lt;/p&gt;
