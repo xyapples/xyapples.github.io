@@ -8,11 +8,12 @@
         <pubDate>Wed, 14 May 2025 20:29:07 +0800</pubDate>
         <lastBuildDate>Wed, 14 May 2025 20:29:07 +0800</lastBuildDate>
         <category>Docker</category>
-        <category>ELKStack</category>
         <category>Harbor</category>
+        <category>ELKStack</category>
         <category>Kubernetes</category>
         <category>Redis</category>
         <category>rsync</category>
+        <category>Rabbitmq</category>
         <category>MySQL</category>
         <category>Windows</category>
         <item>
