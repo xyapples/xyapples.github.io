@@ -4,14 +4,14 @@
     <title>LinuxSre云原生 • Posts by &#34;elkstack&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-05-25T06:35:21.000Z</updated>
+    <category term="ELKStack" />
     <category term="Docker" />
     <category term="Harbor" />
-    <category term="ELKStack" />
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="rsync" />
-    <category term="Rabbitmq" />
     <category term="MySQL" />
+    <category term="Rabbitmq" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/170066797.html</id>
@@ -1224,6 +1224,1275 @@ zookeeper-2               1/1     Running   0          5h41m
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h5 id=&#34;66-访问kibana&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#66-访问kibana&#34;&gt;#&lt;/a&gt; 6.6 访问 kibana&lt;/h5&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/sUXTx1J.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;7-filebeat-sidecar收集业务应用日志&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#7-filebeat-sidecar收集业务应用日志&#34;&gt;#&lt;/a&gt; 7. filebeat-sidecar 收集业务应用日志&lt;/h4&gt;
+&lt;h5 id=&#34;71-部署架构说明&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#71-部署架构说明&#34;&gt;#&lt;/a&gt; 7.1 部署架构说明&lt;/h5&gt;
+&lt;p&gt;对于那些能够将日志输出到本地文件的 Pod，我们可以使用 Sidecar 模式方式运行一个日志采集 Agent，对其进行单独收集日志。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/u20K1ll.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;首先需要将 Pod 中的业务容器日志输出至本地文件，而后运行一个 Filebeat 边车容器，采集本地路径下的日志；&lt;/li&gt;
+&lt;li&gt;Filebeat 容器需要传递如下变量；
+&lt;ul&gt;
+&lt;li&gt;ENV：了解 Pod 属于隶属于哪个环境；&lt;/li&gt;
+&lt;li&gt;PROJECT_NAME：为了后期能在单个索引中区分出不同的项目；&lt;/li&gt;
+&lt;li&gt;PodIP：为了让用户清楚该 Pod 属于哪个 IP；&lt;/li&gt;
+&lt;li&gt;Node：用于获取该 Pod 所处的节点；&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Logstash 根据不同的环境，拉取不同的 topic 数据，然后将数据存储至 ES 对应的索引中；&lt;/li&gt;
+&lt;li&gt;Kibana 添加不同环境的 index pattern，而后选择对应环境不同的项目进行日志探索与展示；&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h5 id=&#34;72-sidecar部署思路&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#72-sidecar部署思路&#34;&gt;#&lt;/a&gt; 7.2 Sidecar 部署思路&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;制作一个业务镜像，要求镜像输出日志至本地；&lt;/li&gt;
+&lt;li&gt;制作 Filebeat 镜像，配置 Input、output 等信息；&lt;/li&gt;
+&lt;li&gt;采用边车模式运行不同环境的 Pod，确保日志信息能输出至 Kafka 集群；&lt;/li&gt;
+&lt;li&gt;准备不同环境下 Logstash 配置文件，而后读取数据写入 ES 集群；&lt;/li&gt;
+&lt;li&gt;使用 kibana 添加索引，进行日志探索与展示；&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h5 id=&#34;73-制作filebeat镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#73-制作filebeat镜像&#34;&gt;#&lt;/a&gt; 7.3 制作 Filebeat 镜像&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;7.3.1 下载 filebeat&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.17.6-x86_64.rpm
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.3.2 编写 Dockerfile&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat Dockerfile 
+# 1、基础镜像
+FROM centos:7
+
+# 2、拷贝filebeat
+ENV VERSION=7.17.6
+ADD ./filebeat-$&amp;#123;VERSION&amp;#125;-x86_64.rpm /
+RUN rpm -ivh /filebeat-$&amp;#123;VERSION&amp;#125;-x86_64.rpm &amp;amp;&amp;amp; \
+    rm -f /filebeat-$&amp;#123;VERSION&amp;#125;-x86_64.rpm
+
+# 3、拷贝filebeat配置文件（核心）
+ADD ./filebeat.yml /etc/filebeat/filebeat.yml
+
+# 4、拷贝启动脚本
+ADD ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# 5、执行启动脚本
+CMD [&amp;quot;/bin/bash&amp;quot;,&amp;quot;-c&amp;quot;,&amp;quot;/entrypoint.sh&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.3.3 编写 entrypoint&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat entrypoint.sh 
+#启动脚本
+#1、替换filbeat配置文件中的内容
+Beat_Conf=/etc/filebeat/filebeat.yml
+
+sed -i s@&amp;#123;ENV&amp;#125;@$&amp;#123;ENV:-test&amp;#125;@g $&amp;#123;Beat_Conf&amp;#125;
+sed -i s@&amp;#123;PodIP&amp;#125;@$&amp;#123;PodIP:-&amp;quot;no-ip&amp;quot;&amp;#125;@g $&amp;#123;Beat_Conf&amp;#125;
+sed -i s@&amp;#123;Node&amp;#125;@$&amp;#123;Node:-&amp;quot;none&amp;quot;&amp;#125;@g $&amp;#123;Beat_Conf&amp;#125;
+sed -i s@&amp;#123;PROJECT_NAME&amp;#125;@$&amp;#123;PROJECT_NAME:-&amp;quot;no-define&amp;quot;&amp;#125;@g $&amp;#123;Beat_Conf&amp;#125;
+sed -i s@&amp;#123;MULTILINE&amp;#125;@$&amp;#123;MULTILINE:-&amp;quot;^\\\d&amp;#123;2&amp;#125;&amp;quot;&amp;#125;@g $&amp;#123;Beat_Conf&amp;#125;		# \\用来转义
+sed -i s@&amp;#123;KAFKA_HOSTS&amp;#125;@$&amp;#123;KAFKA_HOSTS&amp;#125;@g $&amp;#123;Beat_Conf&amp;#125;
+
+# 2、运行filebeat
+filebeat -e -c /etc/filebeat/filebeat.yml
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.3.4 编写 filebeat 配置&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;{ENV}：用于定义环境的变量；&lt;br /&gt;
+{PROJECT_NAME}：用于定义项目名称的变量；&lt;br /&gt;
+{MULTILINE}：用于定义多行合并的正则变量；&lt;br /&gt;
+{KAFKA_HOSTS}：用于定义 KAFKA 集群地址的变量；&lt;br /&gt;
+{PodIP}：用于获取该 Pod 地址的变量；&lt;br /&gt;
+{Node}：用于获取该 Pod 所处的节点；&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 filebeat_sidecar_dockerfile]# cat filebeat.yml 
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /logu/*.log
+    - /logu/*/*.log
+  tags: [&amp;quot;logu&amp;quot;]
+  fields:
+    topic: &amp;#123;PROJECT_NAME&amp;#125;
+    podip: &amp;#123;PodIP&amp;#125;
+    node: &amp;#123;Node&amp;#125;
+  fields_under_root: true               # 增加的所有字段都为顶级字段
+
+- type: log
+  enabled: true
+  paths:
+    - /logm/*.log
+    - /logm/*/*.log
+  tags: [&amp;quot;logm&amp;quot;]
+  fields:
+    topic: &amp;#123;PROJECT_NAME&amp;#125;
+    podip: &amp;#123;PodIP&amp;#125;
+    node: &amp;#123;Node&amp;#125;
+  fields_under_root: true               # 增加的所有字段都为顶级字段
+  multiline.pattern: &#39;&amp;#123;MULTILINE&amp;#125;&#39;      
+  multiline.negate: true
+  multiline.match: after
+  multiline.max_lines: 10000    #默认最大合并行为500，可根据实际情况调整。
+
+output.kafka:
+  hosts: [&amp;#123;KAFKA_HOSTS&amp;#125;]
+  topic: app-&amp;#123;ENV&amp;#125;-%&amp;#123;[topic]&amp;#125;
+  required_acks: 1              # 保证消息可靠，0不保证，1等待写入主分区（默认），-1等待写入副本分区
+  compression: gzip             # 压缩
+  max_message_bytes: 1000000    # 每条消息最大的长度，多余的被删除
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.3.5 构建并推送镜像&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# docker build -t registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat_sidecar:7.17.6 .
+# docker push registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat_sidecar:7.17.6
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;74-nf-flms-gateway日志收集&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#74-nf-flms-gateway日志收集&#34;&gt;#&lt;/a&gt; 7.4 nf-flms-gateway 日志收集&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;7.4.1 创建 Namespace 和 Secrets&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# sed -i &amp;quot;s#dev#prod#g&amp;quot; *.yaml
+# kubectl create ns prod
+# kubectl create secret tls prod-api.hmallleasig.com --key hmallleasing.com.key --cert hmallleasing.com.pem -n prod
+# kubectl create secret docker-registry harbor-admin --docker-server=registry.cn-hangzhou.aliyuncs.com --docker-username=xyapples@163.com --docker-password=passwd -n prod
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.4.2 创建 nf-flms-gateway&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat 01-nf-flms-gateway.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nf-flms-gateway
+  namespace: prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nf-flms-gateway
+  template:
+    metadata:
+      labels:
+        app: nf-flms-gateway
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: nf-flms-gateway
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/nf-flms-gateway:v2.2 
+        command:
+        - &amp;quot;/bin/sh&amp;quot;
+        - &amp;quot;-c&amp;quot;
+        - &amp;quot;java -Xms256m -Xmx1024m -Dspring.profiles.active=prd -Djava.security.egd=file:/dev/./urandom -jar -Duser.timezone=GMT+08 nf-flms-gateway.jar&amp;quot;
+        resources:
+          limits:
+            cpu: &#39;1000m&#39;
+            memory: 1Gi
+          requests:
+            cpu: &amp;quot;200m&amp;quot;
+            memory: &amp;quot;500Mi&amp;quot;
+        ports:
+        - containerPort: 8080
+        readinessProbe:         # 就绪探针，不就绪则从负载均衡移除
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 2
+        livenessProbe:          # 存活探针，不存活会重启
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 2
+        volumeMounts:
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        - name: log
+          mountPath: /logs    # 业务容器日志目录
+      - name: filebeat
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat_sidecar:7.17.6 
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: log
+          mountPath: /logm    # 匹配多行日志
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        env:
+        - name: ENV
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: PodIP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: Node
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: PROJECT_NAME
+          value: &amp;quot;nf-flms-gateway&amp;quot;
+        - name: KAFKA_HOSTS
+          value: &#39;&amp;quot;kafka-0.kafka-svc.logging:9092&amp;quot;,&amp;quot;kafka-1.kafka-svc.logging:9092&amp;quot;,&amp;quot;kafka-2.kafka-svc.logging:9092&amp;quot;&#39;
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+      - name: log
+        emptyDir: &amp;#123;&amp;#125;
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-svc
+  namespace: prod
+spec:
+  selector:
+    app: nf-flms-gateway
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gateway-ingress
+  namespace: prod
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: &amp;quot;false&amp;quot;    #禁用https强制跳转
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: &amp;quot;prod-api.hmallleasing.com&amp;quot;
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: gateway-svc
+            port:
+              number: 8080
+  tls:                  #https
+  - hosts:
+    - prod-api.hmallleasing.com
+    secretName: &amp;quot;prod-api.hmallleasig.com&amp;quot;   #配置默认证书可不添加secretNam
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.4.3 检查 KafkaTopic&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;1、检查是否有对应的 topic&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/SkS0yA0.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;2、点击对应的 Preview，查看 topic 中的最新数据&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/0SOP2qi.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;75-nf-flms-order日志收集&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#75-nf-flms-order日志收集&#34;&gt;#&lt;/a&gt; 7.5 nf-flms-order 日志收集&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;7.5.1 创建 PVC&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;创建 PVC 存储订单合同、身份证复印件等附件&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat 02-data-image.yaml 
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-image
+  namespace: prod
+spec:
+  storageClassName: &amp;quot;nfs-storage&amp;quot;     # 明确指定使用哪个sc的供应商来创建pv
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi                      # 根据业务实际大小进行资源申请
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.5.2 创建 nf-flms-order&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat 02-nf-flms-order.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nf-flms-order
+  namespace: prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nf-flms-order
+  template:
+    metadata:
+      labels:
+        app: nf-flms-order
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: nf-flms-order
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/nf-flms-order:v2.0 
+        command:
+        - &amp;quot;/bin/sh&amp;quot;
+        - &amp;quot;-c&amp;quot;
+        - &amp;quot;java -Xms256m -Xmx1024m -Dspring.profiles.active=prd -Djava.security.egd=file:/dev/./urandom -jar -Duser.timezone=GMT+08 nf-flms-order.jar&amp;quot;
+        resources:
+          limits:
+            cpu: &#39;1000m&#39;
+            memory: 1Gi
+          requests:
+            cpu: &amp;quot;200m&amp;quot;
+            memory: &amp;quot;500Mi&amp;quot;
+        ports:
+        - containerPort: 8080
+        readinessProbe:         # 就绪探针，不就绪则从负载均衡移除
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 2
+        livenessProbe:          # 存活探针，不存活会重启
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 2
+        volumeMounts:
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        - name: data-image
+          mountPath: /data
+        - name: log
+          mountPath: /logs    # 业务容器日志目录
+      - name: filebeat
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat_sidecar:7.17.6
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: log
+          mountPath: /logm    # 匹配多行日志
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        env:
+        - name: ENV
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: PodIP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: Node
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: PROJECT_NAME
+          value: &amp;quot;nf-flms-order&amp;quot;
+        - name: KAFKA_HOSTS
+          value: &#39;&amp;quot;kafka-0.kafka-svc.logging:9092&amp;quot;,&amp;quot;kafka-1.kafka-svc.logging:9092&amp;quot;,&amp;quot;kafka-2.kafka-svc.logging:9092&amp;quot;&#39;
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+      - name: data-image
+        persistentVolumeClaim:      
+          claimName: data-image
+      - name: log
+        emptyDir: &amp;#123;&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.5.3 检查 KafkaTopic&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;1、检查是否有对应的 topic&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/AxF7dhj.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;2、点击对应的 Preview，查看 topic 中的最新数据&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/bYpKAsJ.png&#34; alt=&#34;5.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;76-nf-flms-statistics日志收集&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#76-nf-flms-statistics日志收集&#34;&gt;#&lt;/a&gt; 7.6 nf-flms-statistics 日志收集&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;7.6.1 创建 nf-flms-statistics&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat 03-nf-flms-statistics.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nf-flms-statistics
+  namespace: prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nf-flms-statistics
+  template:
+    metadata:
+      labels:
+        app: nf-flms-statistics
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: nf-flms-statistics
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/nf-flms-statistics:v2.0 
+        command: 
+        - &amp;quot;/bin/sh&amp;quot;
+        - &amp;quot;-c&amp;quot;
+        - &amp;quot;java -Xms256m -Xmx1024m -Dspring.profiles.active=prd -Djava.security.egd=file:/dev/./urandom -jar -Duser.timezone=GMT+08 nf-flms-statistics.jar&amp;quot;
+        resources:
+          limits:
+            cpu: &#39;1000m&#39;
+            memory: 1Gi
+          requests:
+            cpu: &amp;quot;200m&amp;quot;
+            memory: &amp;quot;500Mi&amp;quot;
+        ports:
+        - containerPort: 8080
+        readinessProbe:         # 就绪探针，不就绪则从负载均衡移除
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 2
+        livenessProbe:          # 存活探针，不存活会重启
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 2
+        volumeMounts:
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        - name: log
+          mountPath: /logs    # 业务容器日志目录
+      - name: filebeat
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat_sidecar:7.17.6
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: log
+          mountPath: /logm    # 匹配多行日志
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        env:
+        - name: ENV
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: PodIP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: Node
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: PROJECT_NAME
+          value: &amp;quot;nf-flms-statistics&amp;quot;
+        - name: KAFKA_HOSTS
+          value: &#39;&amp;quot;kafka-0.kafka-svc.logging:9092&amp;quot;,&amp;quot;kafka-1.kafka-svc.logging:9092&amp;quot;,&amp;quot;kafka-2.kafka-svc.logging:9092&amp;quot;&#39;
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+      - name: log
+        emptyDir: &amp;#123;&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.6.2 检查 KafkaTopic&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;1、检查是否有对应的 topic&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/kD0B7C3.png&#34; alt=&#34;6.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;2、点击对应的 Preview，查看 topic 中的最新数据&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/JO9HMip.png&#34; alt=&#34;7.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;77-nf-flms-system日志收集&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#77-nf-flms-system日志收集&#34;&gt;#&lt;/a&gt; 7.7 nf-flms-system 日志收集&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;7.7.1 创建 nf-flms-system&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat 04-nf-flms-system.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nf-flms-system
+  namespace: prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nf-flms-system
+  template:
+    metadata:
+      labels:
+        app: nf-flms-system
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: nf-flms-system
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/nf-flms-system:v2.0 
+        command:
+        - &amp;quot;/bin/sh&amp;quot;
+        - &amp;quot;-c&amp;quot;
+        - &amp;quot;java -Xms256m -Xmx1024m -Dspring.profiles.active=prd -Djava.security.egd=file:/dev/./urandom -jar -Duser.timezone=GMT+08 nf-flms-system.jar&amp;quot;
+        resources:
+          limits:
+            cpu: &#39;1000m&#39;
+            memory: 1Gi
+          requests:
+            cpu: &amp;quot;200m&amp;quot;
+            memory: &amp;quot;500Mi&amp;quot;
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          failureThreshold: 2
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 10
+        volumeMounts:
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        - name: log
+          mountPath: /logs    # 业务容器日志目录
+      - name: filebeat
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat_sidecar:7.17.6
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: log
+          mountPath: /logm    # 匹配多行日志
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        env:
+        - name: ENV
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: PodIP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: Node
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: PROJECT_NAME
+          value: &amp;quot;nf-flms-system&amp;quot;
+        - name: KAFKA_HOSTS
+          value: &#39;&amp;quot;kafka-0.kafka-svc.logging:9092&amp;quot;,&amp;quot;kafka-1.kafka-svc.logging:9092&amp;quot;,&amp;quot;kafka-2.kafka-svc.logging:9092&amp;quot;&#39;
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+      - name: log
+        emptyDir: &amp;#123;&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.7.2 检查 KafkaTopic&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;1、检查是否有对应的 topic&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Rj4wUMF.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;2、点击对应的 Preview，查看 topic 中的最新数据&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/JYCPcgP.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;78-nf-flms-openapi日志收集&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#78-nf-flms-openapi日志收集&#34;&gt;#&lt;/a&gt; 7.8 nf-flms-openapi 日志收集&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;7.8.1 创建 nf-flms-openapi&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat 06-nf-flms-openapi.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nf-flms-openapi
+  namespace: prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nf-flms-openapi
+  template:
+    metadata:
+      labels:
+        app: nf-flms-openapi
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: nf-flms-openapi
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/nf-flms-openapi:v2.2 
+        command: 
+        - &amp;quot;/bin/sh&amp;quot;
+        - &amp;quot;-c&amp;quot;
+        - &amp;quot;java -Xms256m -Xmx1024m -Dspring.profiles.active=prd -Djava.security.egd=file:/dev/./urandom -jar -Duser.timezone=GMT+08 nf-flms-openapi.jar&amp;quot;
+        resources:
+          limits:
+            cpu: &#39;1000m&#39;
+            memory: 1Gi
+          requests:
+            cpu: &amp;quot;200m&amp;quot;
+            memory: &amp;quot;500Mi&amp;quot;
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          failureThreshold: 2
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 10
+        volumeMounts:
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        - name: log
+          mountPath: /logs    # 业务容器日志目录
+      - name: filebeat
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat_sidecar:7.17.6
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: log
+          mountPath: /logm    # 匹配多行日志
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        env:
+        - name: ENV
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: PodIP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: Node
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: PROJECT_NAME
+          value: &amp;quot;nf-flms-openapi&amp;quot;
+        - name: KAFKA_HOSTS
+          value: &#39;&amp;quot;kafka-0.kafka-svc.logging:9092&amp;quot;,&amp;quot;kafka-1.kafka-svc.logging:9092&amp;quot;,&amp;quot;kafka-2.kafka-svc.logging:9092&amp;quot;&#39;
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+      - name: log
+        emptyDir: &amp;#123;&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.8.2 检查 KafkaTopic&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;1、检查是否有对应的 topic&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/esmEJF7.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;2、点击对应的 Preview，查看 topic 中的最新数据&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/2HvC3KR.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;79-nf-flms-ui日志收集&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#79-nf-flms-ui日志收集&#34;&gt;#&lt;/a&gt; 7.9 nf-flms-ui 日志收集&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;7.9.1 准备 Nginx 配置文件&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat prod.hmallleasing.com.conf 
+server &amp;#123;
+        listen 80;
+        server_name prod.hmallleasing.com;
+        root /code/prod;
+
+        location / &amp;#123;
+            index  index.html index.htm;
+        &amp;#125;
+&amp;#125;
+
+server &amp;#123;
+        listen 80;
+        server_name prod-api.hmallleasing.com;
+
+        location / &amp;#123;
+                proxy_set_header Host $http_host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header REMOTE-HOST $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_pass http://gateway-svc.prod.svc.cluster.local:8080;
+        &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.9.2 创建 ConfigMap&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;kubectl create configmap nf-flms-ui-conf --from-file=./prod.hmallleasing.com.conf -n prod
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.9.3 创建 nf-flms-ui&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 06-service-all]# cat 07-ui-deploy-ingress.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nf-flms-ui
+  namespace: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nf-flms-ui
+  template:
+    metadata:
+      labels:
+        app: nf-flms-ui
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: nf-flms-ui
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/nf-flms-ui:v1.0
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: &#39;1000m&#39;
+            memory: 1Gi
+          requests:
+            cpu: &amp;quot;200m&amp;quot;
+            memory: &amp;quot;500Mi&amp;quot;
+        readinessProbe:         # 就绪探针，不就绪则从负载均衡移除
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 10
+        livenessProbe:          # 存活探针，不存活会重启
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 10
+        volumeMounts:
+        - name: ngxconfs
+          mountPath: /etc/nginx/conf.d/
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        - name: log
+          mountPath: /var/log/nginx/    # 业务容器日志目录
+      - name: filebeat
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat_sidecar:7.17.6
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: log
+          mountPath: /logu    # 匹配多行日志
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        env:
+        - name: ENV
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: PodIP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: Node
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: PROJECT_NAME
+          value: &amp;quot;nf-flms-ui&amp;quot;
+        - name: KAFKA_HOSTS
+          value: &#39;&amp;quot;kafka-0.kafka-svc.logging:9092&amp;quot;,&amp;quot;kafka-1.kafka-svc.logging:9092&amp;quot;,&amp;quot;kafka-2.kafka-svc.logging:9092&amp;quot;&#39;
+      volumes:
+      - name: ngxconfs
+        configMap:
+          name: nf-flms-ui-conf
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+      - name: log
+        emptyDir: &amp;#123;&amp;#125;
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nf-flms-ui-svc
+  namespace: prod
+spec:
+  selector:
+    app: nf-flms-ui
+  ports:
+  - port: 80
+    targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nf-flms-ui-ingress
+  namespace: prod
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: &amp;quot;false&amp;quot;    #禁用https强制跳转
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: &amp;quot;prod.hmallleasing.com&amp;quot;
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nf-flms-ui-svc
+            port:
+              number: 80
+  tls:                  #https
+  - hosts:
+    - prod.hmallleasing.com
+    secretName: &amp;quot;prod-api.hmallleasig.com&amp;quot;   #配置默认证书可不添加secretName
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;7.9.2 检查 KafkaTopic&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;1、检查是否有对应的 topic&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/9Nh2ywz.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;2、点击对应的 Preview，查看 topic 中的最新数据&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/xB0bjWA.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;8交付生产环境logstash&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#8交付生产环境logstash&#34;&gt;#&lt;/a&gt; 8. 交付生产环境 Logstash&lt;/h4&gt;
+&lt;h5 id=&#34;81-拉取镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#81-拉取镜像&#34;&gt;#&lt;/a&gt; 8.1 拉取镜像&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# docker pull docker.elastic.co/logstash/logstash-oss:7.17.6
+# docker tag docker.elastic.co/logstash/logstash-oss:7.17.6 registry.cn-hangzhou.aliyuncs.com/kubernetes_public/logstash-oss:7.17.6
+# docker push registry.cn-hangzhou.aliyuncs.com/kubernetes_public/logstash-oss:7.17.6
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;82-编写logstash配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#82-编写logstash配置&#34;&gt;#&lt;/a&gt; 8.2 编写 logstash 配置&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 conf]# cat logstash-prod.conf 
+input &amp;#123;
+    kafka &amp;#123;
+        bootstrap_servers =&amp;gt; &amp;quot;kafka-0.kafka-svc:9092,kafka-1.kafka-svc:9092,kafka-2.kafka-svc:9092&amp;quot;
+        group_id =&amp;gt; &amp;quot;logstash-prod&amp;quot;      # 消费者组名称
+        consumer_threads =&amp;gt; &amp;quot;3&amp;quot;          # 理想情况下，配置与分区数一样多的线程，实现均衡
+        topics_pattern =&amp;gt; &amp;quot;app-prod-.*&amp;quot;  # 通过正则表达式匹配要订阅的主题
+    &amp;#125;
+&amp;#125;
+
+filter &amp;#123;
+	json &amp;#123;
+		source =&amp;gt; &amp;quot;message&amp;quot;
+	&amp;#125;
+&amp;#125;
+
+output &amp;#123;
+    stdout &amp;#123;
+        codec =&amp;gt; rubydebug
+    &amp;#125;
+    elasticsearch &amp;#123;
+        hosts =&amp;gt; [&amp;quot;es-data-0.es-svc:9200&amp;quot;,&amp;quot;es-data-1.es-svc:9200&amp;quot;]
+        index =&amp;gt; &amp;quot;app-prod-%&amp;#123;+YYYY.MM.dd&amp;#125;&amp;quot;
+        template_overwrite =&amp;gt; true
+    &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;83-创建生产环境configmap&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#83-创建生产环境configmap&#34;&gt;#&lt;/a&gt; 8.3 创建生产环境 configmap&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;kubectl create configmap logstash-prod-conf --from-file=logstash.conf=conf/logstash-prod.conf -n logging
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;84-创建生产环境logstash&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#84-创建生产环境logstash&#34;&gt;#&lt;/a&gt; 8.4 创建生产环境 Logstash&lt;/h5&gt;
+&lt;p&gt;1、创建 logstash-svc&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat 01-logstash-svc.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash-svc
+  namespace: logging
+spec:
+  clusterIP: None
+  selector:
+    app: logstash
+  ports:
+  - port: 9600
+    targetPort: 9600
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;2、创建 logstash-StatefulSet&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat 05-logstash-prod-sts.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: logstash-prod
+  namespace: logging
+spec:
+  serviceName: &amp;quot;logstash-svc&amp;quot;           # 使用此前创建的svc，则无需重复创建
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+      env: prod
+  template:
+    metadata:
+      labels:
+        app: logstash
+        env: prod
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: logstash
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/logstash-oss:7.17.6
+        args: [&amp;quot;-f&amp;quot;,&amp;quot;config/logstash.conf&amp;quot;]                     # 启动时指定加载的配置文件
+        resources:
+          limits:
+            memory: 1024Mi
+        env:
+        - name: PIPELINE_WORKERS
+          value: &amp;quot;2&amp;quot;
+        - name: PIPELINE_BATCH_SIZE
+          value: &amp;quot;10000&amp;quot;
+        lifecycle:
+          postStart:                                            # 设定JVM
+            exec:
+              command:
+              - &amp;quot;/bin/bash&amp;quot;
+              - &amp;quot;-c&amp;quot;
+              - &amp;quot;sed -i -e &#39;/^-Xms/c-Xms1024m&#39; -e &#39;/^-Xmx/c-Xmx1024m&#39; /usr/share/logstash/config/jvm.options&amp;quot;
+        volumeMounts:
+        - name: data                                            # 持久化数据目录
+          mountPath: /usr/share/logstash/data
+        - name: conf
+          mountPath: /usr/share/logstash/config/logstash.conf
+          subPath: logstash.conf
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+      volumes:
+      - name: conf
+        configMap:
+          name: logstash-prod-conf
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;         
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&amp;quot;ReadWriteMany&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;85-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#85-更新资源清单&#34;&gt;#&lt;/a&gt; 8.5 更新资源清单&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 08-logstash]# kubectl apply -f 01-logstash-svc.yaml 
+[root@k8s-master01 08-logstash]# kubectl apply -f 05-logstash-prod-sts.yaml
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;86-检查es生产环境索引&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#86-检查es生产环境索引&#34;&gt;#&lt;/a&gt; 8.6 检查 ES 生产环境索引&lt;/h5&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/0OV3zd4.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;9交付测试环境logstash&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#9交付测试环境logstash&#34;&gt;#&lt;/a&gt; 9. 交付测试环境 Logstash&lt;/h4&gt;
+&lt;h5 id=&#34;91-拉取镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#91-拉取镜像&#34;&gt;#&lt;/a&gt; 9.1 拉取镜像&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# docker pull docker.elastic.co/logstash/logstash-oss:7.17.6
+# docker tag docker.elastic.co/logstash/logstash-oss:7.17.6 registry.cn-hangzhou.aliyuncs.com/kubernetes_public/logstash-oss:7.17.6
+# docker push registry.cn-hangzhou.aliyuncs.com/kubernetes_public/logstash-oss:7.17.6
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;92-编写logstash配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#92-编写logstash配置&#34;&gt;#&lt;/a&gt; 9.2 编写 logstash 配置&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 08-logstash]# cat conf/logstash-test.conf 
+input &amp;#123;
+    kafka &amp;#123;
+        bootstrap_servers =&amp;gt; &amp;quot;kafka-0.kafka-svc:9092,kafka-1.kafka-svc:9092,kafka-2.kafka-svc:9092&amp;quot;
+        group_id =&amp;gt; &amp;quot;logstash-test&amp;quot;      # 消费者组名称
+        consumer_threads =&amp;gt; &amp;quot;3&amp;quot;          # 理想情况下，配置与分区数一样多的线程，实现均衡
+        topics_pattern =&amp;gt; &amp;quot;app-test-.*&amp;quot;  # 通过正则表达式匹配要订阅的主题
+    &amp;#125;
+&amp;#125;
+
+filter &amp;#123;
+	json &amp;#123;
+		source =&amp;gt; &amp;quot;message&amp;quot;
+	&amp;#125;
+&amp;#125;
+
+output &amp;#123;
+    stdout &amp;#123;
+        codec =&amp;gt; rubydebug
+    &amp;#125;
+    elasticsearch &amp;#123;
+        hosts =&amp;gt; [&amp;quot;es-data-0.es-svc:9200&amp;quot;,&amp;quot;es-data-1.es-svc:9200&amp;quot;]
+        index =&amp;gt; &amp;quot;app-test-%&amp;#123;+YYYY.MM.dd&amp;#125;&amp;quot;
+        template_overwrite =&amp;gt; true
+    &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;93-创建测试环境configmap&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#93-创建测试环境configmap&#34;&gt;#&lt;/a&gt; 9.3 创建测试环境 configmap&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;kubectl create configmap logstash-test-conf --from-file=logstash.conf=conf/logstash-test.conf -n logging
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;94-创建测试环境logstash&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#94-创建测试环境logstash&#34;&gt;#&lt;/a&gt; 9.4 创建测试环境 Logstash&lt;/h5&gt;
+&lt;p&gt;1、创建 logstash-svc&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat 01-logstash-svc.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash-svc
+  namespace: logging
+spec:
+  clusterIP: None
+  selector:
+    app: logstash
+  ports:
+  - port: 9600
+    targetPort: 9600
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;2、创建 logstash-StatefulSet&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 08-logstash]# cat 03-logstash-test-sts.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: logstash-test
+  namespace: logging
+spec:
+  serviceName: &amp;quot;logstash-svc&amp;quot;           # 使用此前创建的svc，则无需重复创建
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+      env: test
+  template:
+    metadata:
+      labels:
+        app: logstash
+        env: test
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: logstash
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/logstash-oss:7.17.6
+        args: [&amp;quot;-f&amp;quot;,&amp;quot;config/logstash.conf&amp;quot;]                     # 启动时指定加载的配置文件
+        resources:
+          limits:
+            memory: 1024Mi
+        env:
+        - name: PIPELINE_WORKERS
+          value: &amp;quot;2&amp;quot;
+        - name: PIPELINE_BATCH_SIZE
+          value: &amp;quot;10000&amp;quot;
+        lifecycle:
+          postStart:                                            # 设定JVM
+            exec:
+              command:
+              - &amp;quot;/bin/bash&amp;quot;
+              - &amp;quot;-c&amp;quot;
+              - &amp;quot;sed -i -e &#39;/^-Xms/c-Xms1024m&#39; -e &#39;/^-Xmx/c-Xmx1024m&#39; /usr/share/logstash/config/jvm.options&amp;quot;
+        volumeMounts:
+        - name: data                                            # 持久化数据目录
+          mountPath: /usr/share/logstash/data
+        - name: conf
+          mountPath: /usr/share/logstash/config/logstash.conf
+          subPath: logstash.conf
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone          
+      volumes:
+      - name: conf
+        configMap:
+          name: logstash-test-conf
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;          
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&amp;quot;ReadWriteMany&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;95-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#95-更新资源清单&#34;&gt;#&lt;/a&gt; 9.5 更新资源清单&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 08-logstash]# kubectl apply -f 01-logstash-svc.yaml 
+[root@k8s-master01 08-logstash]# kubectl apply -f 03-logstash-test-sts.yaml
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;96-检查es测试环境索引&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#96-检查es测试环境索引&#34;&gt;#&lt;/a&gt; 9.6 检查 ES 测试环境索引&lt;/h5&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/0OV3zd4.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;10-kibana数据展示&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#10-kibana数据展示&#34;&gt;#&lt;/a&gt; 10. Kibana 数据展示&lt;/h4&gt;
+&lt;h5 id=&#34;101-添加生产环境索引&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#101-添加生产环境索引&#34;&gt;#&lt;/a&gt; 10.1 添加生产环境索引&lt;/h5&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/B5uofDF.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;102-查看生产环境数据&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#102-查看生产环境数据&#34;&gt;#&lt;/a&gt; 10.2 查看生产环境数据&lt;/h5&gt;
+&lt;p&gt;kibana-&amp;gt;Discover&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/yY4Y4Sz.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;①点击开发环境索引 -&amp;gt;②选择需要查看的字段 -&amp;gt;③进行 filter 筛选项目 -&amp;gt;④选择对应时间段&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/9i3HsC6.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/PPAQczE.png&#34; alt=&#34;5.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/NkOwqO3.png&#34; alt=&#34;6.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;11daemonset运行日志agent实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11daemonset运行日志agent实践&#34;&gt;#&lt;/a&gt; 11.DaemonSet 运行日志 Agent 实践&lt;/h4&gt;
+&lt;h5 id=&#34;111-部署架构说明&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#111-部署架构说明&#34;&gt;#&lt;/a&gt; 11.1 部署架构说明&lt;/h5&gt;
+&lt;p&gt;对于那些将日志输出到，stdout 与 stderr 的 Pod，可以直接使用 DaemonSet 控制器在每个 Node 节点上运行一个 filebeat、logstash、fluentd 容器进行统一的收集，而后写入到日志存储系统&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/UOlaNE1.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;112-创建serviceaccount&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#112-创建serviceaccount&#34;&gt;#&lt;/a&gt; 11.2 创建 ServiceAccount&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt; kubectl create serviceaccount filebeat -n logging
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;113-创建clusterrole&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#113-创建clusterrole&#34;&gt;#&lt;/a&gt; 11.3 创建 ClusterRole&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;kubectl create clusterrole filebeat --verb=get,list,watch --resource=namespace,pods,nodes 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;114-创建clusterrolebinding&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#114-创建clusterrolebinding&#34;&gt;#&lt;/a&gt; 11.4 创建 ClusterRolebinding&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;kubectl create clusterrolebinding filebeat --serviceaccount=logging:filebeat --clusterrole=filebeat
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;115-交付filebeat&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#115-交付filebeat&#34;&gt;#&lt;/a&gt; 11.5 交付 Filebeat&lt;/h5&gt;
+&lt;h6 id=&#34;1151-下载filebeat镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1151-下载filebeat镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;11.5.1 下载 filebeat 镜像&lt;/strong&gt;&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# docker pull docker.elastic.co/beats/filebeat:7.17.6
+# docker tag docker.elastic.co/beats/filebeat:7.17.6 registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat:7.17.6
+# docker push registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat:7.17.6
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;1152-交付filebeat&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1152-交付filebeat&#34;&gt;#&lt;/a&gt; &lt;strong&gt;11.5.2 交付 filebeat&lt;/strong&gt;&lt;/h6&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;从 ConfigMap 中挂载 filebeat.yaml 配置文件；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;挂载 /var/log、/var/lib/docker/containers 日志相关目录；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;使用 hostPath 方式挂载 /usr/share/filebeat/data 数据目录，该目录下有一个 registry 文件，里面记录了 filebeat 采集日志位置的相关内容，比如文件 offset、source、timestamp 等，如果 Pod 发生异常后 K8S 自动将 Pod 进行重启，不挂载的情况下 registry 会被重置，将导致日志文件又从 offset=0 开始采集，会造成重复收集日志。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 07-filebeat-daemoset]# cat 02-filebeat-ds.yaml 
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: filebeat
+  namespace: logging
+spec:
+  selector:
+    matchLabels:
+      app: filebeat
+  template:
+    metadata:
+      labels:
+        app: filebeat
+    spec:
+      serviceAccountName: &amp;quot;filebeat&amp;quot;
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: &amp;quot;Exists&amp;quot;
+        effect: &amp;quot;NoSchedule&amp;quot;
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: filebeat
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat:7.17.6
+        args: [
+          &amp;quot;-c&amp;quot;,&amp;quot;/etc/filebeat.yml&amp;quot;,
+          &amp;quot;-e&amp;quot;
+        ]
+        securityContext:
+          runAsUser: 0
+        resources:
+          limits:
+            memory: 300Mi
+        volumeMounts:
+        - name: config                          # 从ConfigMap中读取
+          mountPath: /etc/filebeat.yml
+          subPath: filebeat.yml
+        - name: varlog
+          mountPath: /var/log
+          readOnly: true
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: data
+          mountPath: /usr/share/filebeat/data
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+      volumes:
+      - name: config
+        configMap:
+          name: filebeat-config
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: data
+        hostPath:
+          path: /var/lib/filebeat-data
+          type: DirectoryOrCreate
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot; 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;1153-filebeat配置文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1153-filebeat配置文件&#34;&gt;#&lt;/a&gt; 11.5.3 Filebeat 配置文件&lt;/h6&gt;
 </content>
         <category term="ELKStack" />
         <updated>2025-05-25T06:35:21.000Z</updated>

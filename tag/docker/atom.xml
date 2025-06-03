@@ -4,14 +4,14 @@
     <title>LinuxSre云原生 • Posts by &#34;docker&#34; tag</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-05-14T12:29:07.000Z</updated>
+    <category term="ELKStack" />
     <category term="Docker" />
     <category term="Harbor" />
-    <category term="ELKStack" />
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="rsync" />
-    <category term="Rabbitmq" />
     <category term="MySQL" />
+    <category term="Rabbitmq" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/1888662579.html</id>
