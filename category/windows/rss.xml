@@ -7,12 +7,12 @@
         <language>zh-CN</language>
         <pubDate>Thu, 10 Apr 2025 21:32:09 +0800</pubDate>
         <lastBuildDate>Thu, 10 Apr 2025 21:32:09 +0800</lastBuildDate>
-        <category>Harbor</category>
         <category>Docker</category>
+        <category>Harbor</category>
         <category>ELKStack</category>
+        <category>MySQL</category>
         <category>Kubernetes</category>
         <category>Redis</category>
-        <category>MySQL</category>
         <category>rsync</category>
         <category>Rabbitmq</category>
         <category>Windows</category>

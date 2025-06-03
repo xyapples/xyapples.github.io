@@ -4,12 +4,12 @@
     <title>LinuxSre云原生 • Posts by &#34;elkstack&#34; tag</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-05-25T06:35:21.000Z</updated>
-    <category term="Harbor" />
     <category term="Docker" />
+    <category term="Harbor" />
     <category term="ELKStack" />
+    <category term="MySQL" />
     <category term="Kubernetes" />
     <category term="Redis" />
-    <category term="MySQL" />
     <category term="rsync" />
     <category term="Rabbitmq" />
     <category term="Windows" />
@@ -1224,7 +1224,7 @@ zookeeper-2               1/1     Running   0          5h41m
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h5 id=&#34;66-访问kibana&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#66-访问kibana&#34;&gt;#&lt;/a&gt; 6.6 访问 kibana&lt;/h5&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/sUXTx1J.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;七-filebeat-sidecar收集业务应用日志&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#七-filebeat-sidecar收集业务应用日志&#34;&gt;#&lt;/a&gt; 七. filebeat-sidecar 收集业务应用日志&lt;/h4&gt;
+&lt;h4 id=&#34;七-filebeat-sidecar收集业务应用日志&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#七-filebeat-sidecar收集业务应用日志&#34;&gt;#&lt;/a&gt; 七、filebeat-sidecar 收集业务应用日志&lt;/h4&gt;
 &lt;h5 id=&#34;71-部署架构说明&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#71-部署架构说明&#34;&gt;#&lt;/a&gt; 7.1 部署架构说明&lt;/h5&gt;
 &lt;p&gt;对于那些能够将日志输出到本地文件的 Pod，我们可以使用 Sidecar 模式方式运行一个日志采集 Agent，对其进行单独收集日志。&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/u20K1ll.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
@@ -2108,7 +2108,7 @@ spec:
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/9Nh2ywz.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;2、点击对应的 Preview，查看 topic 中的最新数据&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/xB0bjWA.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;八交付生产环境logstash&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#八交付生产环境logstash&#34;&gt;#&lt;/a&gt; 八。交付生产环境 Logstash&lt;/h4&gt;
+&lt;h4 id=&#34;八-交付生产环境logstash&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#八-交付生产环境logstash&#34;&gt;#&lt;/a&gt; 八、交付生产环境 Logstash&lt;/h4&gt;
 &lt;h5 id=&#34;81-拉取镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#81-拉取镜像&#34;&gt;#&lt;/a&gt; 8.1 拉取镜像&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;# docker pull docker.elastic.co/logstash/logstash-oss:7.17.6
 # docker tag docker.elastic.co/logstash/logstash-oss:7.17.6 registry.cn-hangzhou.aliyuncs.com/kubernetes_public/logstash-oss:7.17.6
@@ -2242,7 +2242,7 @@ spec:
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h5 id=&#34;86-检查es生产环境索引&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#86-检查es生产环境索引&#34;&gt;#&lt;/a&gt; 8.6 检查 ES 生产环境索引&lt;/h5&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/0OV3zd4.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;九交付测试环境logstash&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#九交付测试环境logstash&#34;&gt;#&lt;/a&gt; 九。交付测试环境 Logstash&lt;/h4&gt;
+&lt;h4 id=&#34;九-交付测试环境logstash&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#九-交付测试环境logstash&#34;&gt;#&lt;/a&gt; 九、交付测试环境 Logstash&lt;/h4&gt;
 &lt;h5 id=&#34;91-拉取镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#91-拉取镜像&#34;&gt;#&lt;/a&gt; 9.1 拉取镜像&lt;/h5&gt;
 &lt;pre&gt;&lt;code&gt;# docker pull docker.elastic.co/logstash/logstash-oss:7.17.6
 # docker tag docker.elastic.co/logstash/logstash-oss:7.17.6 registry.cn-hangzhou.aliyuncs.com/kubernetes_public/logstash-oss:7.17.6
@@ -2376,7 +2376,7 @@ spec:
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h5 id=&#34;96-检查es测试环境索引&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#96-检查es测试环境索引&#34;&gt;#&lt;/a&gt; 9.6 检查 ES 测试环境索引&lt;/h5&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/0OV3zd4.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;十-kibana数据展示&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#十-kibana数据展示&#34;&gt;#&lt;/a&gt; 十. Kibana 数据展示&lt;/h4&gt;
+&lt;h4 id=&#34;十-kibana数据展示&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#十-kibana数据展示&#34;&gt;#&lt;/a&gt; 十、Kibana 数据展示&lt;/h4&gt;
 &lt;h5 id=&#34;101-添加生产环境索引&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#101-添加生产环境索引&#34;&gt;#&lt;/a&gt; 10.1 添加生产环境索引&lt;/h5&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/B5uofDF.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
 &lt;h5 id=&#34;102-查看生产环境数据&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#102-查看生产环境数据&#34;&gt;#&lt;/a&gt; 10.2 查看生产环境数据&lt;/h5&gt;
@@ -2386,7 +2386,7 @@ spec:
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/9i3HsC6.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/PPAQczE.png&#34; alt=&#34;5.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/NkOwqO3.png&#34; alt=&#34;6.png&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;十一daemonset运行日志agent实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#十一daemonset运行日志agent实践&#34;&gt;#&lt;/a&gt; 十一.DaemonSet 运行日志 Agent 实践&lt;/h4&gt;
+&lt;h4 id=&#34;十一-daemonset运行日志agent实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#十一-daemonset运行日志agent实践&#34;&gt;#&lt;/a&gt; 十一、DaemonSet 运行日志 Agent 实践&lt;/h4&gt;
 &lt;h5 id=&#34;111-部署架构说明&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#111-部署架构说明&#34;&gt;#&lt;/a&gt; 11.1 部署架构说明&lt;/h5&gt;
 &lt;p&gt;对于那些将日志输出到，stdout 与 stderr 的 Pod，可以直接使用 DaemonSet 控制器在每个 Node 节点上运行一个 filebeat、logstash、fluentd 容器进行统一的收集，而后写入到日志存储系统&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/UOlaNE1.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
