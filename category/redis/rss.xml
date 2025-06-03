@@ -10,10 +10,10 @@
         <category>Docker</category>
         <category>Harbor</category>
         <category>ELKStack</category>
-        <category>MySQL</category>
         <category>Kubernetes</category>
         <category>Redis</category>
         <category>rsync</category>
+        <category>MySQL</category>
         <category>Rabbitmq</category>
         <category>Windows</category>
         <item>

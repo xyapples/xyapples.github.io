@@ -7,10 +7,10 @@
     <category term="Docker" />
     <category term="Harbor" />
     <category term="ELKStack" />
-    <category term="MySQL" />
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="rsync" />
+    <category term="MySQL" />
     <category term="Rabbitmq" />
     <category term="Windows" />
     <entry>

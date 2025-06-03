@@ -7,10 +7,10 @@
     <category term="Docker" />
     <category term="Harbor" />
     <category term="ELKStack" />
-    <category term="MySQL" />
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="rsync" />
+    <category term="MySQL" />
     <category term="Rabbitmq" />
     <category term="Windows" />
     <entry>
@@ -204,6 +204,42 @@ spec:
 &lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# dig @10.96.0.10 mysql-nf-flms-0.mysql-nf-flms-svc.prod.svc.cluster.local +short
 172.16.85.231
 [root@k8s-master01 ~]# mysql -h 172.16.85.231 -uroot -p&amp;quot;Superman*2023&amp;quot; -B nf_flms &amp;lt; 202503310038/sggyl_nf_flms_202503310038.sql
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;117-连接外部数据库示例&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#117-连接外部数据库示例&#34;&gt;#&lt;/a&gt; 1.1.7 连接外部数据库示例&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 01-nf-flms-mysql]# cat 05-mysql-nf-flms-svc-external.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mysql-nf-flms-svc-external
+  name: mysql-nf-flms-svc-external
+  namespace: prod
+spec:
+  clusterIP: None
+  ports:
+  - name: mysql
+    port: 3306 
+    protocol: TCP
+    targetPort: 3306
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  labels:
+    app: mysql-nf-flms-svc-external
+  name: mysql-nf-flms-svc-external
+  namespace: prod
+subsets:
+- addresses:
+  - ip: 192.168.1.68
+  ports:
+  - name: mysql
+    port: 3306
+    protocol: TCP
+    
+[root@k8s-master01 01-nf-flms-mysql]# dig @10.96.0.10 mysql-nf-flms-svc-external.prod.svc.cluster.local +short
+192.168.1.68
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h5 id=&#34;12-部署redis-single&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#12-部署redis-single&#34;&gt;#&lt;/a&gt; 1.2 部署 Redis-single&lt;/h5&gt;
 &lt;h6 id=&#34;121-redis-configmap&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#121-redis-configmap&#34;&gt;#&lt;/a&gt; 1.2.1 Redis-ConfigMap&lt;/h6&gt;
