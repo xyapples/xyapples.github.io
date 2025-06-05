@@ -4,15 +4,16 @@
     <title>LinuxSre云原生 • Posts by &#34;elkstack&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-05T11:06:21.000Z</updated>
-    <category term="Docker" />
     <category term="ELKStack" />
+    <category term="Docker" />
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="rsync" />
     <category term="Rabbitmq" />
-    <category term="Windows" />
     <category term="MySQL" />
+    <category term="默认tags" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/570469260.html</id>
         <title>ELK收集Kubernetes组件日志分析与实践</title>

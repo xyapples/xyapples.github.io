@@ -4,15 +4,16 @@
     <title>LinuxSre云原生 • Posts by &#34;rabbitmq&#34; tag</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-05-29T12:48:49.000Z</updated>
-    <category term="Docker" />
     <category term="ELKStack" />
+    <category term="Docker" />
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="rsync" />
     <category term="Rabbitmq" />
-    <category term="Windows" />
     <category term="MySQL" />
+    <category term="默认tags" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/1384812626.html</id>
         <title>Kubenetes部署Rabbitmq集群</title>
