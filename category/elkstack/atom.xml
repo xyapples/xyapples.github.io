@@ -3,16 +3,1655 @@
     <id>http://ixuyong.cn</id>
     <title>LinuxSre云原生 • Posts by &#34;elkstack&#34; category</title>
     <link href="http://ixuyong.cn" />
-    <updated>2025-05-25T06:35:21.000Z</updated>
-    <category term="Docker" />
-    <category term="Harbor" />
+    <updated>2025-06-05T11:06:21.000Z</updated>
     <category term="ELKStack" />
+    <category term="Docker" />
     <category term="Kubernetes" />
     <category term="Redis" />
+    <category term="Harbor" />
     <category term="rsync" />
     <category term="MySQL" />
     <category term="Rabbitmq" />
     <category term="Windows" />
+    <entry>
+        <id>http://ixuyong.cn/posts/570469260.html</id>
+        <title>ELK收集Kubernetes组件日志分析与实践</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/570469260.html"/>
+        <content type="html">&lt;h3 id=&#34;elk收集kubernetes组件日志分析与实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#elk收集kubernetes组件日志分析与实践&#34;&gt;#&lt;/a&gt; ELK 收集 Kubernetes 组件日志分析与实践&lt;/h3&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Og7liF6.jpeg&#34; alt=&#34;Snipaste_2025-05-25_13-43-46.jpg&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;一-elk创建namespace和secrets&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-elk创建namespace和secrets&#34;&gt;#&lt;/a&gt; 一、ELK 创建 Namespace 和 Secrets&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl create ns logging
+# kubectl create secret docker-registry harbor-admin -n logging --docker-server=registry.cn-hangzhou.aliyuncs.com --docker-username=xyapples@163.com --docker-password=passwd
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;二-交付zookeeper集群至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#二-交付zookeeper集群至k8s&#34;&gt;#&lt;/a&gt; 二、交付 Zookeeper 集群至 K8S&lt;/h4&gt;
+&lt;h5 id=&#34;21-制作zk集群镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-制作zk集群镜像&#34;&gt;#&lt;/a&gt; 2.1 制作 ZK 集群镜像&lt;/h5&gt;
+&lt;h6 id=&#34;211-dockerfile&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#211-dockerfile&#34;&gt;#&lt;/a&gt; 2.1.1 Dockerfile&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat Dockerfile 
+FROM openjdk:8-jre
+
+# 1、拷贝Zookeeper压缩包和配置文件
+ENV VERSION=3.8.4
+ADD ./apache-zookeeper-$&amp;#123;VERSION&amp;#125;-bin.tar.gz /
+ADD ./zoo.cfg /apache-zookeeper-$&amp;#123;VERSION&amp;#125;-bin/conf
+
+# 2、对Zookeeper文件夹名称重新命名
+RUN mv /apache-zookeeper-$&amp;#123;VERSION&amp;#125;-bin /zookeeper
+
+# 3、拷贝eentrpoint的启动脚本文件
+ADD ./entrypoint.sh /entrypoint.sh
+
+# 4、暴露Zookeeper端口
+EXPOSE 2181 2888 3888
+
+# 5、执行启动脚本
+CMD [&amp;quot;/bin/bash&amp;quot;,&amp;quot;/entrypoint.sh&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;212-zoocfg&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#212-zoocfg&#34;&gt;#&lt;/a&gt; 2.1.2 zoo.cfg&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat zoo.cfg 
+# 服务器之间或客户端与服务器之间维持心跳的时间间隔 tickTime以毫秒为单位。
+tickTime=&amp;#123;ZOOK_TICKTIME&amp;#125;
+
+# 集群中的follower服务器(F)与leader服务器(L)之间的初始连接心跳数 10* tickTime
+initLimit=&amp;#123;ZOOK_INIT_LIMIT&amp;#125;
+
+# 集群中的follower服务器与leader服务器之间请求和应答之间能容忍的最多心跳数 5 * tickTime
+syncLimit=&amp;#123;ZOOK_SYNC_LIMIT&amp;#125;
+ 
+# 数据保存目录
+dataDir=&amp;#123;ZOOK_DATA_DIR&amp;#125;
+
+# 日志保存目录
+dataLogDir=&amp;#123;ZOOK_LOG_DIR&amp;#125;
+
+# 客户端连接端口
+clientPort=&amp;#123;ZOOK_CLIENT_PORT&amp;#125;
+
+# 客户端最大连接数。# 根据自己实际情况设置，默认为60个
+maxClientCnxns=&amp;#123;ZOOK_MAX_CLIENT_CNXNS&amp;#125;
+
+# 客户端获取 zookeeper 服务的当前状态及相关信息
+4lw.commands.whitelist=*
+
+# 三个接点配置，格式为： server.服务编号=服务地址、LF通信端口、选举端口
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;213-entrypoint&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#213-entrypoint&#34;&gt;#&lt;/a&gt; 2.1.3 entrypoint&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat entrypoint.sh 
+#设定变量
+ZOOK_BIN_DIR=/zookeeper/bin
+ZOOK_CONF_DIR=/zookeeper/conf/zoo.cfg
+
+# 2、对配置文件中的字符串进行变量替换
+sed -i s@&amp;#123;ZOOK_TICKTIME&amp;#125;@$&amp;#123;ZOOK_TICKTIME:-2000&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+sed -i s@&amp;#123;ZOOK_INIT_LIMIT&amp;#125;@$&amp;#123;ZOOK_INIT_LIMIT:-10&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+sed -i s@&amp;#123;ZOOK_SYNC_LIMIT&amp;#125;@$&amp;#123;ZOOK_SYNC_LIMIT:-5&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+sed -i s@&amp;#123;ZOOK_DATA_DIR&amp;#125;@$&amp;#123;ZOOK_DATA_DIR:-/data&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+sed -i s@&amp;#123;ZOOK_LOG_DIR&amp;#125;@$&amp;#123;ZOOK_LOG_DIR:-/logs&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+sed -i s@&amp;#123;ZOOK_CLIENT_PORT&amp;#125;@$&amp;#123;ZOOK_CLIENT_PORT:-2181&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+sed -i s@&amp;#123;ZOOK_MAX_CLIENT_CNXNS&amp;#125;@$&amp;#123;ZOOK_MAX_CLIENT_CNXNS:-60&amp;#125;@g $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+
+# 3、准备ZK的集群节点地址，后期肯定是需要通过ENV的方式注入进来
+for server in $&amp;#123;ZOOK_SERVERS&amp;#125;
+do
+	echo $&amp;#123;server&amp;#125; &amp;gt;&amp;gt; $&amp;#123;ZOOK_CONF_DIR&amp;#125;
+done
+
+# 4、在datadir目录中创建myid的文件，并填入对应的编号
+ZOOK_MYID=$(( $(hostname | sed &#39;s#.*-##g&#39;) + 1 ))
+echo $&amp;#123;ZOOK_MYID:-99&amp;#125; &amp;gt; $&amp;#123;ZOOK_DATA_DIR:-/data&amp;#125;/myid
+
+#5、前台运行Zookeeper
+cd $&amp;#123;ZOOK_BIN_DIR&amp;#125;
+./zkServer.sh start-foreground
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;214-构建镜像并推送仓库&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#214-构建镜像并推送仓库&#34;&gt;#&lt;/a&gt; 2.1.4 构建镜像并推送仓库&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# wget https://dlcdn.apache.org/zookeeper/zookeeper-3.8.4/apache-zookeeper-3.8.4-bin.tar.gz
+# docker build -t registry.cn-hangzhou.aliyuncs.com/kubernetes_public/zookeeper:3.8.4 .
+# docker push  registry.cn-hangzhou.aliyuncs.com/kubernetes_public/zookeeper:3.8.4
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;22-迁移zookeeper至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-迁移zookeeper至k8s&#34;&gt;#&lt;/a&gt; 2.2  迁移 zookeeper 至 K8S&lt;/h5&gt;
+&lt;h6 id=&#34;221-zookeeper-headless&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#221-zookeeper-headless&#34;&gt;#&lt;/a&gt; 2.2.1 zookeeper-headless&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 01-zookeeper-headless.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-svc
+  namespace: logging
+spec:
+  clusterIP: None
+  selector:
+    app: zookeeper
+  ports:
+  - name: client
+    port: 2181
+    targetPort: 2181
+  - name: leader-follwer
+    port: 2888
+    targetPort: 2888
+  - name: selection
+    port: 3888
+    targetPort: 3888
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;222-zookeeper-sts&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#222-zookeeper-sts&#34;&gt;#&lt;/a&gt; 2.2.2 zookeeper-sts&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 01-zookeeper]# vim 02-zookeeper-sts.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zookeeper               
+  namespace: logging
+spec:
+  serviceName: &amp;quot;zookeeper-svc&amp;quot;
+  replicas: 3
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values: [&amp;quot;zookeeper&amp;quot;]
+              topologyKey: &amp;quot;kubernetes.io/hostname&amp;quot;
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: zookeeper
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/zookeeper:3.8.4           
+        imagePullPolicy: Always
+        ports:
+        - name: client
+          containerPort: 2181
+        - name: leader-follwer
+          containerPort: 2888
+        - name: selection
+          containerPort: 3888
+        env:
+        - name: ZOOK_SERVERS
+          value: &amp;quot;server.1=zookeeper-0.zookeeper-svc.logging.svc.cluster.local:2888:3888 server.2=zookeeper-1.zookeeper-svc.logging.svc.cluster.local:2888:3888 server.3=zookeeper-2.zookeeper-svc.logging.svc.cluster.local:2888:3888&amp;quot;
+        readinessProbe:         # 就绪探针，不就绪则不介入流量
+          exec:
+            command:
+            - &amp;quot;/bin/bash&amp;quot;
+            - &amp;quot;-c&amp;quot;
+            - &#39;[[ &amp;quot;$(/zookeeper/bin/zkServer.sh status 2&amp;gt;/dev/null|grep 2181)&amp;quot; ]] &amp;amp;&amp;amp; exit 0 || exit 1&#39;
+          initialDelaySeconds: 5
+        livenessProbe:         # 存活探针。如果不存活则根据重启策略进行重启
+          exec:
+            command:
+            - &amp;quot;/bin/bash&amp;quot;
+            - &amp;quot;-c&amp;quot;
+            - &#39;[[ &amp;quot;$(/zookeeper/bin/zkServer.sh status 2&amp;gt;/dev/null|grep 2181)&amp;quot; ]] &amp;amp;&amp;amp; exit 0 || exit 1&#39;
+          initialDelaySeconds: 5
+        volumeMounts:
+        - name: data
+          mountPath: /data
+          subPath: data
+        - name: data
+          mountPath: /logs
+          subPath: logs
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&amp;quot;ReadWriteMany&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;223-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#223-更新资源清单&#34;&gt;#&lt;/a&gt; 2.2.3 更新资源清单&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 01-zookeeper]# kubectl apply -f 01-zookeeper-headless.yaml 
+[root@k8s-master01 01-zookeeper]# kubectl apply -f 02-zookeeper-sts.yaml
+[root@k8s-master01 01-zookeeper]# kubectl get pods -n logging
+NAME          READY   STATUS    RESTARTS   AGE
+zookeeper-0   1/1     Running   0          17m
+zookeeper-1   1/1     Running   0          14m
+zookeeper-2   1/1     Running   0          11m
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;224-检查zookeeper集群状态&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#224-检查zookeeper集群状态&#34;&gt;#&lt;/a&gt; 2.2.4 检查 zookeeper 集群状态&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# for i in 0 1 2 ; do kubectl exec zookeeper-$i -n logging -- /zookeeper/bin/zkServer.sh status; done
+ZooKeeper JMX enabled by default
+Using config: /zookeeper/bin/../conf/zoo.cfg
+Client port found: 2181. Client address: localhost. Client SSL: false.
+Mode: follower
+ZooKeeper JMX enabled by default
+Using config: /zookeeper/bin/../conf/zoo.cfg
+Client port found: 2181. Client address: localhost. Client SSL: false.
+Mode: leader
+ZooKeeper JMX enabled by default
+Using config: /zookeeper/bin/../conf/zoo.cfg
+Client port found: 2181. Client address: localhost. Client SSL: false.
+Mode: follower
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;225-连接zookeeper集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#225-连接zookeeper集群&#34;&gt;#&lt;/a&gt; 2.2.5 连接 Zookeeper 集群&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 01-zookeeper]# kubectl exec -it zookeeper-0 -n logging -- /bin/sh
+# /zookeeper/bin/zkCli.sh -server zookeeper-svc
+[zk: zookeeper-svc(CONNECTED) 0]  create /hello oldxu
+Created /hello
+[zk: zookeeper-svc(CONNECTED) 1] get /hello
+oldxu
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;三-交付kafka集群至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#三-交付kafka集群至k8s&#34;&gt;#&lt;/a&gt; 三、 交付 Kafka 集群至 K8S&lt;/h4&gt;
+&lt;h5 id=&#34;31-制作kafka集群镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#31-制作kafka集群镜像&#34;&gt;#&lt;/a&gt; 3.1 制作 Kafka 集群镜像&lt;/h5&gt;
+&lt;h6 id=&#34;311-dockerfile&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#311-dockerfile&#34;&gt;#&lt;/a&gt; 3.1.1 Dockerfile&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat Dockerfile 
+FROM openjdk:8-jre
+
+# 1、调整时区
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime &amp;amp;&amp;amp; \
+    echo &#39;Asia/Shanghai&#39; &amp;gt; /etc/timezone
+
+# 2、拷贝kafka软件以及kafka的配置
+ENV VERSION=2.12-2.2.0
+ADD ./kafka_$&amp;#123;VERSION&amp;#125;.tgz /
+ADD ./server.properties /kafka_$&amp;#123;VERSION&amp;#125;/config/server.properties
+
+# 3、修改kafka的名称
+RUN mv /kafka_$&amp;#123;VERSION&amp;#125; /kafka
+
+# 4、启动脚本（修改kafka配置）
+ADD ./entrypoint.sh /entrypoint.sh
+
+# 5、暴露kafka端口 9999是jmx的端口
+EXPOSE 9092 9999
+
+# 6、运行启动脚本
+CMD [&amp;quot;/bin/bash&amp;quot;,&amp;quot;/entrypoint.sh&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;312-serverproperties&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#312-serverproperties&#34;&gt;#&lt;/a&gt; 3.1.2 server.properties&lt;/h6&gt;
+&lt;pre&gt;&lt;code class=&#34;language-&#39;&#34;&gt;# cat server.properties 
+############################# Server Basics ############################# 
+# broker的id，值为整数，且必须唯一，在一个集群中不能重复
+broker.id=&amp;#123;BROKER_ID&amp;#125;
+
+############################# Socket Server Settings ############################# 
+# kafka监听端口，默认9092
+listeners=PLAINTEXT://&amp;#123;LISTENERS&amp;#125;:9092
+
+# 处理网络请求的线程数量，默认为3个
+num.network.threads=3
+
+# 执行磁盘IO操作的线程数量，默认为8个 
+num.io.threads=8
+
+# socket服务发送数据的缓冲区大小，默认100KB
+socket.send.buffer.bytes=102400
+
+# socket服务接受数据的缓冲区大小，默认100KB
+socket.receive.buffer.bytes=102400
+
+# socket服务所能接受的一个请求的最大大小，默认为100M
+socket.request.max.bytes=104857600
+
+############################# Log Basics ############################# 
+# kafka存储消息数据的目录
+log.dirs=&amp;#123;KAFKA_DATA_DIR&amp;#125;
+
+# 每个topic默认的partition
+num.partitions=1
+
+# 设置副本数量为3,当Leader的Replication故障，会进行故障自动转移。
+default.replication.factor=3
+
+# 在启动时恢复数据和关闭时刷新数据时每个数据目录的线程数量
+num.recovery.threads.per.data.dir=1
+
+############################# Log Flush Policy ############################# 
+# 消息刷新到磁盘中的消息条数阈值
+log.flush.interval.messages=10000
+
+# 消息刷新到磁盘中的最大时间间隔,1s
+log.flush.interval.ms=1000
+
+############################# Log Retention Policy ############################# 
+# 日志保留小时数，超时会自动删除，默认为7天
+log.retention.hours=168
+
+# 日志保留大小，超出大小会自动删除，默认为1G
+#log.retention.bytes=1073741824
+
+# 日志分片策略，单个日志文件的大小最大为1G，超出后则创建一个新的日志文件
+log.segment.bytes=1073741824
+
+# 每隔多长时间检测数据是否达到删除条件,300s
+log.retention.check.interval.ms=300000
+
+############################# Zookeeper ############################# 
+# Zookeeper连接信息，如果是zookeeper集群，则以逗号隔开
+zookeeper.connect=&amp;#123;ZOOK_SERVERS&amp;#125;
+
+# 连接zookeeper的超时时间,6s
+zookeeper.connection.timeout.ms=6000
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;313-entrypoint&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#313-entrypoint&#34;&gt;#&lt;/a&gt; 3.1.3 entrypoint&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat entrypoint.sh 
+# 变量
+KAFKA_DIR=/kafka
+KAFKA_CONF=/kafka/config/server.properties
+
+# 1、基于主机名 + 1 获取Broker_id  这个是用来标识集群节点 在整个集群中必须唯一
+BROKER_ID=$(( $(hostname | sed &#39;s#.*-##g&#39;) + 1 ))
+LISTENERS=$(hostname -i)
+
+# 2、替换配置文件内容，后期ZK集群的地址通过ENV传递
+sed -i s@&amp;#123;BROKER_ID&amp;#125;@$&amp;#123;BROKER_ID&amp;#125;@g  $&amp;#123;KAFKA_CONF&amp;#125;
+sed -i s@&amp;#123;LISTENERS&amp;#125;@$&amp;#123;LISTENERS&amp;#125;@g  $&amp;#123;KAFKA_CONF&amp;#125;
+sed -i s@&amp;#123;KAFKA_DATA_DIR&amp;#125;@$&amp;#123;KAFKA_DATA_DIR:-/data&amp;#125;@g  $&amp;#123;KAFKA_CONF&amp;#125;
+sed -i s@&amp;#123;ZOOK_SERVERS&amp;#125;@$&amp;#123;ZOOK_SERVERS&amp;#125;@g  $&amp;#123;KAFKA_CONF&amp;#125;
+
+# 3、启动Kafka
+cd $&amp;#123;KAFKA_DIR&amp;#125;/bin
+sed -i &#39;/export KAFKA_HEAP_OPTS/a export JMX_PORT=&amp;quot;9999&amp;quot;&#39; kafka-server-start.sh
+./kafka-server-start.sh ../config/server.properties
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;314-构建镜像并推送仓库&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#314-构建镜像并推送仓库&#34;&gt;#&lt;/a&gt; 3.1.4 构建镜像并推送仓库&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# wget https://archive.apache.org/dist/kafka/2.2.0/kafka_2.12-2.2.0.tgz
+# docker build -t registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kafka:2.12.2 .
+# docker push registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kafka:2.12.2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;32-迁移kafka集群至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#32-迁移kafka集群至k8s&#34;&gt;#&lt;/a&gt; 3.2 迁移 Kafka 集群至 K8S&lt;/h5&gt;
+&lt;h6 id=&#34;321-kafka-headless&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#321-kafka-headless&#34;&gt;#&lt;/a&gt; 3.2.1 kafka-headless&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 01-kafka-headless.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-svc
+  namespace: logging
+spec:
+  clusterIP: None
+  selector:
+    app: kafka
+  ports:
+  - name: client
+    port: 9092
+    targetPort: 9092
+  - name: jmx
+    port: 9999
+    targetPort: 9999
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;322-kafka-sts&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#322-kafka-sts&#34;&gt;#&lt;/a&gt; 3.2.2 kafka-sts&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 02-kafka-sts.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+  namespace: logging
+spec:
+  serviceName: &amp;quot;kafka-svc&amp;quot;
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values: [&amp;quot;kafka&amp;quot;]
+              topologyKey: &amp;quot;kubernetes.io/hostname&amp;quot;
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: kafka
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kafka:2.12.2 
+        imagePullPolicy: Always
+        ports:
+        - name: client
+          containerPort: 9092
+        - name: jmxport
+          containerPort: 9999
+        env:
+        - name: ZOOK_SERVERS
+          value: &amp;quot;zookeeper-0.zookeeper-svc:2181,zookeeper-1.zookeeper-svc:2181,zookeeper-2.zookeeper-svc:2181&amp;quot;
+        readinessProbe:         # 就绪探针，不就绪则不介入流量
+          tcpSocket:
+            port: 9092
+          initialDelaySeconds: 5
+        livenessProbe:         # 存活探针。如果不存活则根据重启策略进行重启
+          tcpSocket:
+            port: 9092
+          initialDelaySeconds: 5
+        volumeMounts:
+        - name: data
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&amp;quot;ReadWriteMany&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;323-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#323-更新资源清单&#34;&gt;#&lt;/a&gt; 3.2.3 更新资源清单&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 02-kafka]# kubectl apply -f 01-kafka-headless.yaml 
+[root@k8s-master01 02-kafka]# kubectl apply -f 02-kafka-sts.yaml
+[root@k8s-master01 02-kafka]# kubectl get pods -n logging 
+NAME          READY   STATUS    RESTARTS       AGE
+kafka-0       1/1     Running   0              5m49s
+kafka-1       1/1     Running   0              4m43s
+kafka-2       1/1     Running   0              3m40s
+
+#查看kafka是否注册到zookeeper
+[root@k8s-master01 02-kafka]# kubectl exec -it zookeeper-0 -n logging -- /bin/bash
+root@zookeeper-0:/# /zookeeper/bin/zkCli.sh 
+[zk: localhost:2181(CONNECTED) 2] get /brokers/ids/1
+&amp;#123;&amp;quot;listener_security_protocol_map&amp;quot;:&amp;#123;&amp;quot;PLAINTEXT&amp;quot;:&amp;quot;PLAINTEXT&amp;quot;&amp;#125;,&amp;quot;endpoints&amp;quot;:[&amp;quot;PLAINTEXT://172.16.85.201:9092&amp;quot;],&amp;quot;jmx_port&amp;quot;:9999,&amp;quot;host&amp;quot;:&amp;quot;172.16.85.201&amp;quot;,&amp;quot;timestamp&amp;quot;:&amp;quot;1748162470218&amp;quot;,&amp;quot;port&amp;quot;:9092,&amp;quot;version&amp;quot;:4&amp;#125;
+[zk: localhost:2181(CONNECTED) 3] get /brokers/ids/2
+&amp;#123;&amp;quot;listener_security_protocol_map&amp;quot;:&amp;#123;&amp;quot;PLAINTEXT&amp;quot;:&amp;quot;PLAINTEXT&amp;quot;&amp;#125;,&amp;quot;endpoints&amp;quot;:[&amp;quot;PLAINTEXT://172.16.58.205:9092&amp;quot;],&amp;quot;jmx_port&amp;quot;:9999,&amp;quot;host&amp;quot;:&amp;quot;172.16.58.205&amp;quot;,&amp;quot;timestamp&amp;quot;:&amp;quot;1748162532658&amp;quot;,&amp;quot;port&amp;quot;:9092,&amp;quot;version&amp;quot;:4&amp;#125;
+[zk: localhost:2181(CONNECTED) 4] get /brokers/ids/3
+&amp;#123;&amp;quot;listener_security_protocol_map&amp;quot;:&amp;#123;&amp;quot;PLAINTEXT&amp;quot;:&amp;quot;PLAINTEXT&amp;quot;&amp;#125;,&amp;quot;endpoints&amp;quot;:[&amp;quot;PLAINTEXT://172.16.195.1:9092&amp;quot;],&amp;quot;jmx_port&amp;quot;:9999,&amp;quot;host&amp;quot;:&amp;quot;172.16.195.1&amp;quot;,&amp;quot;timestamp&amp;quot;:&amp;quot;1748162649250&amp;quot;,&amp;quot;port&amp;quot;:9092,&amp;quot;version&amp;quot;:4&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;324-检查kafka集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#324-检查kafka集群&#34;&gt;#&lt;/a&gt; 3.2.4 检查 Kafka 集群&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;1.创建一个topic
+root@kafka-0:/# /kafka/bin/kafka-topics.sh --create --zookeeper zookeeper-0.zookeeper-svc:2181,zookeeper-1.zookeeper-svc:2181,zookeeper-2.zookeeper-svc:2181 --partitions 1 --replication-factor 3 --topic oldxu
+
+2.模拟消息发布
+root@kafka-1:/# /kafka/bin/kafka-console-producer.sh --broker-list kafka-0.kafka-svc:9092,kafka-1.kafka-svc:9092,kafka-2.kafka-svc:9092 --topic oldxu
+&amp;gt;hello kubernetes
+&amp;gt;hello world
+
+3.模拟消息订阅
+root@kafka-2:/# /kafka/bin/kafka-console-consumer.sh  --bootstrap-server kafka-0.kafka-svc:9092,kafka-1.kafka-svc:9092,kafka-2.kafka-svc:9092 --topic oldxu --from-beginning
+hello kubernetes
+hello world
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;四-交付efak至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#四-交付efak至k8s&#34;&gt;#&lt;/a&gt; 四、交付 efak 至 K8S&lt;/h4&gt;
+&lt;h5 id=&#34;41-制作efak镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#41-制作efak镜像&#34;&gt;#&lt;/a&gt; 4.1 制作 efak 镜像&lt;/h5&gt;
+&lt;h6 id=&#34;411-dockerfile&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#411-dockerfile&#34;&gt;#&lt;/a&gt; 4.1.1 Dockerfile&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@manager 03-efak]# cat Dockerfile 
+FROM openjdk:8
+
+# 1、调整时区
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime &amp;amp;&amp;amp; \
+    echo &#39;Asia/Shanghai&#39; &amp;gt; /etc/timezone
+
+# 2、拷贝kafka软件以及kafka的配置
+ENV VERSION=3.0.1
+ADD ./efak-web-$&amp;#123;VERSION&amp;#125;-bin.tar.gz /
+ADD ./system-config.properties /efak-web-$&amp;#123;VERSION&amp;#125;/conf/system-config.properties
+
+# 3、修改efak的名称
+RUN mv /efak-web-$&amp;#123;VERSION&amp;#125; /efak
+
+# 4、环境变量
+ENV KE_HOME=/efak
+ENV PATH=$PATH:$KE_HOME/bin
+
+# 5、启动脚本（修改kafka配置）
+ADD ./entrypoint.sh /entrypoint.sh
+
+# 6、暴露kafka端口 9999是jmx的端口
+EXPOSE 8048
+
+# 7、运行启动脚本
+CMD [&amp;quot;/bin/bash&amp;quot;,&amp;quot;/entrypoint.sh&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;412-system-config&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#412-system-config&#34;&gt;#&lt;/a&gt; 4.1.2 system-config&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat system-config.properties 
+######################################
+# 填写 zookeeper集群列表
+######################################
+efak.zk.cluster.alias=cluster1
+cluster1.zk.list=&amp;#123;ZOOK_SERVERS&amp;#125;
+
+######################################
+# broker 最大规模数量
+######################################
+cluster1.efak.broker.size=20
+
+######################################
+# zk 客户端线程数
+######################################
+kafka.zk.limit.size=32
+
+######################################
+# EFAK webui 端口
+######################################
+efak.webui.port=8048
+
+######################################
+# kafka offset storage
+######################################
+cluster1.efak.offset.storage=kafka
+
+######################################
+# kafka jmx uri
+######################################
+cluster1.efak.jmx.uri=service:jmx:rmi:///jndi/rmi://%s/jmxrmi
+
+######################################
+# kafka metrics 指标，默认存储15天
+######################################
+efak.metrics.charts=true
+efak.metrics.retain=15
+
+######################################
+# kafka sql topic records max
+######################################
+efak.sql.topic.records.max=5000
+efak.sql.topic.preview.records.max=10
+
+######################################
+# delete kafka topic token
+######################################
+efak.topic.token=keadmin
+
+######################################
+# kafka sqlite 数据库地址（需要修改存储路径）
+######################################
+efak.driver=org.sqlite.JDBC
+efak.url=jdbc:sqlite:&amp;#123;EFAK_DATA_DIR&amp;#125;/db/ke.db
+efak.username=root
+efak.password=www.kafka-eagle.org
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;413-entrypoint&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#413-entrypoint&#34;&gt;#&lt;/a&gt; 4.1.3 entrypoint&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat entrypoint.sh 
+# 1、变量
+EFAK_DIR=/efak
+EFAK_CONF=/efak/conf/system-config.properties
+
+# 2、替换配置文件内容，后期ZK集群的地址通过ENV传递
+sed -i s@&amp;#123;EFAK_DATA_DIR&amp;#125;@$&amp;#123;EFAK_DIR&amp;#125;@g  $&amp;#123;EFAK_CONF&amp;#125;
+sed -i s@&amp;#123;ZOOK_SERVERS&amp;#125;@$&amp;#123;ZOOK_SERVERS&amp;#125;@g  $&amp;#123;EFAK_CONF&amp;#125;
+
+# 3、启动efka
+$&amp;#123;EFAK_DIR&amp;#125;/bin/ke.sh start
+tail -f $&amp;#123;EFAK_DIR&amp;#125;/logs/ke_console.out
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;414-构建镜像并推送仓库&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#414-构建镜像并推送仓库&#34;&gt;#&lt;/a&gt; 4.1.4 构建镜像并推送仓库&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# wget https://github.com/smartloli/kafka-eagle-bin/archive/v3.0.1.tar.gz
+# docker build -t registry.cn-hangzhou.aliyuncs.com/kubernetes_public/efak:3.0 .
+# docker push registry.cn-hangzhou.aliyuncs.com/kubernetes_public/efak:3.0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;42-迁移efak至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#42-迁移efak至k8s&#34;&gt;#&lt;/a&gt; 4.2 迁移 efak 至 K8S&lt;/h5&gt;
+&lt;h6 id=&#34;421-efak-deploy&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#421-efak-deploy&#34;&gt;#&lt;/a&gt; 4.2.1 efak-deploy&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 01-efak-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: efak
+  namespace: logging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: efak
+  template:
+    metadata:
+      labels:
+        app: efak
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: efak
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/efak:3.0 
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8048
+        env:
+        - name: ZOOK_SERVERS
+          value: &amp;quot;zookeeper-0.zookeeper-svc:2181,zookeeper-1.zookeeper-svc:2181,zookeeper-2.zookeeper-svc:2181&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;422-efak-service&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#422-efak-service&#34;&gt;#&lt;/a&gt; 4.2.2 efak-service&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 02-efak-service.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: efak-svc
+  namespace: logging
+spec:
+  selector:
+    app: efak
+  ports:
+  - port: 8048
+    targetPort: 8048
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;423-efak-ingress&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#423-efak-ingress&#34;&gt;#&lt;/a&gt; 4.2.3 efak-ingress&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 03-efak-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: efak-ingress
+  namespace: logging
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: &amp;quot;efak.hmallleasing.com&amp;quot;
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: efak-svc
+            port: 
+              number: 8048
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;424-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#424-更新资源清单&#34;&gt;#&lt;/a&gt; 4.2.4 更新资源清单&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 03-efak]# kubectl apply -f 01-efak-deploy.yaml 
+[root@k8s-master01 03-efak]# kubectl apply -f 02-efak-service.yaml 
+[root@k8s-master01 03-efak]# kubectl apply -f 03-efak-ingress.yaml 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;425-访问efka&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#425-访问efka&#34;&gt;#&lt;/a&gt; 4.2.5 访问 efka&lt;/h6&gt;
+&lt;p&gt;1、初始用户名密码 admin   123456&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Nq16u4z.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;2、查看 Topics&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/9Bin9cr.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;3、查看 kafka 集群状态&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/U76YIck.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;4、查看 Zookeeper 集群状态&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/cY5LeWx.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;五-交付elastic集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#五-交付elastic集群&#34;&gt;#&lt;/a&gt; 五、交付 Elastic 集群&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;ES 集群是由多个节点组成的，通过 &lt;a href=&#34;http://cluster.name&#34;&gt;cluster.name&lt;/a&gt; 设置 ES 集群名称，同时用于区分其它的 ES 集群。&lt;/li&gt;
+&lt;li&gt;每个节点通过 &lt;a href=&#34;http://node.name&#34;&gt;node.name&lt;/a&gt; 参数来设定所在集群的节点名称。&lt;/li&gt;
+&lt;li&gt;节点使用 discovery.send_hosts 参数来设定集群节点的列表。&lt;/li&gt;
+&lt;li&gt;集群在第一次启动时，需要初始化，同时需要指定参与选举的 master 节点 IP，或节点名称。&lt;/li&gt;
+&lt;li&gt;每个节点可以通过 node.master:true 设定为 master 角色，通过 node.data:true 设定为 data 角色。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# grep &amp;quot;^[a-Z]&amp;quot; /etc/elasticsearch/elasticsearch.yml
+# 集群名称cluster.name: my-oldxu
+# 节点名称node.name: node1
+# 数据存储路径path.data: /var/lib/elasticsearch
+# 日志存储路径path.logs: /var/log/elasticsearch
+# 监听在本地哪个地址上network.host: 10.0.0.100
+# 监听端口http.port: 9200
+# 集群主机列表discovery.seed_hosts: [&amp;quot;ip1&amp;quot;, &amp;quot;ip2&amp;quot;, &amp;quot;ip3&amp;quot;]
+# 仅第一次启动集群时进行选举（可以填写node.name的名称）cluster.initial_master_nodes: [&amp;quot;node01&amp;quot;, &amp;quot;node02&amp;quot;, &amp;quot;node03&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;51-下载elastic镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#51-下载elastic镜像&#34;&gt;#&lt;/a&gt; 5.1 下载 elastic 镜像&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# docker pull elasticsearch:7.17.6
+# docker tag elasticsearch:7.17.6 registry.cn-hangzhou.aliyuncs.com/kubernetes_public/elasticsearch:7.17.6
+# docker push registry.cn-hangzhou.aliyuncs.com/kubernetes_public/elasticsearch:7.17.6
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;52-交付es-service&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#52-交付es-service&#34;&gt;#&lt;/a&gt; 5.2 交付 ES-Service&lt;/h5&gt;
+&lt;p&gt;创建 es-headlessService，为每个 ES Pod 设定固定的 DNS 名称，无论它是 Master 或是 Data，易或是 Coordinating&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# cat 01-es-svc.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: es-svc
+  namespace: logging
+spec:
+  selector:
+    app: es
+  clusterIP: None
+  ports:
+  - name: cluster
+    port: 9200
+    targetPort: 9200
+  - name: transport
+    port: 9300
+    targetPort: 9300
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;53-交付es-master节点&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#53-交付es-master节点&#34;&gt;#&lt;/a&gt; 5.3 交付 ES-Master 节点&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;ES 无法使用 root 直接启动，需要授权数据目录 UID=1000，同时还需要持久化 /usr/share/elasticsearch/data ；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ES 所有节点都需要设定 vm.max_map_count 内核参数以及 ulimit；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ES 启动是通过 ENV 环境变量传参来完成的；&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;集群名称、节点名称、角色类型；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;discovery.seed_hosts 集群地址列表；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;cluster.initial_master_nodes 初始集群参与选举的 master 节点名称；&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# cat 02-es-master.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-master
+  namespace: logging
+spec:
+  serviceName: &amp;quot;es-svc&amp;quot;
+  replicas: 3           # es-pod运行的实例
+  selector:             # 需要管理的ES-Pod标签
+    matchLabels:
+      app: es
+      role: master
+  template:
+    metadata:
+      labels:
+        app: es
+        role: master
+    spec:                       # 定义pod规范
+      imagePullSecrets:         # 镜像拉取使用的认证信息
+      - name: harbor-admin
+      affinity:                 # 设定pod反亲和
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values: [&amp;quot;es&amp;quot;]
+              - key: role
+                operator: In
+                values: [&amp;quot;master&amp;quot;]
+            topologyKey: &amp;quot;kubernetes.io/hostname&amp;quot;       # 每个节点就是一个位置
+      initContainers:           # 初始化容器设定
+      - name: fix-permissions
+        image: busybox
+        command: [&amp;quot;sh&amp;quot;,&amp;quot;-c&amp;quot;,&amp;quot;chown -R 1000:1000 /usr/share/elasticsearch/data ; sysctl -w vm.max_map_count=262144; ulimit -n 65536&amp;quot;]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+      containers:               # ES主容器
+      - name: es
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/elasticsearch:7.17.6 
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 4096Mi
+          requests:
+            cpu: 300m
+            memory: 1024Mi
+        ports:
+        - name: cluster
+          containerPort: 9200
+        - name: transport
+          containerPort: 9300
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        env:
+        - name: ES_JAVA_OPTS
+          value: &amp;quot;-Xms1g -Xmx1g&amp;quot;
+        - name: cluster.name
+          value: es-cluster
+        - name: node.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: node.master
+          value: &amp;quot;true&amp;quot;
+        - name: node.data
+          value: &amp;quot;false&amp;quot;
+        - name: discovery.seed_hosts
+          value: &amp;quot;es-master-0.es-svc,es-master-1.es-svc,es-master-2.es-svc&amp;quot;
+        - name: cluster.initial_master_nodes
+          value: &amp;quot;es-master-0,es-master-1,es-master-2&amp;quot;
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+  volumeClaimTemplates: # 动态pvc
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&amp;quot;ReadWriteOnce&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 04-elasticsearch]# cat 03-es-data.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-data
+  namespace: logging
+spec:
+  serviceName: &amp;quot;es-svc&amp;quot;
+  replicas: 2           # es-pod运行的实例
+  selector:             # 需要管理的ES-Pod标签
+    matchLabels:
+      app: es
+      role: data
+  template:
+    metadata:
+      labels:
+        app: es
+        role: data
+    spec:                       # 定义pod规范
+      imagePullSecrets:         # 镜像拉取使用的认证信息
+      - name: harbor-admin
+      affinity:                 # 设定pod反亲和
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values: [&amp;quot;es&amp;quot;]
+              - key: role
+                operator: In
+                values: [&amp;quot;data&amp;quot;]
+            topologyKey: &amp;quot;kubernetes.io/hostname&amp;quot;       # 每个节点就是一个位置
+      initContainers:           # 初始化容器设定
+      - name: fix-permissions
+        image: busybox
+        command: [&amp;quot;sh&amp;quot;,&amp;quot;-c&amp;quot;,&amp;quot;chown -R 1000:1000 /usr/share/elasticsearch/data ; sysctl -w vm.max_map_count=262144; ulimit -n 65536&amp;quot;]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+      containers:               # ES主容器
+      - name: es
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/elasticsearch:7.17.6 
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 4096Mi
+          requests:
+            cpu: 300m
+            memory: 1024Mi
+        ports:
+        - name: cluster
+          containerPort: 9200
+        - name: transport
+          containerPort: 9300
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        env:
+        - name: ES_JAVA_OPTS
+          value: &amp;quot;-Xms1g -Xmx1g&amp;quot;
+        - name: cluster.name
+          value: es-cluster
+        - name: node.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: node.master
+          value: &amp;quot;false&amp;quot;
+        - name: node.data
+          value: &amp;quot;true&amp;quot;
+        - name: discovery.seed_hosts
+          value: &amp;quot;es-master-0.es-svc,es-master-1.es-svc,es-master-2.es-svc&amp;quot;
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+  volumeClaimTemplates: # 动态pvc
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&amp;quot;ReadWriteOnce&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;54-交付es-data节点&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#54-交付es-data节点&#34;&gt;#&lt;/a&gt; 5.4 交付 ES-Data 节点&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;ES 无法使用 root 直接启动，需要授权数据目录 UID=1000，同时还需要持久化 /usr/share/elasticsearch/data&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ES 所有节点都需要设定 vm.max_map_count 内核参数以及 ulimit；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ES 启动是通过 ENV 环境变量传参来完成的&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;集群名称、节点名称、角色类型&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;discovery.seed_hosts 集群地址列表&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# cat 03-es-data.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-data
+  namespace: logging
+spec:
+  serviceName: &amp;quot;es-svc&amp;quot;
+  replicas: 2           # es-pod运行的实例
+  selector:             # 需要管理的ES-Pod标签
+    matchLabels:
+      app: es
+      role: data
+  template:
+    metadata:
+      labels:
+        app: es
+        role: data
+    spec:                       # 定义pod规范
+      imagePullSecrets:         # 镜像拉取使用的认证信息
+      - name: harbor-admin
+      affinity:                 # 设定pod反亲和
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values: [&amp;quot;es&amp;quot;]
+              - key: role
+                operator: In
+                values: [&amp;quot;data&amp;quot;]
+            topologyKey: &amp;quot;kubernetes.io/hostname&amp;quot;       # 每个节点就是一个位置
+      initContainers:           # 初始化容器设定
+      - name: fix-permissions
+        image: busybox
+        command: [&amp;quot;sh&amp;quot;,&amp;quot;-c&amp;quot;,&amp;quot;chown -R 1000:1000 /usr/share/elasticsearch/data ; sysctl -w vm.max_map_count=262144; ulimit -n 65536&amp;quot;]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+      containers:               # ES主容器
+      - name: es
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/elasticsearch:7.17.6 
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 4096Mi
+          requests:
+            cpu: 300m
+            memory: 1024Mi
+        ports:
+        - name: cluster
+          containerPort: 9200
+        - name: transport
+          containerPort: 9300
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+        env:
+        - name: ES_JAVA_OPTS
+          value: &amp;quot;-Xms1g -Xmx1g&amp;quot;
+        - name: cluster.name
+          value: es-cluster
+        - name: node.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: node.master
+          value: &amp;quot;false&amp;quot;
+        - name: node.data
+          value: &amp;quot;true&amp;quot;
+        - name: discovery.seed_hosts
+          value: &amp;quot;es-master-0.es-svc,es-master-1.es-svc,es-master-2.es-svc&amp;quot;
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+  volumeClaimTemplates: # 动态pvc
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&amp;quot;ReadWriteOnce&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;55-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#55-更新资源清单&#34;&gt;#&lt;/a&gt; 5.5 更新资源清单&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 04-elasticsearch]# kubectl apply -f 01-es-svc.yaml 
+[root@k8s-master01 04-elasticsearch]# kubectl apply -f 02-es-master.yaml 
+[root@k8s-master01 04-elasticsearch]# kubectl apply -f 03-es-data.yaml 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;56-验证es集群&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#56-验证es集群&#34;&gt;#&lt;/a&gt; 5.6 验证 ES 集群&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1.解析headlessService获取对应ES集群任一节点的IP地址
+# dig @10.96.0.10 es-svc.logging.svc.cluster.local  +short
+172.16.58.229
+172.16.122.191
+172.16.195.21
+172.16.122.129
+172.16.32.164
+
+#2.通过curl访问ES，检查ES集群是否正常（如果仅交付Master，没有data节点，集群状态可能会Red，因为没有数据节点进行数据存储；）
+# curl -XGET &amp;quot;http://172.16.122.129:9200/_cluster/health?pretty&amp;quot;
+&amp;#123;
+  &amp;quot;cluster_name&amp;quot; : &amp;quot;es-cluster&amp;quot;,
+  &amp;quot;status&amp;quot; : &amp;quot;green&amp;quot;,
+  &amp;quot;timed_out&amp;quot; : false,
+  &amp;quot;number_of_nodes&amp;quot; : 5,
+  &amp;quot;number_of_data_nodes&amp;quot; : 2,
+  &amp;quot;active_primary_shards&amp;quot; : 3,
+  &amp;quot;active_shards&amp;quot; : 6,
+  &amp;quot;relocating_shards&amp;quot; : 0,
+  &amp;quot;initializing_shards&amp;quot; : 0,
+  &amp;quot;unassigned_shards&amp;quot; : 0,
+  &amp;quot;delayed_unassigned_shards&amp;quot; : 0,
+  &amp;quot;number_of_pending_tasks&amp;quot; : 0,
+  &amp;quot;number_of_in_flight_fetch&amp;quot; : 0,
+  &amp;quot;task_max_waiting_in_queue_millis&amp;quot; : 0,
+  &amp;quot;active_shards_percent_as_number&amp;quot; : 100.0
+&amp;#125;
+
+#3.查看ES各个节点详情
+# curl -XGET &amp;quot;http://172.16.122.129:9200/_cat/nodes&amp;quot;
+172.16.122.129 16 33 20 0.38 0.56 0.38 ilmr       - es-master-2
+172.16.58.229  66 33 22 0.64 0.66 0.44 ilmr       * es-master-1
+172.16.122.191 52 34 15 0.38 0.56 0.38 cdfhilrstw - es-data-0
+172.16.195.21  38 35 19 0.38 0.53 0.36 cdfhilrstw - es-data-1
+172.16.32.164  31 33 12 0.28 0.50 0.59 ilmr       - es-master-0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;六-交付kibana可视化&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#六-交付kibana可视化&#34;&gt;#&lt;/a&gt; 六、交付 Kibana 可视化&lt;/h4&gt;
+&lt;h5 id=&#34;61-下载kibana镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#61-下载kibana镜像&#34;&gt;#&lt;/a&gt; 6.1 下载 kibana 镜像&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# docker pull kibana:7.17.6
+# docker tag kibana:7.17.6 registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kibana:7.17.6
+# docker push registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kibana:7.17.6
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;62-kibana-deploy&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#62-kibana-deploy&#34;&gt;#&lt;/a&gt; 6.2 kibana-deploy&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;Kibana 需要连接 ES 集群，通过 ELASTICSEARCH_HOSTS 变量来传递 ES 集群地址&lt;/li&gt;
+&lt;li&gt;kibana 通过 I18N_LOCALE 来传递语言环境&lt;/li&gt;
+&lt;li&gt;Kibana 通过 SERVER_PUBLICBASEURL 来传递服务访问的公开地址&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# cat 01-kibana-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: logging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: kibana
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/kibana:7.17.6 
+        resources:
+          limits:
+            cpu: 1000m
+        ports:
+        - containerPort: 5601
+        env:
+        - name: ELASTICSEARCH_HOSTS
+          value: &#39;[&amp;quot;http://es-data-0.es-svc:9200&amp;quot;,&amp;quot;http://es-data-1.es-svc:9200&amp;quot;]&#39;
+        - name: I18N_LOCALE
+          value: &amp;quot;zh-CN&amp;quot;
+        - name: SERVER_PUBLICBASEURL
+          value: &amp;quot;http://kibana.hmallleasing.com&amp;quot;   #kibana访问UI
+        volumeMounts:
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;63-kibana-svc&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#63-kibana-svc&#34;&gt;#&lt;/a&gt; 6.3 kibana-svc&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# cat 02-kibana-svc.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-svc
+  namespace: logging
+spec:
+  selector:
+    app: kibana
+  ports:
+  - name: web
+    port: 5601
+    targetPort: 5601
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;64-kibana-ingress&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#64-kibana-ingress&#34;&gt;#&lt;/a&gt; 6.4 kibana-ingress&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# cat 03-kibana-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kibana-ingress
+  namespace: logging
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: &amp;quot;kibana.hmallleasing.com&amp;quot;
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kibana-svc
+            port:
+              number: 5601
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;65-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#65-更新资源清单&#34;&gt;#&lt;/a&gt; 6.5 更新资源清单&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 05-kibana]# kubectl apply -f 01-kibana-deploy.yaml 
+[root@k8s-master01 05-kibana]# kubectl apply -f 02-kibana-svc.yaml 
+[root@k8s-master01 05-kibana]# kubectl apply -f 03-kibana-ingress.yaml
+
+[root@k8s-master01 05-kibana]# kubectl get pods -n logging
+NAME                      READY   STATUS    RESTARTS   AGE
+efak-5cdc74bf59-nrhb4     1/1     Running   0          5h33m
+es-data-0                 1/1     Running   0          16m
+es-data-1                 1/1     Running   0          15m
+es-master-0               1/1     Running   0          17m
+es-master-1               1/1     Running   0          15m
+es-master-2               1/1     Running   0          12m
+kafka-0                   1/1     Running   0          5h39m
+kafka-1                   1/1     Running   0          5h39m
+kafka-2                   1/1     Running   0          5h38m
+kibana-5ccc46864b-ndzx9   1/1     Running   0          118s
+zookeeper-0               1/1     Running   0          5h42m
+zookeeper-1               1/1     Running   0          5h42m
+zookeeper-2               1/1     Running   0          5h41m
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;66-访问kibana&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#66-访问kibana&#34;&gt;#&lt;/a&gt; 6.6 访问 kibana&lt;/h5&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/sUXTx1J.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;七-daemonset运行日志agent实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#七-daemonset运行日志agent实践&#34;&gt;#&lt;/a&gt; 七、DaemonSet 运行日志 Agent 实践&lt;/h4&gt;
+&lt;h5 id=&#34;71-部署架构说明&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#71-部署架构说明&#34;&gt;#&lt;/a&gt; 7.1 部署架构说明&lt;/h5&gt;
+&lt;p&gt;对于那些将日志输出到，stdout 与 stderr 的 Pod，可以直接使用 DaemonSet 控制器在每个 Node 节点上运行一个 filebeat、logstash、fluentd 容器进行统一的收集，而后写入到日志存储系统&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/UOlaNE1.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;72-创建serviceaccount&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#72-创建serviceaccount&#34;&gt;#&lt;/a&gt; 7.2 创建 ServiceAccount&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt; kubectl create serviceaccount filebeat -n logging
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;73-创建clusterrole&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#73-创建clusterrole&#34;&gt;#&lt;/a&gt; 7.3 创建 ClusterRole&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;kubectl create clusterrole filebeat --verb=get,list,watch --resource=namespace,pods,nodes
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;74-创建clusterrolebinding&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#74-创建clusterrolebinding&#34;&gt;#&lt;/a&gt; 7.4 创建 ClusterRolebinding&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;kubectl create clusterrolebinding filebeat --serviceaccount=logging:filebeat --clusterrole=filebeat
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;75-交付filebeat&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#75-交付filebeat&#34;&gt;#&lt;/a&gt; 7.5 交付 Filebeat&lt;/h5&gt;
+&lt;h6 id=&#34;751-下载filebeat镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#751-下载filebeat镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;7.5.1 下载 filebeat 镜像&lt;/strong&gt;&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# docker pull docker.elastic.co/beats/filebeat:7.17.6
+# docker tag docker.elastic.co/beats/filebeat:7.17.6 registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat:7.17.6
+# docker push registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat:7.17.6
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;752-交付filebeat&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#752-交付filebeat&#34;&gt;#&lt;/a&gt; &lt;strong&gt;7.5.2 交付 filebeat&lt;/strong&gt;&lt;/h6&gt;
+&lt;ol&gt;
+&lt;li&gt;从 ConfigMap 中挂载 filebeat.yaml 配置文件；&lt;/li&gt;
+&lt;li&gt;挂载 /var/log、/var/lib/docker/containers 日志相关目录；&lt;/li&gt;
+&lt;li&gt;使用 hostPath 方式挂载 /usr/share/filebeat/data 数据目录，该目录下有一个 registry 文件，里面记录了 filebeat 采集日志位置的相关内容，比如文件 offset、source、timestamp 等，如果 Pod 发生异常后 K8S 自动将 Pod 进行重启，不挂载的情况下 registry 会被重置，将导致日志文件又从 offset=0 开始采集，会造成重复收集日志。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 07-filebeat-daemoset]# cat 02-filebeat-ds.yaml 
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: filebeat
+  namespace: logging
+spec:
+  selector:
+    matchLabels:
+      app: filebeat
+  template:
+    metadata:
+      labels:
+        app: filebeat
+    spec:
+      serviceAccountName: &amp;quot;filebeat&amp;quot;
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: &amp;quot;Exists&amp;quot;
+        effect: &amp;quot;NoSchedule&amp;quot;
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: filebeat
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat:7.17.6
+        args: [
+          &amp;quot;-c&amp;quot;,&amp;quot;/etc/filebeat.yml&amp;quot;,
+          &amp;quot;-e&amp;quot;
+        ]
+        securityContext:
+          runAsUser: 0
+        resources:
+          limits:
+            memory: 300Mi
+        volumeMounts:
+        - name: config                          # 从ConfigMap中读取
+          mountPath: /etc/filebeat.yml
+          subPath: filebeat.yml
+        - name: varlog
+          mountPath: /var/log
+          readOnly: true
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: data
+          mountPath: /usr/share/filebeat/data
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+      volumes:
+      - name: config
+        configMap:
+          name: filebeat-config
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: data
+        hostPath:
+          path: /var/lib/filebeat-data
+          type: DirectoryOrCreate
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot; 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;753-filebeat配置文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#753-filebeat配置文件&#34;&gt;#&lt;/a&gt; 7.5.3 Filebeat 配置文件&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 01-filebeat-configmap.yaml 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  namespace: logging
+
+data:
+  filebeat.yml: |-
+    # ============================== Filebeat inputs ==============================
+    logging.level: warning
+    filebeat.inputs:
+    - type: log
+      enabled: true
+      encoding: utf-8
+      paths: /var/log/messages
+      include_lines: [&#39;kubelet&#39;]            # 获取与kubelet相关的日志
+      fields:                               # 添加filebeat字段
+        namespace: kubelet
+      fields_under_root: true
+
+    # ============================== Filebeat autodiscover ============================
+    filebeat.autodiscover:
+      providers:
+        - type: kubernetes
+          templates:
+          - condition:						# 匹配kube-system名称空间下所有日志
+              equals:
+                kubernetes.namespace: kube-system
+            config:
+              - type: container
+                stream: all					# 收集stdout、stderr类型日志，all是所有
+                encoding: utf-8
+                paths: /var/log/containers/*-$&amp;#123;data.kubernetes.container.id&amp;#125;.log
+                exclude_lines: [&#39;info&#39;]     # 排除info相关的日志
+
+          - condition:                      # 收集ingress-nginx命名空间下stdout日志
+              equals:
+                kubernetes.namespace: ingress-nginx
+            config:
+              - type: container
+                stream: stdout
+                encoding: utf-8
+                paths: /var/log/containers/*-$&amp;#123;data.kubernetes.container.id&amp;#125;.log
+                json.keys_under_root: true  # 默认将json解析存储至messages，true则不存储至message
+                json.overwrite_keys: true   # 覆盖默认message字段，使用自定义json格式的key
+                #exclude_lines: [&#39;kibana&#39;]   # 与kibana相关的则排除
+
+          - condition:                              # 收集ingress-nginx命名空间下stderr日志
+              equals:
+                kubernetes.namespace: ingress-nginx
+            config:
+              - type: container
+                stream: stderr
+                encoding: utf-8
+                paths:
+                  - /var/log/containers/*-$&amp;#123;data.kubernetes.container.id&amp;#125;.log
+
+    # ============================== Filebeat Processors ===========================
+    processors:
+      - rename:                              # 重写kubernetes源数据信息
+          fields:
+          - from: &amp;quot;kubernetes.namespace&amp;quot;
+            to: &amp;quot;namespace&amp;quot;
+          - from: &amp;quot;kubernetes.pod.name&amp;quot;
+            to: &amp;quot;podname&amp;quot;
+          - from: &amp;quot;kubernetes.pod.ip&amp;quot;
+            to: &amp;quot;podip&amp;quot;
+      - drop_fields:                        # 删除无用的字段
+          fields: [&amp;quot;host&amp;quot;,&amp;quot;agent&amp;quot;,&amp;quot;ecs&amp;quot;,&amp;quot;input&amp;quot;,&amp;quot;container&amp;quot;,&amp;quot;kubernetes&amp;quot;]
+
+    # ================================== Kafka Output ===================================
+    output.kafka:
+      hosts: [&amp;quot;kafka-0.kafka-svc:9092&amp;quot;,&amp;quot;kafka-1.kafka-svc:9092&amp;quot;,&amp;quot;kafka-2.kafka-svc:9092&amp;quot;]
+      topic: &amp;quot;app-%&amp;#123;[namespace]&amp;#125;&amp;quot;	# %&amp;#123;[namespace]&amp;#125; 会自动将其转换为namespace对应的值
+      required_acks: 1              # 保证消息可靠，0不保证，1等待写入主分区（默认）-1等待写入副本分区
+      compression: gzip             # 压缩
+      max_message_bytes: 1000000    # 每条消息最大的长度，多余的被删除
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;754-收集ingress-nginx名称空间&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#754-收集ingress-nginx名称空间&#34;&gt;#&lt;/a&gt; 7.5.4 收集 ingress-nginx 名称空间&lt;/h6&gt;
+&lt;p&gt;修改 Ingress 日志输出格式&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# kubectl edit configmap -n ingress-nginx ingress-nginx-controller 
+apiVersion: v1
+data:
+  ...
+  log-format-upstream: &#39;&amp;#123;&amp;quot;timestamp&amp;quot;:&amp;quot;$time_iso8601&amp;quot;,&amp;quot;domain&amp;quot;:&amp;quot;$server_name&amp;quot;,&amp;quot;hostname&amp;quot;:&amp;quot;$hostname&amp;quot;,&amp;quot;remote_user&amp;quot;:&amp;quot;$remote_user&amp;quot;,&amp;quot;clientip&amp;quot;:&amp;quot;$remote_addr&amp;quot;,&amp;quot;proxy_protocol_addr&amp;quot;:&amp;quot;$proxy_protocol_addr&amp;quot;,&amp;quot;@source&amp;quot;:&amp;quot;$server_addr&amp;quot;,&amp;quot;host&amp;quot;:&amp;quot;$http_host&amp;quot;,&amp;quot;request&amp;quot;:&amp;quot;$request&amp;quot;,&amp;quot;args&amp;quot;:&amp;quot;$args&amp;quot;,&amp;quot;upstreamaddr&amp;quot;:&amp;quot;$upstream_addr&amp;quot;,&amp;quot;status&amp;quot;:&amp;quot;$status&amp;quot;,&amp;quot;upstream_status&amp;quot;:&amp;quot;$upstream_status&amp;quot;,&amp;quot;bytes&amp;quot;:&amp;quot;$body_bytes_sent&amp;quot;,&amp;quot;responsetime&amp;quot;:&amp;quot;$request_time&amp;quot;,&amp;quot;upstreamtime&amp;quot;:&amp;quot;$upstream_response_time&amp;quot;,&amp;quot;proxy_upstream_name&amp;quot;:&amp;quot;$proxy_upstream_name&amp;quot;,&amp;quot;x_forwarded&amp;quot;:&amp;quot;$http_x_forwarded_for&amp;quot;,&amp;quot;upstream_response_length&amp;quot;:&amp;quot;$upstream_response_length&amp;quot;,&amp;quot;referer&amp;quot;:&amp;quot;$http_referer&amp;quot;,&amp;quot;user_agent&amp;quot;:&amp;quot;$http_user_agent&amp;quot;,&amp;quot;request_length&amp;quot;:&amp;quot;$request_length&amp;quot;,&amp;quot;request_method&amp;quot;:&amp;quot;$request_method&amp;quot;,&amp;quot;scheme&amp;quot;:&amp;quot;$scheme&amp;quot;,&amp;quot;k8s_ingress_name&amp;quot;:&amp;quot;$ingress_name&amp;quot;,&amp;quot;k8s_service_name&amp;quot;:&amp;quot;$service_name&amp;quot;,&amp;quot;k8s_service_port&amp;quot;:&amp;quot;$service_port&amp;quot;&amp;#125;&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;755-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#755-更新资源清单&#34;&gt;#&lt;/a&gt; 7.5.5 更新资源清单&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;kubectl apply -f 01-filebeat-configmap.yaml
+kubectl apply -f 02-filebeat-ds.yaml
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;756-检查kafka对应topic&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#756-检查kafka对应topic&#34;&gt;#&lt;/a&gt; 7.5.6 检查 kafka 对应 Topic&lt;/h6&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/shg5F6T.png&#34; alt=&#34;PixPin_2025-06-05_16-02-45.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;八-交付logstash&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#八-交付logstash&#34;&gt;#&lt;/a&gt; 八、 交付 Logstash&lt;/h4&gt;
+&lt;h5 id=&#34;81-下载logstash镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#81-下载logstash镜像&#34;&gt;#&lt;/a&gt; 8.1 下载 Logstash 镜像&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# docker pull docker.elastic.co/logstash/logstash-oss:7.17.6
+# docker tag docker.elastic.co/logstash/logstash-oss:7.17.6 registry.cn-hangzhou.aliyuncs.com/kubernetes_public/logstash-oss:7.17.6
+# docker push registry.cn-hangzhou.aliyuncs.com/kubernetes_public/logstash-oss:7.17.6
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;82-如何交付logstash&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#82-如何交付logstash&#34;&gt;#&lt;/a&gt; 8.2 如何交付 Logstash&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;Logstash 需要设定环境变量来调整主配置文件参数，比如：worker 运行数量，以及批量处理的最大条目是多少；&lt;/li&gt;
+&lt;li&gt;Logstash 需要调整 JVM 堆内存使用的范围，没办法传参调整，但可以通过 postStart 来修改其文件对应的 jvm 参数；&lt;/li&gt;
+&lt;li&gt;Logstash 需要配置文件，读取 Kafka 数据，而后通过 filter 处理，最后输出至 ES&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# /usr/share/logstash/config/logstash.yml
+# 可通过变量传参修改
+pipeline.workers: 2
+pipeline.batch.size: 1000
+# /usr/share/logstash/config/jvm.options-Xms512m-Xmx512m
+# /usr/share/logstash/config/logstash.conf
+input &amp;#123;
+	kafka
+&amp;#125;
+filter &amp;#123;
+
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;83-准备logstash配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#83-准备logstash配置&#34;&gt;#&lt;/a&gt; 8.3 准备 logstash 配置&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;input 段含义&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;所有数据都从 kafka 集群中获取；&lt;/li&gt;
+&lt;li&gt;获取 kafka 集群中 topic，主要有 app-kube-system、app-ingress-nginx、app-kubelet&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;filter 段含义&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;判断 namespace 等于 kubelet，则为其添加一个索引字段名称；&lt;/li&gt;
+&lt;li&gt;判断 namespace 等于 kube-system，则为其添加一个索引字段名称；&lt;/li&gt;
+&lt;li&gt;判断 namespace 等于 ingress-nginx，并且 stream 等于 stderr，则为其添加一个索引字段名称；&lt;/li&gt;
+&lt;li&gt;判断 namespace 等于 ingress-nginx，并且 stream 等于 stdout，则使用 geoip 获取地址来源，使用 useragent 模块分析来访客户端设备，使用 date 处理时间，使用 mutate 转换对应字段格式，最后添加一个索引字段名称；&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# cat logstash-node.conf 
+input &amp;#123;
+	kafka &amp;#123;
+	bootstrap_servers =&amp;gt; &amp;quot;kafka-0.kafka-svc:9092,kafka-1.kafka-svc:9092,kafka-2.kafka-svc:9092&amp;quot;
+        group_id =&amp;gt; &amp;quot;logstash-node&amp;quot;     # 消费者组名称
+        consumer_threads =&amp;gt; &amp;quot;3&amp;quot;         # 理想情况下，您应该拥有与分区数一样多的线程,以实现完美的平衡
+        topics =&amp;gt; [&amp;quot;app-kube-system&amp;quot;,&amp;quot;app-ingress-nginx&amp;quot;,&amp;quot;app-kubelet&amp;quot;]
+	    codec =&amp;gt; json
+    &amp;#125;
+&amp;#125;
+
+filter &amp;#123;
+##########################################################################
+	if &amp;quot;kubelet&amp;quot; in [namespace] &amp;#123;
+		mutate &amp;#123; 
+ 			add_field =&amp;gt; &amp;#123; &amp;quot;target_index&amp;quot; =&amp;gt; &amp;quot;app-%&amp;#123;[namespace]&amp;#125;-%&amp;#123;+YYYY.MM.dd&amp;#125;&amp;quot; &amp;#125;
+		&amp;#125;
+	&amp;#125;
+
+##########################################################################
+	if &amp;quot;kube-system&amp;quot; in [namespace] &amp;#123;
+		mutate &amp;#123; 
+ 			add_field =&amp;gt; &amp;#123; &amp;quot;target_index&amp;quot; =&amp;gt; &amp;quot;app-%&amp;#123;[namespace]&amp;#125;-%&amp;#123;+YYYY.MM.dd&amp;#125;&amp;quot; &amp;#125;
+		&amp;#125;
+	&amp;#125;
+	
+##########################################################################
+	if [namespace] == &amp;quot;ingress-nginx&amp;quot; and [stream] == &amp;quot;stdout&amp;quot; &amp;#123;
+		geoip &amp;#123;
+        		source =&amp;gt; &amp;quot;clientip&amp;quot;
+    		&amp;#125;
+		useragent &amp;#123;
+        		source =&amp;gt; &amp;quot;user_agent&amp;quot;
+			target =&amp;gt; &amp;quot;user_agent&amp;quot;
+        	&amp;#125;
+
+    		date &amp;#123;
+			# 2022-10-08T13:13:20.000Z
+        		match =&amp;gt; [&amp;quot;timestamp&amp;quot;,&amp;quot;ISO8601&amp;quot;]
+        		target =&amp;gt; &amp;quot;@timestamp&amp;quot;
+        		timezone =&amp;gt; &amp;quot;Asia/Shanghai&amp;quot;	
+    		&amp;#125;
+		
+		mutate &amp;#123; 
+			convert =&amp;gt; &amp;#123; 
+				&amp;quot;bytes&amp;quot; =&amp;gt; &amp;quot;integer&amp;quot;
+				&amp;quot;responsetime&amp;quot; =&amp;gt; &amp;quot;float&amp;quot;
+				&amp;quot;upstreamtime&amp;quot; =&amp;gt; &amp;quot;float&amp;quot;
+			&amp;#125;
+			add_field =&amp;gt; &amp;#123; &amp;quot;target_index&amp;quot; =&amp;gt; &amp;quot;app-%&amp;#123;[namespace]&amp;#125;-%&amp;#123;[stream]&amp;#125;-%&amp;#123;+YYYY.MM.dd&amp;#125;&amp;quot; &amp;#125;
+		&amp;#125;
+	&amp;#125;
+
+##########################################################################
+	if [namespace] == &amp;quot;ingress-nginx&amp;quot; and [stream] == &amp;quot;stderr&amp;quot; &amp;#123;
+		mutate &amp;#123; 
+ 		  add_field =&amp;gt; &amp;#123; &amp;quot;target_index&amp;quot; =&amp;gt; &amp;quot;app-%&amp;#123;[namespace]&amp;#125;-%&amp;#123;[stream]&amp;#125;-%&amp;#123;+YYYY.MM.dd&amp;#125;&amp;quot; &amp;#125;
+		&amp;#125;
+	&amp;#125;
+&amp;#125;
+
+output &amp;#123;
+    stdout &amp;#123;
+        codec =&amp;gt; rubydebug
+    &amp;#125;
+    elasticsearch &amp;#123;
+        hosts =&amp;gt; [&amp;quot;es-data-0.es-svc:9200&amp;quot;,&amp;quot;es-data-1.es-svc:9200&amp;quot;]
+        index =&amp;gt; &amp;quot;%&amp;#123;[target_index]&amp;#125;&amp;quot;
+        template_overwrite =&amp;gt; true
+    &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;84-创建configmap&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#84-创建configmap&#34;&gt;#&lt;/a&gt; 8.4 创建 ConfigMap&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;kubectl create configmap logstash-node-conf --from-file=logstash.conf=conf/logstash-node.conf -n logging
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;85-创建service&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#85-创建service&#34;&gt;#&lt;/a&gt; 8.5 创建 Service&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# cat 01-logstash-svc.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash-svc
+  namespace: logging
+spec:
+  clusterIP: None
+  selector:
+    app: logstash
+  ports:
+  - port: 9600
+    targetPort: 9600
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;86-交付logstash&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#86-交付logstash&#34;&gt;#&lt;/a&gt; 8.6 交付 Logstash&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 08-logstash]# cat 02-logstash-node-sts.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: logstash-node
+  namespace: logging
+spec:
+  serviceName: &amp;quot;logstash-svc&amp;quot;
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+      env: node
+  template:
+    metadata:
+      labels:
+        app: logstash
+        env: node
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: logstash
+        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/logstash-oss:7.17.6 
+        args: [&amp;quot;-f&amp;quot;,&amp;quot;config/logstash.conf&amp;quot;]                     # 启动时指定加载的配置文件
+        resources:
+          limits:
+            memory: 1024Mi
+        env:
+        - name: PIPELINE_WORKERS
+          value: &amp;quot;2&amp;quot;
+        - name: PIPELINE_BATCH_SIZE
+          value: &amp;quot;10000&amp;quot;
+        lifecycle:
+          postStart:                                            # 设定JVM
+            exec:
+              command:
+              - &amp;quot;/bin/bash&amp;quot;
+              - &amp;quot;-c&amp;quot;
+              - &amp;quot;sed -i -e &#39;/^-Xms/c-Xms512m&#39; -e &#39;/^-Xmx/c-Xmx512m&#39; /usr/share/logstash/config/jvm.options&amp;quot;
+        volumeMounts:
+        - name: data                                            # 持久化数据目录
+          mountPath: /usr/share/logstash/data
+        - name: conf
+          mountPath: /usr/share/logstash/config/logstash.conf
+          subPath: logstash.conf
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+      volumes:
+      - name: conf
+        configMap:
+          name: logstash-node-conf
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&amp;quot;ReadWriteMany&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;87-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#87-更新资源清单&#34;&gt;#&lt;/a&gt; 8.7 更新资源清单&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;kubectl apply -f 01-logstash-svc.yaml 
+kubectl apply -f 02-logstash-node-sts.yaml
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;88-检查kibana索引&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#88-检查kibana索引&#34;&gt;#&lt;/a&gt; 8.8 检查 kibana 索引&lt;/h5&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/DB4w8Ln.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;九-kibana可视化&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#九-kibana可视化&#34;&gt;#&lt;/a&gt; 九、Kibana 可视化&lt;/h4&gt;
+&lt;h5 id=&#34;91-创建索引&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#91-创建索引&#34;&gt;#&lt;/a&gt; 9.1 创建索引&lt;/h5&gt;
+&lt;p&gt;kube-system 索引&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/agOzRmb.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;ingress-stdout 索引&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Iv0xBBe.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;ingress-stderr 索引&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/RpbsKpc.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;kubelet 索引&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/2JBN6fi.png&#34; alt=&#34;5.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;92-日志展示&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#92-日志展示&#34;&gt;#&lt;/a&gt; 9.2 日志展示&lt;/h5&gt;
+&lt;p&gt;app-ingress-nginx-stdout 索引日志&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Yyf0gyS.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;app-ingress-nginx-stderr 索引日志&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/dUWbjv3.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;app-kube-system 索引日志&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/HQO7ECM.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;app-kubelet 索引日志&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/HN2BpY7.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;93-图形展示&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#93-图形展示&#34;&gt;#&lt;/a&gt; 9.3 图形展示&lt;/h5&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/fcx5E8m.png&#34; alt=&#34;5.png&#34; /&gt;&lt;/p&gt;
+</content>
+        <category term="ELKStack" />
+        <updated>2025-06-05T11:06:21.000Z</updated>
+    </entry>
     <entry>
         <id>http://ixuyong.cn/posts/170066797.html</id>
         <title>消费租赁项目Kubernetes基于ELK日志分析与实践</title>
@@ -2386,113 +4025,7 @@ spec:
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/9i3HsC6.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/PPAQczE.png&#34; alt=&#34;5.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/NkOwqO3.png&#34; alt=&#34;6.png&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;十一-daemonset运行日志agent实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#十一-daemonset运行日志agent实践&#34;&gt;#&lt;/a&gt; 十一、DaemonSet 运行日志 Agent 实践&lt;/h4&gt;
-&lt;h5 id=&#34;111-部署架构说明&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#111-部署架构说明&#34;&gt;#&lt;/a&gt; 11.1 部署架构说明&lt;/h5&gt;
-&lt;p&gt;对于那些将日志输出到，stdout 与 stderr 的 Pod，可以直接使用 DaemonSet 控制器在每个 Node 节点上运行一个 filebeat、logstash、fluentd 容器进行统一的收集，而后写入到日志存储系统&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/UOlaNE1.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
-&lt;h5 id=&#34;112-创建serviceaccount&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#112-创建serviceaccount&#34;&gt;#&lt;/a&gt; 11.2 创建 ServiceAccount&lt;/h5&gt;
-&lt;pre&gt;&lt;code&gt; kubectl create serviceaccount filebeat -n logging
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;113-创建clusterrole&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#113-创建clusterrole&#34;&gt;#&lt;/a&gt; 11.3 创建 ClusterRole&lt;/h5&gt;
-&lt;pre&gt;&lt;code&gt;kubectl create clusterrole filebeat --verb=get,list,watch --resource=namespace,pods,nodes 
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;114-创建clusterrolebinding&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#114-创建clusterrolebinding&#34;&gt;#&lt;/a&gt; 11.4 创建 ClusterRolebinding&lt;/h5&gt;
-&lt;pre&gt;&lt;code&gt;kubectl create clusterrolebinding filebeat --serviceaccount=logging:filebeat --clusterrole=filebeat
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;115-交付filebeat&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#115-交付filebeat&#34;&gt;#&lt;/a&gt; 11.5 交付 Filebeat&lt;/h5&gt;
-&lt;h6 id=&#34;1151-下载filebeat镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1151-下载filebeat镜像&#34;&gt;#&lt;/a&gt; &lt;strong&gt;11.5.1 下载 filebeat 镜像&lt;/strong&gt;&lt;/h6&gt;
-&lt;pre&gt;&lt;code&gt;# docker pull docker.elastic.co/beats/filebeat:7.17.6
-# docker tag docker.elastic.co/beats/filebeat:7.17.6 registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat:7.17.6
-# docker push registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat:7.17.6
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h6 id=&#34;1152-交付filebeat&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1152-交付filebeat&#34;&gt;#&lt;/a&gt; &lt;strong&gt;11.5.2 交付 filebeat&lt;/strong&gt;&lt;/h6&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;从 ConfigMap 中挂载 filebeat.yaml 配置文件；&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;挂载 /var/log、/var/lib/docker/containers 日志相关目录；&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;使用 hostPath 方式挂载 /usr/share/filebeat/data 数据目录，该目录下有一个 registry 文件，里面记录了 filebeat 采集日志位置的相关内容，比如文件 offset、source、timestamp 等，如果 Pod 发生异常后 K8S 自动将 Pod 进行重启，不挂载的情况下 registry 会被重置，将导致日志文件又从 offset=0 开始采集，会造成重复收集日志。&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;[root@k8s-master01 07-filebeat-daemoset]# cat 02-filebeat-ds.yaml 
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: filebeat
-  namespace: logging
-spec:
-  selector:
-    matchLabels:
-      app: filebeat
-  template:
-    metadata:
-      labels:
-        app: filebeat
-    spec:
-      serviceAccountName: &amp;quot;filebeat&amp;quot;
-      tolerations:
-      - key: node-role.kubernetes.io/master
-        operator: &amp;quot;Exists&amp;quot;
-        effect: &amp;quot;NoSchedule&amp;quot;
-      imagePullSecrets:
-      - name: harbor-admin
-      containers:
-      - name: filebeat
-        image: registry.cn-hangzhou.aliyuncs.com/kubernetes_public/filebeat:7.17.6
-        args: [
-          &amp;quot;-c&amp;quot;,&amp;quot;/etc/filebeat.yml&amp;quot;,
-          &amp;quot;-e&amp;quot;
-        ]
-        securityContext:
-          runAsUser: 0
-        resources:
-          limits:
-            memory: 300Mi
-        volumeMounts:
-        - name: config                          # 从ConfigMap中读取
-          mountPath: /etc/filebeat.yml
-          subPath: filebeat.yml
-        - name: varlog
-          mountPath: /var/log
-          readOnly: true
-        - name: varlibdockercontainers
-          mountPath: /var/lib/docker/containers
-          readOnly: true
-        - name: data
-          mountPath: /usr/share/filebeat/data
-        - name: tz-config
-          mountPath: /usr/share/zoneinfo/Asia/Shanghai
-        - name: tz-config
-          mountPath: /etc/localtime
-        - name: timezone
-          mountPath: /etc/timezone
-      volumes:
-      - name: config
-        configMap:
-          name: filebeat-config
-      - name: varlog
-        hostPath:
-          path: /var/log
-      - name: varlibdockercontainers
-        hostPath:
-          path: /var/lib/docker/containers
-      - name: data
-        hostPath:
-          path: /var/lib/filebeat-data
-          type: DirectoryOrCreate
-      - name: tz-config
-        hostPath:
-          path: /usr/share/zoneinfo/Asia/Shanghai
-          type: &amp;quot;&amp;quot;
-      - name: timezone
-        hostPath:
-          path: /etc/timezone
-          type: &amp;quot;&amp;quot; 
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h6 id=&#34;1153-filebeat配置文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1153-filebeat配置文件&#34;&gt;#&lt;/a&gt; 11.5.3 Filebeat 配置文件&lt;/h6&gt;
+&lt;h6 id=&#34;&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#&#34;&gt;#&lt;/a&gt; &lt;/h6&gt;
 </content>
         <category term="ELKStack" />
         <updated>2025-05-25T06:35:21.000Z</updated>
