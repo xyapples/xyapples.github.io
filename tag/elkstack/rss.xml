@@ -7,15 +7,15 @@
         <language>zh-CN</language>
         <pubDate>Thu, 05 Jun 2025 19:06:21 +0800</pubDate>
         <lastBuildDate>Thu, 05 Jun 2025 19:06:21 +0800</lastBuildDate>
-        <category>ELKStack</category>
         <category>Docker</category>
+        <category>ELKStack</category>
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>Redis</category>
         <category>rsync</category>
-        <category>Rabbitmq</category>
+        <category>Openvpn</category>
         <category>MySQL</category>
-        <category>默认tags</category>
+        <category>Rabbitmq</category>
         <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/570469260.html</guid>

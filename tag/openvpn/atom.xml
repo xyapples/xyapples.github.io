@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>http://ixuyong.cn</id>
-    <title>LinuxSre云原生 • Posts by &#34;默认分类&#34; category</title>
+    <title>LinuxSre云原生 • Posts by &#34;openvpn&#34; tag</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-05T13:50:22.000Z</updated>
-    <category term="ELKStack" />
     <category term="Docker" />
+    <category term="ELKStack" />
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="rsync" />
-    <category term="Rabbitmq" />
+    <category term="Openvpn" />
     <category term="MySQL" />
-    <category term="默认tags" />
+    <category term="Rabbitmq" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/2126514413.html</id>
@@ -20,7 +20,7 @@
         <link rel="alternate" href="http://ixuyong.cn/posts/2126514413.html"/>
         <content type="html">&lt;h3 id=&#34;虚拟隧道网络openvpn&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#虚拟隧道网络openvpn&#34;&gt;#&lt;/a&gt; 虚拟隧道网络 Openvpn&lt;/h3&gt;
 </content>
-        <category term="默认tags" />
+        <category term="Openvpn" />
         <updated>2025-06-05T13:50:22.000Z</updated>
     </entry>
 </feed>
