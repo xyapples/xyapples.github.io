@@ -4,15 +4,15 @@
     <title>LinuxSre云原生 • Posts by &#34;redis&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-05-12T13:21:44.000Z</updated>
-    <category term="ELKStack" />
     <category term="Docker" />
+    <category term="ELKStack" />
+    <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
-    <category term="Harbor" />
     <category term="rsync" />
-    <category term="MySQL" />
     <category term="Rabbitmq" />
     <category term="Windows" />
+    <category term="MySQL" />
     <entry>
         <id>http://ixuyong.cn/posts/1490514396.html</id>
         <title>Redis Cluster集群部署</title>

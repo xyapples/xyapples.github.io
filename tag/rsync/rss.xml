@@ -7,15 +7,15 @@
         <language>zh-CN</language>
         <pubDate>Sun, 30 Mar 2025 20:45:48 +0800</pubDate>
         <lastBuildDate>Sun, 30 Mar 2025 20:45:48 +0800</lastBuildDate>
-        <category>ELKStack</category>
         <category>Docker</category>
+        <category>ELKStack</category>
+        <category>Harbor</category>
         <category>Kubernetes</category>
         <category>Redis</category>
-        <category>Harbor</category>
         <category>rsync</category>
-        <category>MySQL</category>
         <category>Rabbitmq</category>
         <category>Windows</category>
+        <category>MySQL</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1922841233.html</guid>
             <title>Rsync服务实践</title>
