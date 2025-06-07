@@ -9,9 +9,10 @@
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
+    <category term="Linux" />
     <category term="rsync" />
-    <category term="Openvpn" />
     <category term="MySQL" />
+    <category term="Openvpn" />
     <category term="Rabbitmq" />
     <category term="Windows" />
     <entry>

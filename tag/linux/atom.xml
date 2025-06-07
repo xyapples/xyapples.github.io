@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>http://ixuyong.cn</id>
+    <title>LinuxSre云原生 • Posts by &#34;linux&#34; tag</title>
+    <link href="http://ixuyong.cn" />
+    <updated>2025-06-07T02:40:25.000Z</updated>
+    <category term="Docker" />
+    <category term="ELKStack" />
+    <category term="Harbor" />
+    <category term="Kubernetes" />
+    <category term="Redis" />
+    <category term="Linux" />
+    <category term="rsync" />
+    <category term="MySQL" />
+    <category term="Openvpn" />
+    <category term="Rabbitmq" />
+    <category term="Windows" />
+    <entry>
+        <id>http://ixuyong.cn/posts/2260957686.html</id>
+        <title>Linux—Centos7修改网卡名称</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/2260957686.html"/>
+        <content type="html">&lt;h3 id=&#34;linuxcentos7修改网卡名称&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#linuxcentos7修改网卡名称&#34;&gt;#&lt;/a&gt; Linux—Centos7 修改网卡名称&lt;/h3&gt;
+&lt;p&gt;首先我们先了解不同网卡名称对应的内核参数：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;biosdevname=0  net.ifnames=1：网卡名 “enp&lt;em&gt;s&lt;/em&gt;” 此内核参数一般为默认&lt;/li&gt;
+&lt;li&gt;biosdevname=1  net.ifnames=0：网卡名 “em*”&lt;/li&gt;
+&lt;li&gt;biosdevname=0  net.ifnames=0：网卡名 “eth*”&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;本次以将网卡名命名为 eth * 格式作示例&lt;/p&gt;
+&lt;h4 id=&#34;1-查看当前网卡的信息&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-查看当前网卡的信息&#34;&gt;#&lt;/a&gt; 1. 查看当前网卡的信息&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;[root@manager ~]# ifconfig
+ens33: flags=4163&amp;lt;UP,BROADCAST,RUNNING,MULTICAST&amp;gt;  mtu 1500
+        inet 192.168.40.88  netmask 255.255.255.0  broadcast 192.168.40.255
+        inet6 fe80::b92f:3dd3:19e7:1311  prefixlen 64  scopeid 0x20&amp;lt;link&amp;gt;
+        ether 00:0c:29:5e:a0:59  txqueuelen 1000  (Ethernet)
+        RX packets 75  bytes 8065 (7.8 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 63  bytes 7754 (7.5 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73&amp;lt;UP,LOOPBACK,RUNNING&amp;gt;  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10&amp;lt;host&amp;gt;
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;2-修改配置文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-修改配置文件&#34;&gt;#&lt;/a&gt; 2 . 修改配置文件&lt;/h4&gt;
+&lt;p&gt;（1）在下列路径下找到 ifcgf-ens33&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@manager ~]# cd /etc/sysconfig/network-scripts/
+[root@manager network-scripts]# ls
+ifcfg-ens33  ifdown-ippp  ifdown-routes    ifup          ifup-ipv6   ifup-ppp       ifup-tunnel
+ifcfg-lo     ifdown-ipv6  ifdown-sit       ifup-aliases  ifup-isdn   ifup-routes    ifup-wireless
+ifdown       ifdown-isdn  ifdown-Team      ifup-bnep     ifup-plip   ifup-sit       init.ipv6-global
+ifdown-bnep  ifdown-post  ifdown-TeamPort  ifup-eth      ifup-plusb  ifup-Team      network-functions
+ifdown-eth   ifdown-ppp   ifdown-tunnel    ifup-ippp     ifup-post   ifup-TeamPort  network-functions-ipv6
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;（2）使用 MV 命令，修改当前网卡的名称&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@manager ~]# mv ifcfg-ens33 ifcfg-eth0
+[root@manager network-scripts]# ls
+ifcfg-eth0   ifdown-ippp  ifdown-routes    ifup          ifup-ipv6   ifup-ppp       ifup-tunnel
+ifcfg-lo     ifdown-ipv6  ifdown-sit       ifup-aliases  ifup-isdn   ifup-routes    ifup-wireless
+ifdown       ifdown-isdn  ifdown-Team      ifup-bnep     ifup-plip   ifup-sit       init.ipv6-global
+ifdown-bnep  ifdown-post  ifdown-TeamPort  ifup-eth      ifup-plusb  ifup-Team      network-functions
+ifdown-eth   ifdown-ppp   ifdown-tunnel    ifup-ippp     ifup-post   ifup-TeamPort  network-functions-ipv6
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;（3）同步修改网卡配置文件中的 name 和 device，修改为需要配置网卡的名字&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;NAME=&amp;quot;ens33&amp;quot;
+DEVICE=&amp;quot;ens33&amp;quot;
+ 
+将上列命令修改为
+ 
+NAME=&amp;quot;eth0&amp;quot;
+DEVICE=&amp;quot;eth0&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;（4）修改 grub&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@manager ~]# cd /etc/default/
+
+#编辑内核信息,在GRUB_CMDLINE_LINUX行添加字段net.ifnames=0 biosdevname=0
+[root@manager default]# cat grub 
+GRUB_TIMEOUT=5
+GRUB_DISTRIBUTOR=&amp;quot;$(sed &#39;s, release .*$,,g&#39; /etc/system-release)&amp;quot;
+GRUB_DEFAULT=saved
+GRUB_DISABLE_SUBMENU=true
+GRUB_TERMINAL_OUTPUT=&amp;quot;console&amp;quot;
+GRUB_CMDLINE_LINUX=&amp;quot;crashkernel=auto rhgb net.ifnames=0 biosdevname=0 quiet&amp;quot;
+GRUB_DISABLE_RECOVERY=&amp;quot;true&amp;quot;
+
+#生成启动菜单
+[root@manager default]# grub2-mkconfig -o /boot/grub2/grub.cfg
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;（5）完成之后 reboot 重启系统即可&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@manager default]# reboot
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;（6）使用 ifconfig 即可查看&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@manager ~]# ifconfig
+eth0: flags=4163&amp;lt;UP,BROADCAST,RUNNING,MULTICAST&amp;gt;  mtu 1500
+        inet 192.168.40.88  netmask 255.255.255.0  broadcast 192.168.40.255
+        inet6 fe80::63d4:467f:9b76:e34f  prefixlen 64  scopeid 0x20&amp;lt;link&amp;gt;
+        inet6 fe80::1856:7b0:9d1e:7208  prefixlen 64  scopeid 0x20&amp;lt;link&amp;gt;
+        ether 00:0c:29:5e:a0:59  txqueuelen 1000  (Ethernet)
+        RX packets 77  bytes 8117 (7.9 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 62  bytes 7842 (7.6 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73&amp;lt;UP,LOOPBACK,RUNNING&amp;gt;  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10&amp;lt;host&amp;gt;
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+        <category term="Linux" />
+        <updated>2025-06-07T02:40:25.000Z</updated>
+    </entry>
+</feed>

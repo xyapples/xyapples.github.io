@@ -12,9 +12,10 @@
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>Redis</category>
+        <category>Linux</category>
         <category>rsync</category>
-        <category>Openvpn</category>
         <category>MySQL</category>
+        <category>Openvpn</category>
         <category>Rabbitmq</category>
         <category>Windows</category>
         <item>
