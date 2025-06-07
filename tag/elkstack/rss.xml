@@ -7,17 +7,17 @@
         <language>zh-CN</language>
         <pubDate>Thu, 05 Jun 2025 19:06:21 +0800</pubDate>
         <lastBuildDate>Thu, 05 Jun 2025 19:06:21 +0800</lastBuildDate>
-        <category>Docker</category>
         <category>ELKStack</category>
-        <category>Harbor</category>
         <category>Kubernetes</category>
         <category>Redis</category>
         <category>Linux</category>
-        <category>rsync</category>
-        <category>MySQL</category>
+        <category>Harbor</category>
+        <category>Docker</category>
         <category>Openvpn</category>
         <category>Rabbitmq</category>
+        <category>MySQL</category>
         <category>Windows</category>
+        <category>rsync</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/570469260.html</guid>
             <title>ELK收集Kubernetes组件日志分析与实践</title>
