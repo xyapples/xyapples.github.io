@@ -3,18 +3,53 @@
     <id>http://ixuyong.cn</id>
     <title>LinuxSre云原生</title>
     <link href="http://ixuyong.cn" />
-    <updated>2025-06-07T02:40:25.000Z</updated>
+    <updated>2025-06-08T02:33:49.000Z</updated>
+    <category term="DevOps" />
     <category term="ELKStack" />
+    <category term="Docker" />
     <category term="Kubernetes" />
     <category term="Redis" />
-    <category term="Linux" />
     <category term="Harbor" />
-    <category term="Docker" />
+    <category term="Linux" />
+    <category term="rsync" />
+    <category term="MySQL" />
+    <category term="Prometheus" />
     <category term="Openvpn" />
     <category term="Rabbitmq" />
-    <category term="MySQL" />
     <category term="Windows" />
-    <category term="rsync" />
+    <entry>
+        <id>http://ixuyong.cn/posts/2041568856.html</id>
+        <title>Prometheus监控Kubernetes</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/2041568856.html"/>
+        <content type="html"></content>
+        <category term="Kubernetes" />
+        <category term="Prometheus" />
+        <updated>2025-06-08T02:33:49.000Z</updated>
+    </entry>
+    <entry>
+        <id>http://ixuyong.cn/posts/1595025559.html</id>
+        <title>Prometheus监控实战</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/1595025559.html"/>
+        <content type="html"></content>
+        <category term="Prometheus" />
+        <updated>2025-06-08T02:33:41.000Z</updated>
+    </entry>
+    <entry>
+        <id>http://ixuyong.cn/posts/2015283801.html</id>
+        <title>K8S基于Jenkins实现SpringCloud微服务CI与CD实践（二）</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/2015283801.html"/>
+        <content type="html"></content>
+        <category term="DevOps" />
+        <updated>2025-06-08T02:28:36.000Z</updated>
+    </entry>
+    <entry>
+        <id>http://ixuyong.cn/posts/1208493697.html</id>
+        <title>K8S基于Jenkins实现SpringCloud微服务CI与CD实践（一）</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/1208493697.html"/>
+        <content type="html"></content>
+        <category term="DevOps" />
+        <updated>2025-06-08T02:28:16.000Z</updated>
+    </entry>
     <entry>
         <id>http://ixuyong.cn/posts/2260957686.html</id>
         <title>Linux—Centos7修改网卡名称</title>
