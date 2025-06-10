@@ -6,18 +6,18 @@
     <updated>2025-06-05T13:50:22.000Z</updated>
     <category term="Aliyun" />
     <category term="DevOps" />
+    <category term="ELKStack" />
     <category term="Docker" />
     <category term="Harbor" />
-    <category term="ELKStack" />
-    <category term="Kubernetes" />
-    <category term="Redis" />
+    <category term="MySQL" />
     <category term="Linux" />
     <category term="rsync" />
-    <category term="MySQL" />
+    <category term="Kubernetes" />
+    <category term="Redis" />
+    <category term="Openvpn" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
     <category term="Windows" />
-    <category term="Openvpn" />
     <category term="Tomcat" />
     <entry>
         <id>http://ixuyong.cn/posts/2126514413.html</id>
