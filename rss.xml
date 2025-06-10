@@ -5,23 +5,31 @@
         <link>http://ixuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Sun, 08 Jun 2025 10:55:56 +0800</pubDate>
-        <lastBuildDate>Sun, 08 Jun 2025 10:55:56 +0800</lastBuildDate>
+        <pubDate>Tue, 10 Jun 2025 21:57:00 +0800</pubDate>
+        <lastBuildDate>Tue, 10 Jun 2025 21:57:00 +0800</lastBuildDate>
+        <category>Aliyun</category>
         <category>DevOps</category>
         <category>Docker</category>
-        <category>ELKStack</category>
         <category>Harbor</category>
+        <category>ELKStack</category>
         <category>Kubernetes</category>
         <category>Redis</category>
         <category>Linux</category>
         <category>rsync</category>
-        <category>Prometheus</category>
         <category>MySQL</category>
+        <category>Prometheus</category>
         <category>Rabbitmq</category>
+        <category>Windows</category>
         <category>Openvpn</category>
         <category>Tomcat</category>
-        <category>Windows</category>
-        <category>Aliyun</category>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/1366748664.html</guid>
+            <title>K8S基于Jenkins实现Java项目CI与CD实践（二）</title>
+            <link>http://ixuyong.cn/posts/1366748664.html</link>
+            <category>DevOps</category>
+            <pubDate>Tue, 10 Jun 2025 21:57:00 +0800</pubDate>
+            <description><![CDATA[  ]]></description>
+        </item>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1528713798.html</guid>
             <title>阿里云ECS、SLB、RDS、CDN、ESS应用与实践</title>
