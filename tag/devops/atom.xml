@@ -5,20 +5,20 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-06-08T02:28:36.000Z</updated>
     <category term="DevOps" />
-    <category term="Aliyun" />
     <category term="Docker" />
-    <category term="Harbor" />
     <category term="ELKStack" />
+    <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="Linux" />
     <category term="rsync" />
-    <category term="MySQL" />
-    <category term="Openvpn" />
     <category term="Prometheus" />
-    <category term="Tomcat" />
+    <category term="MySQL" />
     <category term="Rabbitmq" />
+    <category term="Openvpn" />
+    <category term="Tomcat" />
     <category term="Windows" />
+    <category term="Aliyun" />
     <entry>
         <id>http://ixuyong.cn/posts/2015283801.html</id>
         <title>K8S基于Jenkins实现SpringCloud微服务CI与CD实践（三）</title>
@@ -270,7 +270,7 @@ spec:
             gitlab_rails[&#39;smtp_address&#39;] = &amp;quot;smtp.qq.com&amp;quot;
             gitlab_rails[&#39;smtp_port&#39;] = 465
             gitlab_rails[&#39;smtp_user_name&#39;] = &amp;quot;373370405@qq.com&amp;quot;   #发件人邮箱账户
-            gitlab_rails[&#39;smtp_password&#39;] = &amp;quot;pohleicnfawvbgei&amp;quot;   #发件人邮箱客户端授权码
+            gitlab_rails[&#39;smtp_password&#39;] = &amp;quot;pohleicnfawvb&amp;quot;   #发件人邮箱客户端授权码
             gitlab_rails[&#39;smtp_domain&#39;] = &amp;quot;smtp.qq.com&amp;quot;
             gitlab_rails[&#39;smtp_authentication&#39;] = &amp;quot;login&amp;quot;
             gitlab_rails[&#39;smtp_enable_starttls_auto&#39;] = true

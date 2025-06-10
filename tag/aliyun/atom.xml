@@ -5,20 +5,20 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-06-08T02:55:56.000Z</updated>
     <category term="DevOps" />
-    <category term="Aliyun" />
     <category term="Docker" />
-    <category term="Harbor" />
     <category term="ELKStack" />
+    <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
     <category term="Linux" />
     <category term="rsync" />
-    <category term="MySQL" />
-    <category term="Openvpn" />
     <category term="Prometheus" />
-    <category term="Tomcat" />
+    <category term="MySQL" />
     <category term="Rabbitmq" />
+    <category term="Openvpn" />
+    <category term="Tomcat" />
     <category term="Windows" />
+    <category term="Aliyun" />
     <entry>
         <id>http://ixuyong.cn/posts/1528713798.html</id>
         <title>阿里云ECS、SLB、RDS、CDN、ESS应用与实践</title>
