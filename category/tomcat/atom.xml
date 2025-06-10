@@ -6,19 +6,19 @@
     <updated>2025-06-08T02:51:57.000Z</updated>
     <category term="Aliyun" />
     <category term="DevOps" />
-    <category term="ELKStack" />
     <category term="Docker" />
+    <category term="ELKStack" />
     <category term="Harbor" />
-    <category term="MySQL" />
     <category term="Linux" />
-    <category term="rsync" />
     <category term="Kubernetes" />
+    <category term="rsync" />
     <category term="Redis" />
     <category term="Openvpn" />
     <category term="Prometheus" />
+    <category term="MySQL" />
     <category term="Rabbitmq" />
-    <category term="Windows" />
     <category term="Tomcat" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/754945111.html</id>
         <title>Tomcat JVM调优实践</title>
