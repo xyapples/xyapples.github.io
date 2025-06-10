@@ -14,11 +14,11 @@
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>Redis</category>
-        <category>Linux</category>
         <category>rsync</category>
+        <category>Linux</category>
         <category>MySQL</category>
-        <category>Openvpn</category>
         <category>Prometheus</category>
+        <category>Openvpn</category>
         <category>Rabbitmq</category>
         <category>Tomcat</category>
         <category>Windows</category>

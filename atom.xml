@@ -11,11 +11,11 @@
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
-    <category term="Linux" />
     <category term="rsync" />
+    <category term="Linux" />
     <category term="MySQL" />
-    <category term="Openvpn" />
     <category term="Prometheus" />
+    <category term="Openvpn" />
     <category term="Rabbitmq" />
     <category term="Tomcat" />
     <category term="Windows" />
@@ -66,9 +66,9 @@
     </entry>
     <entry>
         <id>http://ixuyong.cn/posts/2015283801.html</id>
-        <title>K8S基于Jenkins实现SpringCloud微服务CI与CD实践（二）</title>
+        <title>K8S基于Jenkins实现SpringCloud微服务CI与CD实践（三）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/2015283801.html"/>
-        <content type="html">&lt;h3 id=&#34;k8s基于jenkins实现springcloud微服务ci与cd实践二&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s基于jenkins实现springcloud微服务ci与cd实践二&#34;&gt;#&lt;/a&gt; K8S 基于 Jenkins 实现 SpringCloud 微服务 CI 与 CD 实践（二）&lt;/h3&gt;
+        <content type="html">&lt;h3 id=&#34;k8s基于jenkins实现springcloud微服务ci与cd实践三&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s基于jenkins实现springcloud微服务ci与cd实践三&#34;&gt;#&lt;/a&gt; K8S 基于 Jenkins 实现 SpringCloud 微服务 CI 与 CD 实践（三）&lt;/h3&gt;
 </content>
         <category term="DevOps" />
         <updated>2025-06-08T02:28:36.000Z</updated>
@@ -78,6 +78,1017 @@
         <title>K8S基于Jenkins实现SpringCloud微服务CI与CD实践（一）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/1208493697.html"/>
         <content type="html">&lt;h3 id=&#34;k8s基于jenkins实现springcloud微服务ci与cd实践一&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s基于jenkins实现springcloud微服务ci与cd实践一&#34;&gt;#&lt;/a&gt; K8S 基于 Jenkins 实现 SpringCloud 微服务 CI 与 CD 实践（一）&lt;/h3&gt;
+&lt;h3 id=&#34;k8s基于jenkins实现springcloud微服务ci与cd实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s基于jenkins实现springcloud微服务ci与cd实践&#34;&gt;#&lt;/a&gt; K8S 基于 Jenkins 实现 SpringCloud 微服务 CI 与 CD 实践&lt;/h3&gt;
+&lt;p&gt;CI 阶段：开发人员 -&amp;gt; 提交代码 -&amp;gt;gitlab 仓库 -&amp;gt;Jenkins/CI 抓取代码 -&amp;gt; 漏洞扫描 -&amp;gt; 编译 -&amp;gt; 构建镜像 -&amp;gt; 推送 Harbor-&amp;gt; 部署应用至 K8S 测试环境；&lt;/p&gt;
+&lt;p&gt;CD 阶段：Jenkins/CD-&amp;gt; 拉取 Harbor 仓库对应项目镜像 -&amp;gt; 部署应用至 K8S 测试环境&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/reddUL2.jpeg&#34; alt=&#34;1.jpg&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;一-部署harbor&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-部署harbor&#34;&gt;#&lt;/a&gt; 一、部署 Harbor&lt;/h4&gt;
+&lt;h5 id=&#34;11-安装基础环境&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-安装基础环境&#34;&gt;#&lt;/a&gt; 1.1 安装基础环境&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@harbor ~]# yum remove docker*
+[root@harbor ~]# yum install -y yum-utils device-mapper-persistent-data lvm2
+[root@harbor ~]# curl -o /etc/yum.repos.d/docker-ce.repo  https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+[root@harbor ~]# yum list docker-ce --showduplicates |sort -r 
+[root@harbor ~]# yum install docker-ce docker-compose -y
+
+###提示：No match for argument: python-pip
+#改成为 Centos 8已经换成python3 使用该命令解决 yum install python3-pip
+[root@harbor ~]# yum -y install python-pip
+#升级
+[root@harbor ~]# pip3 install --upgrade pip
+[root@harbor ~]# pip3 install docker-compose
+[root@Harbor ~]# docker-compose -version
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;12-配置-docker-加速&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#12-配置-docker-加速&#34;&gt;#&lt;/a&gt; 1.2 配置 Docker 加速&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@harbor ~]# sudo mkdir -p /etc/docker
+
+#Docker加速1
+[root@harbor ~]# sudo tee /etc/docker/daemon.json &amp;lt;&amp;lt;-&#39;EOF&#39;
+&amp;#123;
+  &amp;quot;registry-mirrors&amp;quot;: [
+    &amp;quot;https://docker.credclouds.com&amp;quot;,
+    &amp;quot;https://k8s.credclouds.com&amp;quot;,
+    &amp;quot;https://quay.credclouds.com&amp;quot;,
+    &amp;quot;https://gcr.credclouds.com&amp;quot;,
+    &amp;quot;https://k8s-gcr.credclouds.com&amp;quot;,
+    &amp;quot;https://ghcr.credclouds.com&amp;quot;,
+    &amp;quot;https://do.nark.eu.org&amp;quot;,
+    &amp;quot;https://docker.m.daocloud.io&amp;quot;,
+    &amp;quot;https://docker.nju.edu.cn&amp;quot;,
+    &amp;quot;https://docker.mirrors.sjtug.sjtu.edu.cn&amp;quot;,
+    &amp;quot;https://docker.1panel.live&amp;quot;,
+    &amp;quot;https://docker.rainbond.cc&amp;quot;
+  ],
+  &amp;quot;exec-opts&amp;quot;: [&amp;quot;native.cgroupdriver=systemd&amp;quot;]
+&amp;#125;
+EOF
+
+#Docker加速2
+[root@harbor ~]# sudo tee /etc/docker/daemon.json &amp;lt;&amp;lt;-&#39;EOF&#39;
+&amp;#123;
+  &amp;quot;registry-mirrors&amp;quot;: [
+    &amp;quot;https://docker.1panel.live&amp;quot;,
+    &amp;quot;https://hub.littlediary.cn&amp;quot;,
+    &amp;quot;https://docker.kejilion.pro&amp;quot;,
+    &amp;quot;https://docker.1ms.run&amp;quot;,
+    &amp;quot;https://lispy.org&amp;quot;,
+    &amp;quot;https://docker.xiaogenban1993.com&amp;quot;,
+    &amp;quot;https://docker.xuanyuan.me&amp;quot;,
+    &amp;quot;https://docker.mybacc.com&amp;quot;,
+    &amp;quot;https://docker-0.unsee.tech&amp;quot;,
+    &amp;quot;https://dockerpull.cn&amp;quot;
+  ],
+  &amp;quot;exec-opts&amp;quot;: [&amp;quot;native.cgroupdriver=systemd&amp;quot;]
+&amp;#125;
+EOF
+
+[root@harbor ~]# systemctl enable docker --now
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;13-装-harbor&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#13-装-harbor&#34;&gt;#&lt;/a&gt; 1.3 装 Harbor&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@harbor ~]# cd /soft/
+[root@harbor ~]# wget https://github.com/goharbor/harbor/releases/download/v2.6.1/harbor-offline-installer-v2.6.1.tgz
+[root@harbor soft]# tar xf harbor-offline-installer-v2.6.1.tgz
+[root@harbor soft]# cd harbor
+[root@Harbor harbor]# cp harbor.yml.tmpl harbor.yml
+[root@Harbor harbor]# cat harbor.yml
+...
+hostname: s.hmallleasing.com
+...
+http:
+  # port for http, default is 80. If https enabled, this port will redirect to https port
+  port: 80
+
+# https related config
+https:
+  # https port for harbor, default is 443
+  port: 443
+  # The path of cert and key files for nginx
+  certificate: /soft/harbor/ssl/hmallleasing.com.pem
+  private_key: /soft/harbor/ssl/hmallleasing.com.key
+...
+harbor_admin_password: Harbor12345
+[root@harbor harbor]#  ./install.sh
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;14-配置-nginx-负载均衡调度&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#14-配置-nginx-负载均衡调度&#34;&gt;#&lt;/a&gt; 1.4 配置 Nginx 负载均衡调度&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@lb ~]# vim s.hmallleasing.com.conf
+server &amp;#123;
+    listen 443 ssl;
+    server_name harbor.hmallleasing.com;
+    client_max_body_size 1G; 
+    ssl_prefer_server_ciphers on;
+    ssl_certificate  /etc/nginx/sslkey/_.hmallleasing.com_chain.crt;
+    ssl_certificate_key  /etc/nginx/sslkey/_.hmallleasing.com_key.key;
+    location / &amp;#123;
+        proxy_pass http://192.168.1.134;
+#       include proxy_params;
+#       proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        
+        proxy_connect_timeout 30;
+        proxy_send_timeout 60;
+        proxy_read_timeout 60;
+        
+        proxy_buffering on;
+        proxy_buffer_size 32k;
+        proxy_buffers 4 128k;
+        proxy_temp_file_write_size 10240k;		
+        proxy_max_temp_file_size 10240k;
+    &amp;#125;
+&amp;#125;
+
+server &amp;#123;
+    listen 80;
+    server_name s.hmallleasing.com;
+    return 302 https://$server_name$request_uri;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;15-推送镜像至-harbor&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#15-推送镜像至-harbor&#34;&gt;#&lt;/a&gt; 1.5 推送镜像至 Harbor&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@harbor harbor]# docker tag beae173ccac6 harbor.hmallleasing.com/ops/busybox.v1
+[root@harbor harbor]# docker login harbor.hmallleasing.com
+[root@harbor harbor]# docker push harbor.hmallleasing.com/ops/busybox.v1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;16-harbor-停止与启动&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#16-harbor-停止与启动&#34;&gt;#&lt;/a&gt; 1.6 Harbor 停止与启动&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#停用Harbor
+[root@harbor harbor]# pwd
+/soft/harbor
+[root@harbor harbor]# docker-compose down
+ #启动Harbor
+[root@harbor harbor]# docker-compose up -d
+[root@harbor harbor]# docker-compose start
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;二-部署gitlab&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#二-部署gitlab&#34;&gt;#&lt;/a&gt; 二、部署 Gitlab&lt;/h4&gt;
+&lt;p&gt;通常 Gitlab 都是在独立服务器进行部署和维护，但为了更好的掌握 Kubernetes，所以本次课程采用资源清单方式将 Gitlab 以&lt;/p&gt;
+&lt;p&gt;StatefulSet 方式交付到 Kubernetes 中；&lt;/p&gt;
+&lt;p&gt;Gitlab 以容器方式运行，需要持久化如下几个目录中的数据：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;strong&gt;持久化本地位置&lt;/strong&gt;&lt;/th&gt;
+&lt;th&gt;&lt;strong&gt;容器位置&lt;/strong&gt;&lt;/th&gt;
+&lt;th&gt;&lt;strong&gt;使用&lt;/strong&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;${pvc}/data&lt;/td&gt;
+&lt;td&gt;/var/opt/gitlab&lt;/td&gt;
+&lt;td&gt;用于存储应用程序数据&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;${pvc}/logs&lt;/td&gt;
+&lt;td&gt;/var/log/gitlab&lt;/td&gt;
+&lt;td&gt;用于存储日志&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;${pvc}/config&lt;/td&gt;
+&lt;td&gt;/etc/gitlab&lt;/td&gt;
+&lt;td&gt;用于存储 GitLab 配置文件&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h5 id=&#34;21下载gitlab镜像推送至harbor&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21下载gitlab镜像推送至harbor&#34;&gt;#&lt;/a&gt; 2.1 下载 Gitlab 镜像推送至 Harbor&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@harbor harbor]# docker pull gitlab/gitlab-ce:14.6.0-ce.0
+[root@harbor harbor]# docker tag gitlab/gitlab-ce:14.6.0-ce.0 s.hmallleasing.com/base/gitlab-ce:14.6.0
+[root@harbor harbor]# docker login s.hmallleasing.com
+[root@harbor harbor]# docker push s.hmallleasing.com/base/gitlab-ce:14.6.0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;22-创建service&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-创建service&#34;&gt;#&lt;/a&gt; 2.2 创建 Service&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@master01 gitlab]# cat 01-gitlab-svc.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitlab-svc
+  namespace: ops
+spec:
+  clusterIP: None
+  selector:
+    app: gitlab
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  - name: https
+    port: 443
+    targetPort: 443
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;23-创建statefulset&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#23-创建statefulset&#34;&gt;#&lt;/a&gt; 2.3 创建 Statefulset&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;# cat 02-gitlab-sts.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: gitlab
+  namespace: ops
+spec:
+  serviceName: &amp;quot;gitlab-svc&amp;quot;               # 关联的headlessService
+  selector:
+    matchLabels:
+      app: gitlab
+  template:
+    metadata:
+      labels:
+        app: gitlab
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: gitlab-ce
+        image: s.hmallleasing.com/base/gitlab-ce:14.6.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: GITLAB_ROOT_PASSWORD
+          value: &amp;quot;admin123&amp;quot;
+        - name: GITLAB_OMNIBUS_CONFIG
+          value: |
+            external_url &amp;quot;http://gitlab.hmallleasing.com&amp;quot;
+            gitlab_rails[&#39;time_zone&#39;] = &#39;Asia/Shanghai&#39;
+            node_exporter[&#39;enable&#39;] = false
+            redis_exporter[&#39;enable&#39;] = false
+            postgres_exporter[&#39;enable&#39;] = false
+            gitlab_exporter[&#39;enable&#39;] = false
+            grafana[&#39;enable&#39;] = false
+            grafana[&#39;reporting_enabled&#39;] = false
+            prometheus[&#39;enable&#39;] = false
+            prometheus[&#39;monitor_kubernetes&#39;] = false
+            gitlab_rails[&#39;gitlab_email_enabled&#39;] = true
+            gitlab_rails[&#39;gitlab_email_from&#39;] = &#39;373370405@qq.com&#39;  #发件邮箱
+            gitlab_rails[&#39;gitlab_email_display_name&#39;] = &#39;Nfzl-Gitlab&#39;  #发件人显示名称
+            gitlab_rails[&#39;smtp_enable&#39;] = true
+            gitlab_rails[&#39;smtp_address&#39;] = &amp;quot;smtp.qq.com&amp;quot;
+            gitlab_rails[&#39;smtp_port&#39;] = 465
+            gitlab_rails[&#39;smtp_user_name&#39;] = &amp;quot;373370405@qq.com&amp;quot;   #发件人邮箱账户
+            gitlab_rails[&#39;smtp_password&#39;] = &amp;quot;pohleicnfawvbgei&amp;quot;   #发件人邮箱客户端授权码
+            gitlab_rails[&#39;smtp_domain&#39;] = &amp;quot;smtp.qq.com&amp;quot;
+            gitlab_rails[&#39;smtp_authentication&#39;] = &amp;quot;login&amp;quot;
+            gitlab_rails[&#39;smtp_enable_starttls_auto&#39;] = true
+            gitlab_rails[&#39;smtp_tls&#39;] = true
+        ports:
+        - name: http
+          containerPort: 80
+        - name: https
+          containerPort: 443
+        volumeMounts:
+        - name: data
+          mountPath: /etc/gitlab
+          subPath: config
+        - name: data
+          mountPath: /var/opt/gitlab
+          subPath: data
+        - name: data
+          mountPath: /var/log/gitlab
+          subPath: logs
+  volumeClaimTemplates:         # pvc
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&amp;quot;ReadWriteMany&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 2Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;24-创建ingress&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#24-创建ingress&#34;&gt;#&lt;/a&gt; 2.4 创建 Ingress&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@master01 gitlab]# cat 03-gitlab-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gitlab-ingress
+  namespace: ops
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: &amp;quot;gitlab.hmallleasing.com&amp;quot;
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: gitlab-svc
+            port:
+              name: http
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;25-更新资源清单&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#25-更新资源清单&#34;&gt;#&lt;/a&gt; 2.5 更新资源清单&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@master01 gitlab]# kubectl create ns ops
+[root@master01 gitlab]# kubectl create secret docker-registry harbor-admin --docker-server=s.hmallleasing.com --docker-username=admin --docker-password=passwd -n ops
+[root@master01 gitlab]# kubectl apply -f .
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;26-访问gitlab&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#26-访问gitlab&#34;&gt;#&lt;/a&gt; 2.6 访问 Gitlab&lt;/h5&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/KX8NiKX.png&#34; alt=&#34;PixPin_2025-06-09_14-27-11.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;三-部署sonarqube&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#三-部署sonarqube&#34;&gt;#&lt;/a&gt; 三、部署 Sonarqube&lt;/h4&gt;
+&lt;p&gt;SonarQube 是一个开源的代码质量管理系统，用于检测代码中的错误、漏洞。它可以与 Jenkins 集成，让我们能自动化进行&lt;/p&gt;
+&lt;p&gt;代码质量扫描。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/9h7nyjZ.jpeg&#34; alt=&#34;1.jpg&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Sonarqube 扫描流程：&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;使用 SonarScanner 客户端工具将代码源文件以 http/https 方式推送给 Sonarqube 服务端；&lt;/li&gt;
+&lt;li&gt;Sonarqube 服务端基于 ElasticSerach 对代码进行分析，而后将分析结果存储至 Database；&lt;/li&gt;
+&lt;li&gt;Sonarqube 服务端读取 Database 数据，然后将扫描结果进行前端展示；&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;所以，安装 Sonarqube 之前需要先安装依赖的数据库，后期进行漏洞扫描时还需要借助 SonarScanner 客户端；&lt;/p&gt;
+&lt;h5 id=&#34;31-部署pgsql&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#31-部署pgsql&#34;&gt;#&lt;/a&gt; 3.1 部署 Pgsql&lt;/h5&gt;
+&lt;h6 id=&#34;311-下载postgresql镜像推送至harbor&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#311-下载postgresql镜像推送至harbor&#34;&gt;#&lt;/a&gt; 3.1.1 下载 postgresql 镜像推送至 Harbor&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@master01 ~]# docker pull postgres:13.8
+[root@master01 ~]# docker tag postgres:13.8 s.hmallleasing.com/base/postgres:13.8
+[root@master01 ~]# docker login s.hmallleasing.com
+[root@master01 ~]# docker push s.hmallleasing.com/base/postgres:13.8
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;312-部署pgsql-sts&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#312-部署pgsql-sts&#34;&gt;#&lt;/a&gt; 3.1.2 部署 Pgsql-sts&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 sonarqube]# cat 01-pgsql-sts.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgsql-svc
+  namespace: ops
+spec:
+  clusterIP: None
+  selector:
+    app: pgsql
+  ports:
+  - port: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresql
+  namespace: ops
+spec:
+  serviceName: &amp;quot;pgsql-svc&amp;quot;
+  selector:
+    matchLabels:
+      app: pgsql
+  template:
+    metadata:
+      labels:
+        app: pgsql
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: postgresql
+        image: s.hmallleasing.com/ops/postgres:13.8
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: POSTGRES_DB                   # 数据库
+          value: sonardb
+        - name: POSTGRES_USER                 # 用户
+          value: sonar
+        - name: POSTGRES_PASSWORD             # 密码
+          value: &amp;quot;Superman*2023&amp;quot;
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: db
+          mountPath: /var/lib/postgresql/data
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+  volumeClaimTemplates:         
+  - metadata:
+      name: db
+    spec:
+      accessModes: [&amp;quot;ReadWriteOnce&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;313-检查postgresql&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#313-检查postgresql&#34;&gt;#&lt;/a&gt; 3.1.3 检查 postgresql&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 sonarqube]# kubectl exec -it postgresql-0 -n ops -- /bin/bash
+root@postgresql-0:/# psql -Usonar -d sonardb 
+psql (13.8 (Debian 13.8-1.pgdg110+1))
+Type &amp;quot;help&amp;quot; for help.
+
+sonardb=# \l
+                             List of databases
+   Name    | Owner | Encoding |  Collate   |   Ctype    | Access privileges 
+-----------+-------+----------+------------+------------+-------------------
+ postgres  | sonar | UTF8     | en_US.utf8 | en_US.utf8 | 
+ sonardb   | sonar | UTF8     | en_US.utf8 | en_US.utf8 | 
+ template0 | sonar | UTF8     | en_US.utf8 | en_US.utf8 | =c/sonar         +
+           |       |          |            |            | sonar=CTc/sonar
+ template1 | sonar | UTF8     | en_US.utf8 | en_US.utf8 | =c/sonar         +
+           |       |          |            |            | sonar=CTc/sonar
+(4 rows)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;32-部署sonarqube&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#32-部署sonarqube&#34;&gt;#&lt;/a&gt; 3.2 部署 Sonarqube&lt;/h5&gt;
+&lt;h6 id=&#34;321-下载sonarqube镜像推送至harbor&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#321-下载sonarqube镜像推送至harbor&#34;&gt;#&lt;/a&gt; 3.2.1 下载 sonarqube 镜像推送至 Harbor&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@master01 ~]# docker pull sonarqube:9.9.8-community
+[root@master01 ~]# docker tag sonarqube:9.9.8-community s.hmallleasing.com/base/sonarqube:9.9.8
+[root@master01 ~]# docker login s.hmallleasing.com
+[root@master01 ~]# docker push s.hmallleasing.com/base/sonarqube:9.9.8
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;322-部署sonarqube-sts&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#322-部署sonarqube-sts&#34;&gt;#&lt;/a&gt; 3.2.2 部署 Sonarqube-sts&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;# cat 02-sonarqube-sts.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarqube-svc
+  namespace: ops
+spec:
+  clusterIP: None
+  selector:
+    app: sonarqube
+  ports:
+  - name: web
+    port: 9000
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sonarqube
+  namespace: ops
+spec:
+  serviceName: &amp;quot;sonarqube-svc&amp;quot;
+  selector:
+    matchLabels:
+      app: sonarqube
+  template:
+    metadata:
+      labels:
+        app: sonarqube
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      initContainers:
+      - name: set-kernel
+        image: busybox
+        command: [&amp;quot;sh&amp;quot;, &amp;quot;-c&amp;quot;, &amp;quot;sysctl -w vm.max_map_count=524288 ; sysctl -w fs.file-max=131072 ; ulimit -n 131072 ; ulimit -u 8192&amp;quot;]
+        securityContext:
+          privileged: true
+      containers:
+      - name: sonarqube
+        image: s.hmallleasing.com/base/sonarqube:9.9.8
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: JAVA_OPTS
+          value: -Duser.timezone=Asia/Shanghai
+        - name: SONARQUBE_JDBC_USERNAME               # 连接pgsql用户名
+          value: sonar
+        - name: SONARQUBE_JDBC_PASSWORD               # 连接pgsql密码
+          value: &amp;quot;admin123&amp;quot;
+        - name: SONARQUBE_JDBC_URL                    # 连接pgsql地址/数据库
+          value: jdbc:postgresql://pgsql-svc:5432/sonardb
+        resources:
+          limits:
+            cpu: 1500m
+            memory: 2048Mi
+        ports:
+        - name: web
+          containerPort: 9000
+        volumeMounts:
+        - name: data
+          mountPath: /opt/sonarqube/data
+          subPath: data
+        - name: data
+          mountPath: /opt/sonarqube/logs
+          subPath: logs
+        - name: data
+          mountPath: /opt/sonarqube/extensions
+          subPath: extensions
+        - name: tz-config
+          mountPath: /usr/share/zoneinfo/Asia/Shanghai
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+  volumeClaimTemplates:         
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&amp;quot;ReadWriteOnce&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5G
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;323-创建ingress&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#323-创建ingress&#34;&gt;#&lt;/a&gt; 3.2.3 创建 Ingress&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 sonarqube]# cat 03-sonarqube-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sonarqube-ingress
+  namespace: ops
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: &amp;quot;sonar.hmallleasing.com&amp;quot;
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sonarqube-svc
+            port:
+              name: web
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;324-访问sonarqube&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#324-访问sonarqube&#34;&gt;#&lt;/a&gt; 3.2.4 访问 sonarqube&lt;/h6&gt;
+&lt;p&gt;通过 http://sonar.hmallleasing.com ，用户名：admin，密码：admin&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/uTo5Uoy.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;安装中文插件&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/gD2k8u1.png&#34; alt=&#34;image-20230322101425876.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;四-部署jenkins&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#四-部署jenkins&#34;&gt;#&lt;/a&gt; 四、部署 Jenkins&lt;/h4&gt;
+&lt;p&gt;既然是基于 Kubernetes 来实现 CI/CD，那么最好将 Jenkins 以 Pod 的形式运行在 Kubernetes 集群中。其次 Jenkins 没有数&lt;/p&gt;
+&lt;p&gt;据库，所有的数据都存储在本地，所以只需要将 Jenkins 的数据目录持久化下来就可以了。&lt;/p&gt;
+&lt;h5 id=&#34;41-下载jenkins镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#41-下载jenkins镜像&#34;&gt;#&lt;/a&gt; 4.1 下载 Jenkins 镜像&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@master01 ~]# docker pull jenkins/jenkins:2.504.2-lts
+[root@master01 ~]# docker tag jenkins/jenkins:2.504.2-lts s.hmallleasing.com/base/jenkins:2.504.2
+[root@master01 ~]# docker login s.hmallleasing.com
+[root@master01 ~]# docker push s.hmallleasing.com/base/jenkins:2.504.2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;42-创建rbac&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#42-创建rbac&#34;&gt;#&lt;/a&gt; 4.2 创建 RBAC&lt;/h5&gt;
+&lt;p&gt;后期 Jenkins 需要创建 Slave Pod 来完成流水线的执行，为此我们需要一些权限。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 jenkins]# cat 01-jenkins-rbac.yaml 
+# serviceaccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins
+  namespace: ops
+---
+# clusterRole
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: jenkins
+rules:
+  - apiGroups: [&amp;quot;extensions&amp;quot;, &amp;quot;apps&amp;quot;]
+    resources: [&amp;quot;deployments&amp;quot;, &amp;quot;ingresses&amp;quot;]
+    verbs: [&amp;quot;create&amp;quot;, &amp;quot;delete&amp;quot;, &amp;quot;get&amp;quot;, &amp;quot;list&amp;quot;, &amp;quot;watch&amp;quot;, &amp;quot;patch&amp;quot;, &amp;quot;update&amp;quot;]
+  - apiGroups: [&amp;quot;&amp;quot;]
+    resources: [&amp;quot;services&amp;quot;]
+    verbs: [&amp;quot;create&amp;quot;, &amp;quot;delete&amp;quot;, &amp;quot;get&amp;quot;, &amp;quot;list&amp;quot;, &amp;quot;watch&amp;quot;, &amp;quot;patch&amp;quot;, &amp;quot;update&amp;quot;]
+  - apiGroups: [&amp;quot;&amp;quot;]
+    resources: [&amp;quot;pods&amp;quot;]
+    verbs: [&amp;quot;create&amp;quot;, &amp;quot;delete&amp;quot;, &amp;quot;get&amp;quot;, &amp;quot;list&amp;quot;, &amp;quot;patch&amp;quot;, &amp;quot;update&amp;quot;, &amp;quot;watch&amp;quot;]
+  - apiGroups: [&amp;quot;&amp;quot;]
+    resources: [&amp;quot;pods/exec&amp;quot;]
+    verbs: [&amp;quot;create&amp;quot;, &amp;quot;delete&amp;quot;, &amp;quot;get&amp;quot;, &amp;quot;list&amp;quot;, &amp;quot;patch&amp;quot;, &amp;quot;update&amp;quot;, &amp;quot;watch&amp;quot;]
+  - apiGroups: [&amp;quot;&amp;quot;]
+    resources: [&amp;quot;pods/log&amp;quot;, &amp;quot;events&amp;quot;]
+    verbs: [&amp;quot;get&amp;quot;, &amp;quot;list&amp;quot;, &amp;quot;watch&amp;quot;]
+  - apiGroups: [&amp;quot;&amp;quot;]
+    resources: [&amp;quot;secrets&amp;quot;]
+    verbs: [&amp;quot;get&amp;quot;]
+---
+# clusterrolebinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: jenkins
+  namespace: ops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: jenkins
+subjects:
+  - kind: ServiceAccount
+    name: jenkins
+    namespace: ops
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;43-创建service&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#43-创建service&#34;&gt;#&lt;/a&gt; 4.3 创建 Service&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 jenkins]# cat 02-jenkins-svc.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-svc
+  namespace: ops
+spec:
+  clusterIP: None
+  selector:
+    app: jenkins
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+    - name: agent
+      port: 50000
+      targetPort: 50000
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;44-创建statefulset&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#44-创建statefulset&#34;&gt;#&lt;/a&gt; 4.4 创建 StatefulSet&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 jenkins]# cat 03-jenkins-sts.yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jenkins
+  namespace: ops
+spec:
+  serviceName: &amp;quot;jenkins-svc&amp;quot;
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      serviceAccount: jenkins
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+        - name: jenkins
+          image: s.hmallleasing.com/base/jenkins:2.504.2
+          imagePullPolicy: IfNotPresent
+          securityContext:     # 添加参数启用容器root权限
+            privileged: true
+            runAsUser: 0        # root身份运行
+          env:
+          - name: JAVA_OPTS     
+            value: -Duser.timezone=Asia/Shanghai
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: agent
+              containerPort: 50000 
+          resources:
+            limits:
+              cpu: 1500m
+              memory: 4096Mi
+          readinessProbe:          # 就绪探针
+            httpGet:
+              path: /login
+              port: 8080
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+            failureThreshold: 12
+          volumeMounts:
+            - name: data
+              mountPath: /var/jenkins_home
+            - name: tz-config
+              mountPath: /usr/share/zoneinfo/Asia/Shanghai
+            - name: tz-config
+              mountPath: /etc/localtime
+            - name: timezone
+              mountPath: /etc/timezone
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: &amp;quot;&amp;quot;
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: &amp;quot;&amp;quot;
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [&amp;quot;ReadWriteOnce&amp;quot;]
+      storageClassName: &amp;quot;nfs-storage&amp;quot;
+      resources:
+        requests:
+          storage: 5Gi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;45-创建ingress&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#45-创建ingress&#34;&gt;#&lt;/a&gt; 4.5 创建 Ingress&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 jenkins]# cat 04-jenkins-ingress.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jenkins-ingress
+  namespace: ops
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: jenkins.hmallleasing.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: jenkins-svc 
+            port:
+              name: http
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;46-初始化jenkins&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#46-初始化jenkins&#34;&gt;#&lt;/a&gt; 4.6 初始化 Jenkins&lt;/h5&gt;
+&lt;p&gt;1、查看 jenkins 对应的初始化密码；&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/7oXyJkT.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;2、跳过插件安装，进入 jenkins 自行安装即可；&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Yd8GYZ3.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;47-jenkins配置与插件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#47-jenkins配置与插件&#34;&gt;#&lt;/a&gt; 4.7 Jenkins 配置与插件&lt;/h5&gt;
+&lt;p&gt;1、修改默认管理员密码&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/QhEqsq2.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;2、安装 Jenkins 插件&lt;/p&gt;
+&lt;p&gt;#1. 将 jenkins 插件的路径，更改为国内源&lt;br /&gt;
+系统管理 -&amp;gt; 插件管理 -&amp;gt; 高级 -&amp;gt; 升级站点 -&amp;gt; 修改 URL-&amp;gt;&lt;a href=&#34;https://updates.jenkins.io/update-center.json&#34;&gt;https://updates.jenkins.io/update-center.json&lt;/a&gt; 替换 https://mirrors.huaweicloud.com/jenkins/updates/update-center.json&lt;/p&gt;
+&lt;p&gt;#2. 安装 Jenkins 插件&lt;/p&gt;
+&lt;p&gt;中文插件： Localization: Chinese&lt;/p&gt;
+&lt;p&gt;Git 插件： git、gitlab&lt;/p&gt;
+&lt;p&gt;Sonar 插件： SonarQube Scanner&lt;/p&gt;
+&lt;p&gt;Pipeline 插件： pipeline、Stage View、BlueOcean&lt;/p&gt;
+&lt;p&gt;Kubernetes 插件： Kubernetes&lt;/p&gt;
+&lt;h4 id=&#34;五-jenkins-pipeline&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#五-jenkins-pipeline&#34;&gt;#&lt;/a&gt; 五、Jenkins Pipeline&lt;/h4&gt;
+&lt;h5 id=&#34;51-什么是pipeline&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#51-什么是pipeline&#34;&gt;#&lt;/a&gt; 5.1 什么是 Pipeline&lt;/h5&gt;
+&lt;p&gt;Pipeline 就是通过 “代码的方式” 将多个步骤的任务连接起来。共同来完成一件事；比如：应用发布就会牵扯到非常多的步骤，获取代码 -&amp;gt; 代码扫描 -&amp;gt; 代码编译 -&amp;gt; 制作镜像 -&amp;gt; 推送仓库 -&amp;gt; 部署应用，将这些步骤通过代码的方式组织在一起完成这次应用发布，这个就可以称之为流水线，亦或者是 Pipeline 流水线；&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/YhNTYQC.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;52-pipeline代码示例&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#52-pipeline代码示例&#34;&gt;#&lt;/a&gt; 5.2 Pipeline 代码示例&lt;/h5&gt;
+&lt;p&gt;agent: 节点&lt;/p&gt;
+&lt;p&gt;stage: 阶段&lt;/p&gt;
+&lt;p&gt;steps: 动作&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pipeline&amp;#123;
+    agent any    //目前只有一台jenkins，所以他会在本地执行
+	
+	environment &amp;#123;       //全局变量
+		Harbor_Url=&amp;quot;s.hmallleasing.com&amp;quot;
+		Harbor_Pro=&amp;quot;base&amp;quot;
+	&amp;#125;
+	
+    stages &amp;#123;
+        stage(&#39;下载代码&#39;) &amp;#123;
+			environment &amp;#123;     //局部变量
+				Image_Name=&amp;quot;nf-flms-order:v1.1&amp;quot;
+				Full_Image=&amp;quot;$&amp;#123;Harbor_Url&amp;#125;/$&amp;#123;Harbor_Pro&amp;#125;/$&amp;#123;Image_Name&amp;#125;&amp;quot;
+			&amp;#125;		
+            steps &amp;#123;
+				sh &#39;echo &amp;quot;Get Gitlab Code $&amp;#123;Full_Image&amp;#125;&amp;quot;&#39;
+            &amp;#125;
+        &amp;#125;
+        stage(&#39;检测代码&#39;) &amp;#123;
+			environment &amp;#123;     //局部变量
+				Image_Name=&amp;quot;nf-flms-static:v1.1&amp;quot;
+				Full_Image=&amp;quot;$&amp;#123;Harbor_Url&amp;#125;/$&amp;#123;Harbor_Pro&amp;#125;/$&amp;#123;Image_Name&amp;#125;&amp;quot;		
+			&amp;#125;
+            steps &amp;#123;
+                sh &#39;echo &amp;quot;Unit Test $&amp;#123;Full_Image&amp;#125;&amp;quot;&#39;
+            &amp;#125;
+        &amp;#125;
+        stage(&#39;编译代码&#39;) &amp;#123;
+            steps &amp;#123;
+                sh &#39;echo &amp;quot;Build Code&amp;quot;&#39;
+            &amp;#125;
+        &amp;#125;
+        stage(&#39;制作镜像&#39;) &amp;#123;
+            steps &amp;#123;
+			    sh &#39;echo &amp;quot;Build Docker&amp;quot;&#39;
+            &amp;#125;
+        &amp;#125;
+        stage(&#39;部署应用&#39;) &amp;#123;
+            steps &amp;#123;
+                sh &#39;echo &amp;quot;Deploy Code&amp;quot;&#39;
+            &amp;#125;
+        &amp;#125;
+    &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;六-jenkins-slave架构&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#六-jenkins-slave架构&#34;&gt;#&lt;/a&gt; 六、 Jenkins Slave 架构&lt;/h4&gt;
+&lt;h5 id=&#34;61-架构基本说明&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#61-架构基本说明&#34;&gt;#&lt;/a&gt; 6.1 架构基本说明&lt;/h5&gt;
+&lt;p&gt;所谓 JenkinsMaster/Slave 架构，及在 Master 上进行任务分配。然后由 Slave 来完成，不过 Slave 运行方式有两种：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;静态 SLave：需要固定的节点，配置其对应环境，手动注册到 Master，然后执行任务，任务完成节点处于空闲等待状态；&lt;/li&gt;
+&lt;li&gt;动态 Slave：由 Master 动态创建 Slave 的 Pod，自动注册到 Master，然后执行任务，任务结束 Pod 自动销毁；&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;静态 Jenkins Slave&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;1、能够分担主节点上的压力，加快构建速度（所有任务都由 Master 执行，造成构建速度缓慢，且任务多会出现排队现象&lt;/p&gt;
+&lt;p&gt;2、能够将特定的任务在特定的主机上运行（比如：不同的任务需要不同的编译环境）&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/mayAACO.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;痛点：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1、Master 发生单点故障时，整个 Jenkins 都没办法使用；&lt;/li&gt;
+&lt;li&gt;2、每个 Slave 的环境不一样，用于完成不同项目的编译打包工作，但这些不同环境的配置管理及维护都特别困难；&lt;/li&gt;
+&lt;li&gt;3、有的 Slave 构建任务频繁，可能出现排队等待，而有的 Slave 又处于空闲状态，所以会出现资源分配严重不均衡；&lt;/li&gt;
+&lt;li&gt;4、因为每个 Slave 都需要一台虚拟机，当 Slave 空间时，等于就是空跑，资源浪费明显；&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;** 动态 Jenkins Slave **&lt;/p&gt;
+&lt;p&gt;所谓动态 Slave，就是根据任务进行动态供应和动态删除。Jenkins Master 和 Jenkins Slave 都是以 Pod 的形式运行在 Kubernetes 集群节点上，Master 运行在其中一个节点上，其配置数据存储在一个持久卷声明中。而 Slave 则随机运行在各个节点上，但它不会一直处于运行状态，而是根据需求动态创建并自动删除。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/ngDX7Wo.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优势：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1、高可用性：（当 Jenkins Master 故障时，Kubernetes 会自动创建一个新的 Jenkins Master 容器，并将持久卷挂载至新创建的容器，保证数据不会丢失，从而实现 Jenkins 的高可用性。）&lt;/li&gt;
+&lt;li&gt;2、高可扩缩性：（当 Kubernetes 集群因资源不足而导致任务长时间排队等待时，可以向集群新增节点，来环节压力。）&lt;/li&gt;
+&lt;li&gt;3、资源分配合理：（Kubernetes 动态分配 Slave 至空闲节点，避免因单个节点资源利用率高而导致任务排队等待。）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;七-jenkins动态slave配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#七-jenkins动态slave配置&#34;&gt;#&lt;/a&gt; 七、Jenkins 动态 Slave 配置&lt;/h4&gt;
+&lt;h5 id=&#34;71-配置kubernetes&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#71-配置kubernetes&#34;&gt;#&lt;/a&gt; 7.1 配置 Kubernetes&lt;/h5&gt;
+&lt;p&gt;&lt;em&gt;&lt;mark&gt;系统管理 -&amp;gt; 节点管理 -&amp;gt;Cloud-&amp;gt;Add a New Cloud-&amp;gt;Kubernetes&lt;/mark&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/teMdRgu.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Kubernetes 地址： &lt;a href=&#34;https://kubernetes.default.svc.cluster.local&#34;&gt;https://kubernetes.default.svc.cluster.local&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Kubernetes 命名空间：ops&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;由于 Jenkins 是通过 Pod 运行在 Kubernetes 集群中，所以通过 service 地址即可连接 Kubernetes 集群，正常通信。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/fJss696.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;72-配置jenkins&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#72-配置jenkins&#34;&gt;#&lt;/a&gt; 7.2 配置 Jenkins&lt;/h5&gt;
+&lt;p&gt;Jenkins 地址：&lt;a href=&#34;http://jenkins-svc.ops.svc.cluster.local:8080&#34;&gt;http://jenkins-svc.ops.svc.cluster.local:8080&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Jenkins 通道：jenkins-svc.ops.svc.cluster.local:50000&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/8rRPlr9.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;73-运行测试流水线&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#73-运行测试流水线&#34;&gt;#&lt;/a&gt; 7.3 运行测试流水线&lt;/h5&gt;
+&lt;p&gt;1、编写流水线&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pipeline &amp;#123;
+  agent &amp;#123;
+    kubernetes &amp;#123;
+      cloud &#39;kubernetes&#39;
+    &amp;#125;
+  &amp;#125;
+	stages &amp;#123;
+		stage(&#39;输出主机名称&#39;) &amp;#123;
+			steps &amp;#123;
+				sh &#39;hostname&#39;
+			&amp;#125;
+		&amp;#125;
+		stage(&#39;等待片刻&#39;) &amp;#123;
+			steps &amp;#123;
+				sh &#39;sleep 60&#39;
+			&amp;#125;
+		&amp;#125;
+	&amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;2、jenkins 会自动拉起一个 Pod，运行 agent 容器注册到 Master 节点，然后进行任务的执行&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 03-jenkins]# kubectl get pods -n ops
+NAME                                   READY   STATUS    RESTARTS      AGE
+gitlab-0                               1/1     Running   0             20h
+jenkins-0                              1/1     Running   2 (22m ago)   86m
+pipeline-daemon1-4-z9rqq-0t4nr-ql2v3   1/1     Running   0             2s    #jenkins slave
+postgresql-0                           1/1     Running   0             17h
+sonarqube-0                            1/1     Running   0             17h
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/MmlW9RG.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;八-制作pod模板镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#八-制作pod模板镜像&#34;&gt;#&lt;/a&gt; 八、制作 Pod 模板镜像&lt;/h4&gt;
+&lt;p&gt;jnlp 镜像是用来连接 JenkinsMaster 以及共享 Master 的 WORKSPACE，但该镜像并没有 maven、docker、kubectl 等常用命令，为此我们需要定制几个镜像，后期通过 Pipeline 将不同的任务交由同一个 Pod 的不同的容器来执行。&lt;/p&gt;
+&lt;h5 id=&#34;81-maven&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#81-maven&#34;&gt;#&lt;/a&gt; 8.1 Maven&lt;/h5&gt;
+&lt;p&gt;1、下载 settings.xml&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 maven]# wget https://linux.oldxu.net/settings_docker.xml
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;2、Dockerfile&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 maven]# cat Dockerfile
+FROM maven:3.8.6-openjdk-8
+ADD ./settings_docker.xml /usr/share/maven/conf/settings.xml
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;3、构建镜像并推送私有仓库&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 maven]# docker build -t s.hmallleasing.com/base/maven:3.8.6 .
+[root@k8s-master01 maven]# docker push s.hmallleasing.com/base/maven:3.8.6
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;82-sonar&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#82-sonar&#34;&gt;#&lt;/a&gt; 8.2 sonar&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# docker pull emeraldsquad/sonar-scanner:2.3.0
+[root@k8s-master01 ~]# docker tag emeraldsquad/sonar-scanner:2.3.0 s.hmallleasing.com/base/sonar-scanner:2.3.0
+[root@k8s-master01 ~]# docker push s.hmallleasing.com/base/sonar-scanner:2.3.0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;83-nodejs&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#83-nodejs&#34;&gt;#&lt;/a&gt; 8.3 NodeJs&lt;/h5&gt;
+&lt;p&gt;1、Dockerfile&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 nodejs]# cat Dockerfile
+FROM centos:7
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+RUN curl --silent --location https://rpm.nodesource.com/setup_14.x |bash -
+RUN curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+RUN yum install nodejs gcc-c++ make vim -y &amp;amp;&amp;amp; \
+    yum clean all
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;2、构建镜像并推送私有仓库&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 nodejs]# docker build -t s.hmallleasing.com/base/nodejs:14.20 .
+[root@k8s-master01 nodejs]# docker push s.hmallleasing.com/base/nodejs:14.20
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;84-docker&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#84-docker&#34;&gt;#&lt;/a&gt; 8.4 Docker&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# docker pull docker:20.10 
+[root@k8s-master01 ~]# docker tag docker:20.10 s.hmallleasing.com/base/docker:20.10
+[root@k8s-master01 ~]# docker push s.hmallleasing.com/base/docker:20.10
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;85-kubectl&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#85-kubectl&#34;&gt;#&lt;/a&gt; 8.5 kubectl&lt;/h5&gt;
+&lt;p&gt;1、编写 kubernetes.repo 文件&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cat &amp;lt;&amp;lt;EOF&amp;gt; ./kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://mirrors.aliyun.com/kubernetes-new/core/stable/v1.32/rpm/
+enabled=1
+gpgcheck=0
+gpgkey=https://mirrors.aliyun.com/kubernetes-new/core/stable/v1.32/rpm/repodata/repomd.xml.key
+EOF
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;2、Dockerfile&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 kubectl]# cat Dockerfile 
+FROM centos:7
+# 1、调整时区
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime &amp;amp;&amp;amp; \
+    echo &#39;Asia/Shanghai&#39; &amp;gt;/etc/timezone
+RUN curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+
+# 2、添加yum源
+ADD ./kubernetes.repo /etc/yum.repos.d/kubernetes.repo
+
+# 3、安装Kubectl
+RUN yum makecache &amp;amp;&amp;amp; yum install kubectl-1.32.3 -y &amp;amp;&amp;amp; \
+    yum clean all
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;3、构建镜像并推送私有仓库&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 kubectl]# docker build -t s.hmallleasing.com/base/kubectl:1.32.3 .
+[root@k8s-master01 kubectl]# docker push s.hmallleasing.com/base/kubectl:1.32.3
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;九-测试pod模板镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#九-测试pod模板镜像&#34;&gt;#&lt;/a&gt; 九、测试 Pod 模板镜像&lt;/h4&gt;
+&lt;p&gt;运行一个流水线任务，定义 Pod 模板中的容器名称以及容器镜像地址，而后定义任务，不同的任务由不同的容器来执行&lt;/p&gt;
+&lt;h5 id=&#34;91-定义podtemplate&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#91-定义podtemplate&#34;&gt;#&lt;/a&gt; 9.1 定义 podTemplate&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;pipeline &amp;#123;
+  agent &amp;#123;
+    kubernetes &amp;#123;
+      cloud &#39;kubernetes&#39;
+      yaml &#39;&#39;&#39;
+        apiVersion: v1
+        kind: Pod
+        spec:
+          imagePullSecrets:
+          - name: harbor-admin
+          volumes:
+          - name: data
+            nfs:
+              server: 192.168.1.75
+              path: /data/nfs/maven
+          - name: dockersocket
+            hostPath:
+              path: /run/docker.sock
+          containers:
+          - name: maven
+            image: s.hmallleasing.com/base/maven:3.8.6
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: data
+              mountPath: /root/.m2
+          - name: nodejs
+            image: s.hmallleasing.com/base/nodejs:14.20
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: sonar
+            image: s.hmallleasing.com/base/sonar-scanner:2.3.0
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: docker
+            image: s.hmallleasing.com/base/docker:20.10
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: dockersocket
+              mountPath: /run/docker.sock
+          - name: kubectl
+            image: s.hmallleasing.com/base/kubectl:1.32.3
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+      &#39;&#39;&#39;
+    &amp;#125;
+  &amp;#125;
+  stages &amp;#123;
+    stage(&#39;maven测试&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+		  sh &#39;mvn --version&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;
+
+    stage(&#39;nodejs测试&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;nodejs&#39;) &amp;#123;
+		  sh &#39;node -v&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	
+	
+    stage(&#39;docker测试&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;docker&#39;) &amp;#123;
+		  sh &#39;docker ps&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+
+    stage(&#39;kubectl测试&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;kubectl&#39;) &amp;#123;
+		  sh &#39;kubectl version&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+  &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;&lt;strong&gt;#在 nfs 中创建 /data/maven 文件夹，将 maven 缓存 /root/.m2 挂载至该目录&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;h5 id=&#34;92-运行pipeline&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#92-运行pipeline&#34;&gt;#&lt;/a&gt; 9.2 运行 Pipeline&lt;/h5&gt;
+&lt;p&gt;构建流水线，检查各个阶段调用容器执行的输出结果是否 OK；&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/iLcep5b.png&#34; alt=&#34;5.png&#34; /&gt;&lt;/p&gt;
 </content>
         <category term="DevOps" />
         <updated>2025-06-08T02:28:16.000Z</updated>
