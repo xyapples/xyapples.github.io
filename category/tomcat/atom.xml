@@ -4,20 +4,20 @@
     <title>LinuxSre云原生 • Posts by &#34;tomcat&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-08T02:51:57.000Z</updated>
-    <category term="Aliyun" />
     <category term="DevOps" />
+    <category term="Aliyun" />
     <category term="Docker" />
-    <category term="ELKStack" />
     <category term="Harbor" />
+    <category term="ELKStack" />
     <category term="Kubernetes" />
     <category term="Redis" />
-    <category term="rsync" />
     <category term="Linux" />
+    <category term="rsync" />
     <category term="MySQL" />
-    <category term="Prometheus" />
     <category term="Openvpn" />
-    <category term="Rabbitmq" />
+    <category term="Prometheus" />
     <category term="Tomcat" />
+    <category term="Rabbitmq" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/754945111.html</id>

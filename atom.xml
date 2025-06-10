@@ -4,20 +4,20 @@
     <title>LinuxSre云原生</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-08T02:55:56.000Z</updated>
-    <category term="Aliyun" />
     <category term="DevOps" />
+    <category term="Aliyun" />
     <category term="Docker" />
-    <category term="ELKStack" />
     <category term="Harbor" />
+    <category term="ELKStack" />
     <category term="Kubernetes" />
     <category term="Redis" />
-    <category term="rsync" />
     <category term="Linux" />
+    <category term="rsync" />
     <category term="MySQL" />
-    <category term="Prometheus" />
     <category term="Openvpn" />
-    <category term="Rabbitmq" />
+    <category term="Prometheus" />
     <category term="Tomcat" />
+    <category term="Rabbitmq" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/1528713798.html</id>
@@ -78,7 +78,6 @@
         <title>K8S基于Jenkins实现SpringCloud微服务CI与CD实践（一）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/1208493697.html"/>
         <content type="html">&lt;h3 id=&#34;k8s基于jenkins实现springcloud微服务ci与cd实践一&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s基于jenkins实现springcloud微服务ci与cd实践一&#34;&gt;#&lt;/a&gt; K8S 基于 Jenkins 实现 SpringCloud 微服务 CI 与 CD 实践（一）&lt;/h3&gt;
-&lt;h3 id=&#34;k8s基于jenkins实现springcloud微服务ci与cd实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#k8s基于jenkins实现springcloud微服务ci与cd实践&#34;&gt;#&lt;/a&gt; K8S 基于 Jenkins 实现 SpringCloud 微服务 CI 与 CD 实践&lt;/h3&gt;
 &lt;p&gt;CI 阶段：开发人员 -&amp;gt; 提交代码 -&amp;gt;gitlab 仓库 -&amp;gt;Jenkins/CI 抓取代码 -&amp;gt; 漏洞扫描 -&amp;gt; 编译 -&amp;gt; 构建镜像 -&amp;gt; 推送 Harbor-&amp;gt; 部署应用至 K8S 测试环境；&lt;/p&gt;
 &lt;p&gt;CD 阶段：Jenkins/CD-&amp;gt; 拉取 Harbor 仓库对应项目镜像 -&amp;gt; 部署应用至 K8S 测试环境&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/reddUL2.jpeg&#34; alt=&#34;1.jpg&#34; /&gt;&lt;/p&gt;
