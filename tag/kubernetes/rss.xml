@@ -7,15 +7,15 @@
         <language>zh-CN</language>
         <pubDate>Sun, 18 May 2025 21:42:46 +0800</pubDate>
         <lastBuildDate>Sun, 18 May 2025 21:42:46 +0800</lastBuildDate>
-        <category>Aliyun</category>
-        <category>Docker</category>
         <category>DevOps</category>
+        <category>Docker</category>
+        <category>Aliyun</category>
         <category>ELKStack</category>
         <category>Harbor</category>
-        <category>Linux</category>
-        <category>rsync</category>
         <category>Kubernetes</category>
         <category>Redis</category>
+        <category>Linux</category>
+        <category>rsync</category>
         <category>MySQL</category>
         <category>Openvpn</category>
         <category>Prometheus</category>

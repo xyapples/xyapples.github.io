@@ -4,15 +4,15 @@
     <title>LinuxSre云原生 • Posts by &#34;redis&#34; tag</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-05-12T13:21:44.000Z</updated>
-    <category term="Aliyun" />
-    <category term="Docker" />
     <category term="DevOps" />
+    <category term="Docker" />
+    <category term="Aliyun" />
     <category term="ELKStack" />
     <category term="Harbor" />
-    <category term="Linux" />
-    <category term="rsync" />
     <category term="Kubernetes" />
     <category term="Redis" />
+    <category term="Linux" />
+    <category term="rsync" />
     <category term="MySQL" />
     <category term="Openvpn" />
     <category term="Prometheus" />
