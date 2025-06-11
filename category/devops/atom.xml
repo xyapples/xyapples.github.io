@@ -9,21 +9,1446 @@
     <category term="Docker" />
     <category term="ELKStack" />
     <category term="Harbor" />
-    <category term="Linux" />
-    <category term="rsync" />
     <category term="Kubernetes" />
     <category term="Redis" />
+    <category term="Linux" />
+    <category term="rsync" />
     <category term="MySQL" />
     <category term="Prometheus" />
-    <category term="Openvpn" />
     <category term="Rabbitmq" />
-    <category term="Tomcat" />
+    <category term="Openvpn" />
     <category term="Windows" />
+    <category term="Tomcat" />
     <entry>
         <id>http://ixuyong.cn/posts/1366748664.html</id>
         <title>K8S基于Jenkins实现Java项目CI与CD实践（二）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/1366748664.html"/>
-        <content type="html"></content>
+        <content type="html">&lt;p&gt;&lt;strong&gt;&lt;u&gt;场景 1：常规 java 应用，使用 jenkins pipeline 交付到 Kubernetes 集群中&lt;/u&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;CI 阶段：开发人员 -&amp;gt; 提交代码 -&amp;gt;gitlab 仓库 -&amp;gt;Jenkins/CI 抓取代码 -&amp;gt; 漏洞扫描 -&amp;gt; 编译 -&amp;gt; 构建镜像 -&amp;gt; 推送 Harbor-&amp;gt; 部署应用至 K8S 测试环境；&lt;br /&gt;
+CD 阶段：Jenkins/CD-&amp;gt; 拉取 Harbor 仓库对应项目镜像 -&amp;gt; 部署应用至 K8S 生产环境；&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/reddUL2.jpeg&#34; alt=&#34;1.jpg&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;一-环境准备&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-环境准备&#34;&gt;#&lt;/a&gt; 一、环境准备&lt;/h4&gt;
+&lt;p&gt;准备好 Java 代码、Dockerfile、deploy.yaml 资源清单文件  提交到 Gitlab 服务器；&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ git config --global user.name &amp;quot;xuyong&amp;quot;
+$ git config --global user.email &amp;quot;373370405@qq.com&amp;quot;
+$ git init
+$ git add .
+$ git commit -m &amp;quot;first commit&amp;quot;
+$ git remote remove origin
+$ git remote add origin http://gitlab.hmallleasing.com/root/springboot-cicd.git
+$ git push -u origin &amp;quot;master&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;二-ci阶段&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#二-ci阶段&#34;&gt;#&lt;/a&gt; 二、CI 阶段&lt;/h4&gt;
+&lt;p&gt;CI 阶段分为以下 6 步：&lt;br /&gt;
+1、获取代码&lt;br /&gt;
+ 2、漏洞扫描&lt;br /&gt;
+ 3、检测漏洞扫描结果，如果正常则继续、否则就终止&lt;br /&gt;
+ 4、使用 maven 进行编译，打包&lt;br /&gt;
+ 5、制作 Docker 镜像、推送到 Harbor 仓库  (Dockerfile 文件)&lt;br /&gt;
+ 6、交付应用到 K8S&lt;/p&gt;
+&lt;h5 id=&#34;21-编写pipeline框架&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-编写pipeline框架&#34;&gt;#&lt;/a&gt; 2.1 编写 Pipeline 框架&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;pipeline &amp;#123;
+  agent &amp;#123;
+    kubernetes &amp;#123;
+      cloud &#39;kubernetes&#39;
+      yaml &#39;&#39;&#39;
+        apiVersion: v1
+        kind: Pod
+        spec:
+          imagePullSecrets:
+          - name: harbor-admin
+          volumes:
+          - name: data
+            nfs:
+              server: 192.168.1.75
+              path: /data/nfs/maven
+          - name: dockersocket
+            hostPath:
+              path: /run/docker.sock
+          containers:
+          - name: maven
+            image: s.hmallleasing.com/base/maven:3.8.6
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: data
+              mountPath: /root/.m2
+          - name: nodejs
+            image: s.hmallleasing.com/base/nodejs:14.20
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: sonar
+            image: s.hmallleasing.com/base/sonar-scanner:2.3.0
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: docker
+            image: s.hmallleasing.com/base/docker:20.10
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: dockersocket
+              mountPath: /run/docker.sock
+          - name: kubectl
+            image: s.hmallleasing.com/base/kubectl:1.32.3
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+      &#39;&#39;&#39;
+    &amp;#125;
+  &amp;#125;
+  stages &amp;#123;
+    stage(&#39;获取代码&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;获取代码&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;
+    stage(&#39;代码扫描&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;sonar&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;代码扫描&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+    stage(&#39;检查扫描结果&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;sonar&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;Code Result Check&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		    
+    stage(&#39;代码编译&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;代码编译&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	    
+    stage(&#39;制作Docker镜像&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;docker&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;制作Docker镜像&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	
+    stage(&#39;交付应用至K8S&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;kubectl&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;交付应用至K8S&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+  &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/A7fPIQd.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;22-获取代码&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-获取代码&#34;&gt;#&lt;/a&gt; 2.2 获取代码&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;1、Jenkins 上配置 Gitlab 认证信息&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;系统管理 -&amp;gt;manage credentials-&amp;gt; 全局 -&amp;gt;Add Credential&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Dhao75j.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2、SlavePod 访问 gitlab&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;通过 Coredns 配置自定义域名解析，如果 sgitlab 解析至公网，无需配置此步骤；&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl edit cm coredns -n kube-system
+...
+        ready
+
+        hosts &amp;#123;
+           192.168.1.74 gitlab.hmallleasing.com
+           fallthrough
+        &amp;#125;
+        kubernetes cluster.local in-addr.arpa ip6.arpa &amp;#123;
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;测试解析是否生效；&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl exec -it gitlab-0 -n ops -- /bin/bash
+root@gitlab-0:/# ping gitlab.hmallleasing.com
+PING gitlab.hmallleasing.com (192.168.1.74): 56 data bytes
+64 bytes from 192.168.1.74: seq=0 ttl=63 time=0.381 ms
+64 bytes from 192.168.1.74: seq=1 ttl=63 time=0.203 ms
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;3、生成流水线脚本获取代码&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;通过流水线语法 -&amp;gt; 片段生成器 -&amp;gt; 生成流水线脚本，生成 Pipeline 流水线&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/O2hXRRW.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/8txbe6d.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3、测试获取代码 Pipeline&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pipeline &amp;#123;
+  agent &amp;#123;
+    kubernetes &amp;#123;
+      cloud &#39;kubernetes&#39;
+      yaml &#39;&#39;&#39;
+        apiVersion: v1
+        kind: Pod
+        spec:
+          imagePullSecrets:
+          - name: harbor-admin
+          volumes:
+          - name: data
+            nfs:
+              server: 192.168.1.75
+              path: /data/nfs/maven
+          - name: dockersocket
+            hostPath:
+              path: /run/docker.sock
+          containers:
+          - name: maven
+            image: s.hmallleasing.com/base/maven:3.8.6
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: data
+              mountPath: /root/.m2
+          - name: nodejs
+            image: s.hmallleasing.com/base/nodejs:14.20
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: sonar
+            image: s.hmallleasing.com/base/sonar-scanner:2.3.0
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: docker
+            image: s.hmallleasing.com/base/docker:20.10
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: dockersocket
+              mountPath: /run/docker.sock
+          - name: kubectl
+            image: s.hmallleasing.com/base/kubectl:1.32.3
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+      &#39;&#39;&#39;
+    &amp;#125;
+  &amp;#125;
+  
+  environment&amp;#123;
+    //定义git变量
+    Git_Id = &amp;quot;gitlab-root-token&amp;quot;
+    Git_Url = &amp;quot;http://gitlab.hmallleasing.com/root/springboot-cicd.git&amp;quot;
+  &amp;#125;
+  
+  stages &amp;#123;
+    stage(&#39;获取代码&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+		  checkout scmGit(branches: [[name: &#39;*/master&#39;]], extensions: [], userRemoteConfigs: [[credentialsId: &amp;quot;$&amp;#123;Git_Id&amp;#125;&amp;quot;, url: &amp;quot;$&amp;#123;Git_Url&amp;#125;&amp;quot;]])
+		  sh &#39;pwd &amp;amp;&amp;amp; ls&#39; 		  
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;
+    stage(&#39;代码扫描&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;sonar&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;代码扫描&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+    stage(&#39;检查扫描结果&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;sonar&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;Code Result Check&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		    
+    stage(&#39;代码编译&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;代码编译&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	    
+    stage(&#39;制作Docker镜像&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;docker&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;制作Docker镜像&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	
+    stage(&#39;交付应用至K8S&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;kubectl&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;交付应用至K8S&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+  &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/psokxwc.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;23-sonarqube漏洞扫描&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#23-sonarqube漏洞扫描&#34;&gt;#&lt;/a&gt; 2.3 Sonarqube 漏洞扫描&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;1、配置 dns 解析（如果 sonarqube 解析至公网，无需配置此步骤）&lt;/strong&gt;&lt;br /&gt;
+slavePod 需要访问 sonarqube 服务端，sonarqube 服务端需要回调 jenkins，获取扫描结果 。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl edit cm -n kube-system coredns
+...
+        ready
+
+        hosts &amp;#123;
+           192.168.1.74 gitlab.hmallleasing.com        #gitalb
+           192.168.1.74 sonar.hmallleasing.com         #sonar
+           192.168.1.74 jenkins.hmallleasing.com       #jenkins
+           fallthrough
+        &amp;#125;
+        kubernetes cluster.local in-addr.arpa ip6.arpa &amp;#123;
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;测试解析是否生效；&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl exec -it gitlab-0 -n ops -- /bin/bash
+root@gitlab-0:/# ping sonar.hmallleasing.com
+PING sonar.hmallleasing.com (192.168.1.74): 56 data bytes
+64 bytes from 192.168.1.74: seq=0 ttl=63 time=0.187 ms
+64 bytes from 192.168.1.74: seq=1 ttl=63 time=0.202 ms
+
+root@gitlab-0:/# ping jenkins.hmallleasing.com
+PING jenkins.hmallleasing.com (192.168.1.74): 56 data bytes
+64 bytes from 192.168.1.74: seq=0 ttl=63 time=0.189 ms
+64 bytes from 192.168.1.74: seq=1 ttl=63 time=0.202 ms
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;2、Jenkins 集成 Sonarqube&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;生成 sonarqube 令牌：用户 -&amp;gt; 我的账号 -&amp;gt; 安全&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;保存令牌信息：squ_6e57e496a22ebdf0723c3683bd489df57f967f49&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/WIPhwiL.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;配置 sonarqube 认证信息：系统管理 -&amp;gt;manage credentials-&amp;gt; 全局 -&amp;gt;Add Credential&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/6hyCvFt.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Jenkins 集成 Sonarqube：系统管理 -&amp;gt; 系统配置 -&amp;gt;SonarQube servers-&amp;gt;Add SonarQube&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/TDCKExZ.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3、获取 sonar-scanner 扫描命令（此步骤不用执行）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;项目 -&amp;gt; 手工 -&amp;gt; 显示名&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/6xdkGGq.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/WV443AU.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/kgfxuOS.png&#34; alt=&#34;5.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/bahZPtg.png&#34; alt=&#34;6.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;#获取 sonar-scanner 扫描命令，需要在项目目录下进行扫描&lt;/em&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sonar-scanner \
+  -Dsonar.projectKey=springboot \
+  -Dsonar.sources=. \
+  -Dsonar.host.url=http://sonar.hmallleasing.com \
+  -Dsonar.login=squ_6e57e496a22ebdf0723c3683bd489df57f967f49
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;4、测试代码扫描 Pipeline&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pipeline &amp;#123;
+  agent &amp;#123;
+    kubernetes &amp;#123;
+      cloud &#39;kubernetes&#39;
+      yaml &#39;&#39;&#39;
+        apiVersion: v1
+        kind: Pod
+        spec:
+          imagePullSecrets:
+          - name: harbor-admin
+          volumes:
+          - name: data
+            nfs:
+              server: 192.168.1.75
+              path: /data/nfs/maven
+          - name: dockersocket
+            hostPath:
+              path: /run/docker.sock
+          containers:
+          - name: maven
+            image: s.hmallleasing.com/base/maven:3.8.6
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: data
+              mountPath: /root/.m2
+          - name: nodejs
+            image: s.hmallleasing.com/base/nodejs:14.20
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: sonar
+            image: s.hmallleasing.com/base/sonar-scanner:2.3.0
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: docker
+            image: s.hmallleasing.com/base/docker:20.10
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: dockersocket
+              mountPath: /run/docker.sock
+          - name: kubectl
+            image: s.hmallleasing.com/base/kubectl:1.32.3
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+      &#39;&#39;&#39;
+    &amp;#125;
+  &amp;#125;
+  
+  environment&amp;#123;
+    //定义git变量
+    Git_Id = &amp;quot;gitlab-root-token&amp;quot;
+    Git_Url = &amp;quot;http://gitlab.hmallleasing.com/root/springboot-cicd.git&amp;quot;
+  &amp;#125;
+  
+  stages &amp;#123;
+    stage(&#39;获取代码&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+		  checkout scmGit(branches: [[name: &#39;*/master&#39;]], extensions: [], userRemoteConfigs: [[credentialsId: &amp;quot;$&amp;#123;Git_Id&amp;#125;&amp;quot;, url: &amp;quot;$&amp;#123;Git_Url&amp;#125;&amp;quot;]])
+		  sh &#39;pwd &amp;amp;&amp;amp; ls&#39; 		  
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;
+    stage(&#39;代码扫描&#39;)&amp;#123;
+      steps &amp;#123;
+        withSonarQubeEnv(&#39;sonar-k8s&#39;)&amp;#123;   //jenkins集成sonarqube名称sonar-k8s
+          container(&#39;sonar&#39;)&amp;#123;
+            sh &#39;pwd &amp;amp;&amp;amp; ls -l&#39;
+            sh &#39;sonar-scanner \
+                  -Dsonar.projectKey=springboot-cicd \
+                  -Dsonar.java.binaries=src \
+                  -Dsonar.sources=.&#39;
+          &amp;#125;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+    stage(&#39;检查扫描结果&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;sonar&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;Code Result Check&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		    
+    stage(&#39;代码编译&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;代码编译&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	    
+    stage(&#39;制作Docker镜像&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;docker&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;制作Docker镜像&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	
+    stage(&#39;交付应用至K8S&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;kubectl&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;交付应用至K8S&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+  &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/2jIMhwU.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/gEwDNX4.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;24-检查扫描结果&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#24-检查扫描结果&#34;&gt;#&lt;/a&gt; 2.4 检查扫描结果&lt;/h5&gt;
+&lt;p&gt;1、配置 sonarquber, 让其将检查结果通知 jiekins，如果正常则继续、否则就终止执行&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/aU33pHW.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/oufVrcE.png&#34; alt=&#34;5.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;URL：&lt;a href=&#34;http://admin:talent@jenkins.hmallleasing.com/sonarqube-webhook&#34;&gt;http://admin:talent@jenkins.hmallleasing.com/sonarqube-webhook&lt;/a&gt;&lt;br /&gt;
+Jenkins 访问地址：&lt;a href=&#34;http://jenkins.hamlllleasing.com&#34;&gt;jenkins.hamlllleasing.com&lt;/a&gt;&lt;br /&gt;
+Jenkins 用户名：admin&lt;br /&gt;
+Jenkins 密码：talent&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2、检查扫描结果 pipeline&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pipeline &amp;#123;
+  agent &amp;#123;
+    kubernetes &amp;#123;
+      cloud &#39;kubernetes&#39;
+      yaml &#39;&#39;&#39;
+        apiVersion: v1
+        kind: Pod
+        spec:
+          imagePullSecrets:
+          - name: harbor-admin
+          volumes:
+          - name: data
+            nfs:
+              server: 192.168.1.75
+              path: /data/nfs/maven
+          - name: dockersocket
+            hostPath:
+              path: /run/docker.sock
+          containers:
+          - name: maven
+            image: s.hmallleasing.com/base/maven:3.8.6
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: data
+              mountPath: /root/.m2
+          - name: nodejs
+            image: s.hmallleasing.com/base/nodejs:14.20
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: sonar
+            image: s.hmallleasing.com/base/sonar-scanner:2.3.0
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: docker
+            image: s.hmallleasing.com/base/docker:20.10
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: dockersocket
+              mountPath: /run/docker.sock
+          - name: kubectl
+            image: s.hmallleasing.com/base/kubectl:1.32.3
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+      &#39;&#39;&#39;
+    &amp;#125;
+  &amp;#125;
+  
+  environment&amp;#123;
+    //定义git变量
+    Git_Id = &amp;quot;gitlab-root-token&amp;quot;
+    Git_Url = &amp;quot;http://gitlab.hmallleasing.com/root/springboot-cicd.git&amp;quot;
+  &amp;#125;
+  
+  stages &amp;#123;
+    stage(&#39;获取代码&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+		  checkout scmGit(branches: [[name: &#39;*/master&#39;]], extensions: [], userRemoteConfigs: [[credentialsId: &amp;quot;$&amp;#123;Git_Id&amp;#125;&amp;quot;, url: &amp;quot;$&amp;#123;Git_Url&amp;#125;&amp;quot;]])
+		  sh &#39;pwd &amp;amp;&amp;amp; ls&#39; 		  
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;
+    stage(&#39;代码扫描&#39;)&amp;#123;
+      steps &amp;#123;
+        withSonarQubeEnv(&#39;sonar-k8s&#39;)&amp;#123;   //jenkins集成sonarqube名称sonar-k8s
+          container(&#39;sonar&#39;)&amp;#123;
+            sh &#39;pwd &amp;amp;&amp;amp; ls -l&#39;
+            sh &#39;sonar-scanner \
+                  -Dsonar.projectKey=springboot-cicd \
+                  -Dsonar.java.binaries=src \
+                  -Dsonar.sources=.&#39;
+          &amp;#125;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+    stage(&#39;检查扫描结果&#39;)&amp;#123;
+      steps &amp;#123;
+        container(&#39;sonar&#39;)&amp;#123;
+          script &amp;#123;
+            timeout(5) &amp;#123;
+              def qg = waitForQualityGate()
+              if (qg.status != &#39;OK&#39;) &amp;#123;
+                error &amp;quot;Sonarqube代码检查失败, error的原因 $&amp;#123;qg.status&amp;#125;&amp;quot;
+              &amp;#125;
+            &amp;#125;
+          &amp;#125;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	
+    stage(&#39;代码编译&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;代码编译&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	    
+    stage(&#39;制作Docker镜像&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;docker&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;制作Docker镜像&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	
+    stage(&#39;交付应用至K8S&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;kubectl&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;交付应用至K8S&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+  &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/hbERBmv.png&#34; alt=&#34;6.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;25-代码编译&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#25-代码编译&#34;&gt;#&lt;/a&gt; 2.5 代码编译&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;pipeline &amp;#123;
+  agent &amp;#123;
+    kubernetes &amp;#123;
+      cloud &#39;kubernetes&#39;
+      yaml &#39;&#39;&#39;
+        apiVersion: v1
+        kind: Pod
+        spec:
+          imagePullSecrets:
+          - name: harbor-admin
+          volumes:
+          - name: data
+            nfs:
+              server: 192.168.1.75
+              path: /data/nfs/maven
+          - name: dockersocket
+            hostPath:
+              path: /run/docker.sock
+          containers:
+          - name: maven
+            image: s.hmallleasing.com/base/maven:3.8.6
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: data
+              mountPath: /root/.m2
+          - name: nodejs
+            image: s.hmallleasing.com/base/nodejs:14.20
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: sonar
+            image: s.hmallleasing.com/base/sonar-scanner:2.3.0
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: docker
+            image: s.hmallleasing.com/base/docker:20.10
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: dockersocket
+              mountPath: /run/docker.sock
+          - name: kubectl
+            image: s.hmallleasing.com/base/kubectl:1.32.3
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+      &#39;&#39;&#39;
+    &amp;#125;
+  &amp;#125;
+  
+  environment&amp;#123;
+    //定义git变量
+    Git_Id = &amp;quot;gitlab-root-token&amp;quot;
+    Git_Url = &amp;quot;http://gitlab.hmallleasing.com/root/springboot-cicd.git&amp;quot;
+  &amp;#125;
+  
+  stages &amp;#123;
+    stage(&#39;获取代码&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+		  checkout scmGit(branches: [[name: &#39;*/master&#39;]], extensions: [], userRemoteConfigs: [[credentialsId: &amp;quot;$&amp;#123;Git_Id&amp;#125;&amp;quot;, url: &amp;quot;$&amp;#123;Git_Url&amp;#125;&amp;quot;]])
+		  sh &#39;pwd &amp;amp;&amp;amp; ls&#39; 		  
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;
+    stage(&#39;代码扫描&#39;)&amp;#123;
+      steps &amp;#123;
+        withSonarQubeEnv(&#39;sonar-k8s&#39;)&amp;#123;   //jenkins集成sonarqube名称sonar-k8s
+          container(&#39;sonar&#39;)&amp;#123;
+            sh &#39;pwd &amp;amp;&amp;amp; ls -l&#39;
+            sh &#39;sonar-scanner \
+                  -Dsonar.projectKey=springboot-cicd \
+                  -Dsonar.java.binaries=src \
+                  -Dsonar.sources=.&#39;
+          &amp;#125;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+    stage(&#39;检查扫描结果&#39;)&amp;#123;
+      steps &amp;#123;
+        container(&#39;sonar&#39;)&amp;#123;
+          script &amp;#123;
+            timeout(5) &amp;#123;
+              def qg = waitForQualityGate()
+              if (qg.status != &#39;OK&#39;) &amp;#123;
+                error &amp;quot;Sonarqube代码检查失败, error的原因 $&amp;#123;qg.status&amp;#125;&amp;quot;
+              &amp;#125;
+            &amp;#125;
+          &amp;#125;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	 
+    stage(&#39;编译代码&#39;)&amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;)&amp;#123;
+          sh &#39;pwd &amp;amp;&amp;amp; ls -l&#39;
+          sh &#39;mvn package -Dmaven.test.skip=true&#39;
+          sh &#39;pwd &amp;amp;&amp;amp; ls -l target/*&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	
+    stage(&#39;制作Docker镜像&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;docker&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;制作Docker镜像&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	
+    stage(&#39;交付应用至K8S&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;kubectl&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;交付应用至K8S&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+  &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/iv0lmND.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;26-制作docker镜像&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#26-制作docker镜像&#34;&gt;#&lt;/a&gt; 2.6 制作 Docker 镜像&lt;/h5&gt;
+&lt;p&gt;制作 Docker 镜像、推送到 Harbor 仓库，根据 Dockerfile 文件生成 Docker 镜像&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1、配置 dns 解析（如果 harbor 解析至公网，无需配置此步骤）&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl edit cm -n kube-system coredns
+...
+        ready
+
+        hosts &amp;#123;
+           192.168.1.74 gitlab.hmallleasing.com        #gitalb
+           192.168.1.74 sonar.hmallleasing.com         #sonar
+           192.168.1.74 jenkins.hmallleasing.com       #jenkins
+           192.168.1.68 s.hmallleasing.com             #harbor
+           fallthrough
+        &amp;#125;
+        kubernetes cluster.local in-addr.arpa ip6.arpa &amp;#123;
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;测试解析是否生效；&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl exec -it gitlab-0 -n ops -- /bin/bash
+root@gitlab-0:/# ping s.hmallleasing.com
+PING s.hmallleasing.com (192.168.1.68): 56 data bytes
+64 bytes from 192.168.1.68: seq=0 ttl=63 time=0.257 ms
+64 bytes from 192.168.1.68: seq=1 ttl=63 time=0.198 ms
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;2、配置 harbor 认证信息：系统管理 -&amp;gt;manage credentials-&amp;gt; 全局 -&amp;gt;Add Credential&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/eW8zQLR.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;3、代码扫描 Pipeline&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pipeline &amp;#123;
+  agent &amp;#123;
+    kubernetes &amp;#123;
+      cloud &#39;kubernetes&#39;
+      yaml &#39;&#39;&#39;
+        apiVersion: v1
+        kind: Pod
+        spec:
+          imagePullSecrets:
+          - name: harbor-admin
+          volumes:
+          - name: data
+            nfs:
+              server: 192.168.1.75
+              path: /data/nfs/maven
+          - name: dockersocket
+            hostPath:
+              path: /run/docker.sock
+          containers:
+          - name: maven
+            image: s.hmallleasing.com/base/maven:3.8.6
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: data
+              mountPath: /root/.m2
+          - name: nodejs
+            image: s.hmallleasing.com/base/nodejs:14.20
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: sonar
+            image: s.hmallleasing.com/base/sonar-scanner:2.3.0
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: docker
+            image: s.hmallleasing.com/base/docker:20.10
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: dockersocket
+              mountPath: /run/docker.sock
+          - name: kubectl
+            image: s.hmallleasing.com/base/kubectl:1.32.3
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+      &#39;&#39;&#39;
+    &amp;#125;
+  &amp;#125;
+  
+  environment&amp;#123;
+    //定义git变量
+    Git_Id = &amp;quot;gitlab-root-token&amp;quot;
+    Git_Url = &amp;quot;http://gitlab.hmallleasing.com/root/springboot-cicd.git&amp;quot;
+
+	//Harbor相关的全局变量
+    Url = &amp;quot;s.hmallleasing.com&amp;quot;
+    Pro = &amp;quot;base&amp;quot;
+    ImageName = &amp;quot;$&amp;#123;Url&amp;#125;/$&amp;#123;Pro&amp;#125;/springboot&amp;quot;
+    HARBOR_ID = &amp;quot;harbor-auth&amp;quot;
+  &amp;#125;
+  
+  stages &amp;#123;
+    stage(&#39;获取代码&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+		  checkout scmGit(branches: [[name: &#39;*/master&#39;]], extensions: [], userRemoteConfigs: [[credentialsId: &amp;quot;$&amp;#123;Git_Id&amp;#125;&amp;quot;, url: &amp;quot;$&amp;#123;Git_Url&amp;#125;&amp;quot;]])
+		  sh &#39;pwd &amp;amp;&amp;amp; ls&#39; 		  
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;
+    stage(&#39;代码扫描&#39;)&amp;#123;
+      steps &amp;#123;
+        withSonarQubeEnv(&#39;sonar-k8s&#39;)&amp;#123;   //jenkins集成sonarqube名称sonar-k8s
+          container(&#39;sonar&#39;)&amp;#123;
+            sh &#39;pwd &amp;amp;&amp;amp; ls -l&#39;
+            sh &#39;sonar-scanner \
+                  -Dsonar.projectKey=springboot-cicd \
+                  -Dsonar.java.binaries=src \
+                  -Dsonar.sources=.&#39;
+          &amp;#125;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+    stage(&#39;检查扫描结果&#39;)&amp;#123;
+      steps &amp;#123;
+        container(&#39;sonar&#39;)&amp;#123;
+          script &amp;#123;
+            timeout(5) &amp;#123;
+              def qg = waitForQualityGate()
+              if (qg.status != &#39;OK&#39;) &amp;#123;
+                error &amp;quot;Sonarqube代码检查失败, error的原因 $&amp;#123;qg.status&amp;#125;&amp;quot;
+              &amp;#125;
+            &amp;#125;
+          &amp;#125;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	 
+    stage(&#39;编译代码&#39;)&amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;)&amp;#123;
+          sh &#39;pwd &amp;amp;&amp;amp; ls -l&#39;
+          sh &#39;mvn package -Dmaven.test.skip=true&#39;
+          sh &#39;pwd &amp;amp;&amp;amp; ls -l target/*&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	
+    stage(&#39;生成镜像Tag&#39;)&amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+          script &amp;#123;
+            //本次git提交的commid  (git log -n1 --pretty=format:&#39;%h&#39;)
+            env.COMMITID = sh(returnStdout: true, script: &amp;quot;git log -n1 --pretty=format:&#39;%h&#39;&amp;quot;).trim()
+            //构建的时间   (date +%Y%m%d_%H%M%S)
+            env.BuildTime = sh(returnStdout: true, script: &amp;quot;date +%Y%m%d_%H%M%S&amp;quot;).trim()
+            
+            //完整的镜像Tag   (c106654_20221115_133911)
+            env.ImageTag = COMMITID + &amp;quot;_&amp;quot; +  BuildTime
+          &amp;#125;
+          
+          sh &#39;echo &amp;quot;镜像的Tag: $&amp;#123;ImageTag&amp;#125;&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;
+    stage(&#39;制作Docker镜像&#39;)&amp;#123;
+      steps &amp;#123;
+        container(&#39;docker&#39;)&amp;#123;
+          withCredentials([usernamePassword(credentialsId: &amp;quot;$&amp;#123;HARBOR_ID&amp;#125;&amp;quot;, passwordVariable: &#39;HARBOR_PASSWORD&#39;, usernameVariable: &#39;HARBOR_USER&#39;)]) &amp;#123;
+              //登陆harbor
+              sh &#39;echo &amp;quot;$&amp;#123;HARBOR_PASSWORD&amp;#125;&amp;quot; | docker login $&amp;#123;Url&amp;#125; -u &amp;quot;$&amp;#123;HARBOR_USER&amp;#125;&amp;quot; --password-stdin&#39;
+
+              //构建镜像
+              sh &#39;docker build -t $&amp;#123;ImageName&amp;#125;:$&amp;#123;ImageTag&amp;#125; .&#39;
+              //推送镜像
+              sh &#39;docker push $&amp;#123;ImageName&amp;#125;:$&amp;#123;ImageTag&amp;#125;&#39;
+              //删除镜像
+              sh &#39;docker rmi $&amp;#123;ImageName&amp;#125;:$&amp;#123;ImageTag&amp;#125;&#39; 
+          &amp;#125;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;
+    stage(&#39;交付应用至K8S&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;kubectl&#39;) &amp;#123;
+		  sh &#39;echo &amp;quot;交付应用至K8S&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+  &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Zu1zCdk.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;27-交付应用到k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#27-交付应用到k8s&#34;&gt;#&lt;/a&gt; 2.7 交付应用到 K8S&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;1、将 K8S 的 kubeconfig 文件下载至本地，配置 Jenkins，将 config 文件制作为一个 Scretfile；&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# sz /root/.kube/config 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;配置 k8s 认证信息：系统管理 -&amp;gt;manage credentials-&amp;gt; 全局 -&amp;gt;Add Credential&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/9AysMkZ.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2、编写 pipeline 流水线&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在 Stage 中引用这个 config 文件，就可以操作对应的集群，部署前需做以下操作；&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;部署的名称空间需要提前创建&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;需要创建对应 namespace 的 Harbor 认证 Secrets -&amp;gt;harbor-admin&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl create ns dev
+[root@k8s-master01 ~]# kubectl create secret docker-registry harbor-admin --docker-server=s.hmallleasing.com --docker-username=admin --docker-password=passwd -n dev
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;3、编写 yaml 文件&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot
+  namespace: &amp;#123;NameSpace&amp;#125;			#修改为&amp;#123;&amp;#125;特殊字符，后期好替换
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: spring
+  template:
+    metadata:
+      labels:
+        app: spring
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: springboot
+        image: &amp;#123;Image&amp;#125;			# 修改为&amp;#123;&amp;#125;特殊字符，后期好替换
+        ports:
+        - name: http
+          containerPort: 8080
+        env:            # 传递初始堆内存和最大堆内存占用
+        - name: XMS_OPTS
+          valueFrom:
+            resourceFieldRef:
+              resource: requests.memory
+        - name: XMX_OPTS
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.memory
+        resources:
+          requests:
+            memory: 150Mi
+          limits:
+            memory: 300Mi
+        readinessProbe:         # 就绪探针；如果端口不存活，则从负载均衡中移除
+          tcpSocket:
+            port: http          # http是一个名字；它会获取这个名字对应的端口；
+          initialDelaySeconds: 10
+          failureThreshold: 3
+        livenessProbe:          # 存活探针；获取url，状态码不对那么则触发重启操作
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 10
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-svc
+  namespace: &amp;#123;namespace&amp;#125;
+spec:
+  selector:
+    app: spring
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: springboot-ingress
+  namespace: &amp;#123;namespace&amp;#125;
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: &amp;quot;&amp;#123;host&amp;#125;&amp;quot;
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: spring-svc
+            port:
+              number: 8080
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;4、编写交付 K8spipeline&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pipeline &amp;#123;
+  agent &amp;#123;
+    kubernetes &amp;#123;
+      cloud &#39;kubernetes&#39;
+      yaml &#39;&#39;&#39;
+        apiVersion: v1
+        kind: Pod
+        spec:
+          imagePullSecrets:
+          - name: harbor-admin
+          volumes:
+          - name: data
+            nfs:
+              server: 192.168.1.75
+              path: /data/nfs/maven
+          - name: dockersocket
+            hostPath:
+              path: /run/docker.sock
+          containers:
+          - name: maven
+            image: s.hmallleasing.com/base/maven:3.8.6
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: data
+              mountPath: /root/.m2
+          - name: nodejs
+            image: s.hmallleasing.com/base/nodejs:14.20
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: sonar
+            image: s.hmallleasing.com/base/sonar-scanner:2.3.0
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+          - name: docker
+            image: s.hmallleasing.com/base/docker:20.10
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+            volumeMounts:
+            - name: dockersocket
+              mountPath: /run/docker.sock
+          - name: kubectl
+            image: s.hmallleasing.com/base/kubectl:1.32.3
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+      &#39;&#39;&#39;
+    &amp;#125;
+  &amp;#125;
+  
+  environment&amp;#123;
+    //定义git变量
+    Git_Id = &amp;quot;gitlab-root-token&amp;quot;
+    Git_Url = &amp;quot;http://gitlab.hmallleasing.com/root/springboot-cicd.git&amp;quot;
+
+	//Harbor相关的全局变量
+    Url = &amp;quot;s.hmallleasing.com&amp;quot;
+    Pro = &amp;quot;base&amp;quot;
+    ImageName = &amp;quot;$&amp;#123;Url&amp;#125;/$&amp;#123;Pro&amp;#125;/springboot&amp;quot;
+    HARBOR_ID = &amp;quot;harbor-auth&amp;quot;
+	
+	//对外暴露的域名
+    Ingress_Host = &amp;quot;spring-dev.hmallleasing.com&amp;quot;
+  &amp;#125;
+  
+  stages &amp;#123;
+    stage(&#39;获取代码&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+		  checkout scmGit(branches: [[name: &#39;*/master&#39;]], extensions: [], userRemoteConfigs: [[credentialsId: &amp;quot;$&amp;#123;Git_Id&amp;#125;&amp;quot;, url: &amp;quot;$&amp;#123;Git_Url&amp;#125;&amp;quot;]])
+		  sh &#39;pwd &amp;amp;&amp;amp; ls&#39; 		  
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;
+    stage(&#39;代码扫描&#39;)&amp;#123;
+      steps &amp;#123;
+        withSonarQubeEnv(&#39;sonar-k8s&#39;)&amp;#123;   //jenkins集成sonarqube名称sonar-k8s
+          container(&#39;sonar&#39;)&amp;#123;
+            sh &#39;pwd &amp;amp;&amp;amp; ls -l&#39;
+            sh &#39;sonar-scanner \
+                  -Dsonar.projectKey=springboot-cicd \
+                  -Dsonar.java.binaries=src \
+                  -Dsonar.sources=.&#39;
+          &amp;#125;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+    stage(&#39;检查扫描结果&#39;)&amp;#123;
+      steps &amp;#123;
+        container(&#39;sonar&#39;)&amp;#123;
+          script &amp;#123;
+            timeout(5) &amp;#123;
+              def qg = waitForQualityGate()
+              if (qg.status != &#39;OK&#39;) &amp;#123;
+                error &amp;quot;Sonarqube代码检查失败, error的原因 $&amp;#123;qg.status&amp;#125;&amp;quot;
+              &amp;#125;
+            &amp;#125;
+          &amp;#125;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	 
+    stage(&#39;编译代码&#39;)&amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;)&amp;#123;
+          sh &#39;pwd &amp;amp;&amp;amp; ls -l&#39;
+          sh &#39;mvn package -Dmaven.test.skip=true&#39;
+          sh &#39;pwd &amp;amp;&amp;amp; ls -l target/*&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;	
+    stage(&#39;生成镜像Tag&#39;)&amp;#123;
+      steps &amp;#123;
+        container(&#39;maven&#39;) &amp;#123;
+          script &amp;#123;
+            //本次git提交的commid  (git log -n1 --pretty=format:&#39;%h&#39;)
+            env.COMMITID = sh(returnStdout: true, script: &amp;quot;git log -n1 --pretty=format:&#39;%h&#39;&amp;quot;).trim()
+            //构建的时间   (date +%Y%m%d_%H%M%S)
+            env.BuildTime = sh(returnStdout: true, script: &amp;quot;date +%Y%m%d_%H%M%S&amp;quot;).trim()
+            
+            //完整的镜像Tag   (c106654_20221115_133911)
+            env.ImageTag = COMMITID + &amp;quot;_&amp;quot; +  BuildTime
+          &amp;#125;
+          
+          sh &#39;echo &amp;quot;镜像的Tag: $&amp;#123;ImageTag&amp;#125;&amp;quot;&#39;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;
+    stage(&#39;制作Docker镜像&#39;)&amp;#123;
+      steps &amp;#123;
+        container(&#39;docker&#39;)&amp;#123;
+          withCredentials([usernamePassword(credentialsId: &amp;quot;$&amp;#123;HARBOR_ID&amp;#125;&amp;quot;, passwordVariable: &#39;HARBOR_PASSWORD&#39;, usernameVariable: &#39;HARBOR_USER&#39;)]) &amp;#123;
+              //登陆harbor
+              sh &#39;echo &amp;quot;$&amp;#123;HARBOR_PASSWORD&amp;#125;&amp;quot; | docker login $&amp;#123;Url&amp;#125; -u &amp;quot;$&amp;#123;HARBOR_USER&amp;#125;&amp;quot; --password-stdin&#39;
+
+              //构建镜像
+              sh &#39;docker build -t $&amp;#123;ImageName&amp;#125;:$&amp;#123;ImageTag&amp;#125; .&#39;
+              //推送镜像
+              sh &#39;docker push $&amp;#123;ImageName&amp;#125;:$&amp;#123;ImageTag&amp;#125;&#39;
+              //删除镜像
+              sh &#39;docker rmi $&amp;#123;ImageName&amp;#125;:$&amp;#123;ImageTag&amp;#125;&#39; 
+          &amp;#125;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;
+    stage(&#39;交付应用至K8S&#39;) &amp;#123;
+      steps &amp;#123;
+        container(&#39;kubectl&#39;) &amp;#123;
+          withCredentials([file(credentialsId: &#39;kubeconfig&#39;, variable: &#39;KUBECONFIG&#39;)]) &amp;#123;
+              sh &#39;mkdir -p /root/.kube &amp;amp;&amp;amp; echo $&amp;#123;KUBECONFIG&amp;#125; &amp;gt;/root/.kube/config&#39;
+
+              //替换depoy.yaml中&amp;#123;namespace&amp;#125;&amp;#123;Image&amp;#125;&amp;#123;host&amp;#125; 
+              sh &#39;cat deploy.yaml&#39;
+              sh &#39;sed -i &amp;quot;s#&amp;#123;namespace&amp;#125;#dev#g&amp;quot; deploy.yaml&#39;
+              sh &#39;sed -i &amp;quot;s#&amp;#123;Image&amp;#125;#$&amp;#123;ImageName&amp;#125;:$&amp;#123;ImageTag&amp;#125;#g&amp;quot; deploy.yaml&#39;
+              sh &#39;sed -i &amp;quot;s#&amp;#123;host&amp;#125;#$&amp;#123;Ingress_Host&amp;#125;#g&amp;quot; deploy.yaml&#39;
+              sh &#39;cat deploy.yaml&#39;
+
+              sh &#39;kubectl apply -f deploy.yaml&#39;
+          &amp;#125;
+        &amp;#125;
+      &amp;#125;
+    &amp;#125;		
+  &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/CtUFtcP.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/1F41fQQ.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;28-配置自动触发构建&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#28-配置自动触发构建&#34;&gt;#&lt;/a&gt; 2.8 配置自动触发构建&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;Jenkins 配置：&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;#Gitee 配置参考连接 https://blog.csdn.net/hali90s/article/details/126991514&lt;/p&gt;
+&lt;p&gt;#Gitlab 配置参考连接 https://blog.csdn.net/weixin_58423196/article/details/146407508&lt;/p&gt;
+&lt;p&gt;1、安装插件：&lt;a href=&#34;https://so.csdn.net/so/search?q=GitLab&amp;amp;spm=1001.2101.3001.7020&#34;&gt;GitLab&lt;/a&gt; Plugin&lt;/p&gt;
+&lt;p&gt;2、配置 -&amp;gt;Triggers&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/1Chji1c.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;点击右下角的 &amp;quot;Advanced&amp;quot;，进入触发器的高级配置，在 &amp;quot;Allowed branched&amp;quot; 部分按需选择 webhook 作用于哪些分支，然后点击 &amp;quot;Generate&amp;quot; 生成唯一的 secret token。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/YbtVvMh.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Gitlab 配置：&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;1、设置 -&amp;gt; 网络 -&amp;gt; 外部请求 -&amp;gt; 允许 Webhook 和服务对本地网络的请求&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/jlcu5UF.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;1、Gitlab 点击对应项目 -&amp;gt; 设置 -&amp;gt;Webhooks&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/odZ46yy.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/UEqybx9.png&#34; alt=&#34;6.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/KBeFU1v.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;h4 id=&#34;3-cd阶段&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-cd阶段&#34;&gt;#&lt;/a&gt; 3. CD 阶段&lt;/h4&gt;
+&lt;p&gt;CD 阶段：Jenkins/CD-&amp;gt; 拉取 Harbor 仓库对应项目镜像 -&amp;gt; 部署应用至 K8S 生产环境；&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/reddUL2.jpeg&#34; alt=&#34;1.jpg&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;31-获取完整的镜像名称&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#31-获取完整的镜像名称&#34;&gt;#&lt;/a&gt; 3.1 获取完整的镜像名称&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;1、获取 Harbor 镜像 Tag&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# curl -s -uadmin:passwd -H&#39;Content-Type: application/json&#39; -X GET https://s.hmallleasing.com/v2/base/springboot/tags/list | sed -r &#39;s#(\&amp;#123;.*\[)(.*)(\]\&amp;#125;)#\2#g&#39; | xargs -d &amp;quot;,&amp;quot; -n1 | xargs -n1 | sort -t &amp;quot;_&amp;quot; -k2 -k3 -nr | head -5
+3e24684_20230326_153018
+5041fbd_20230326_144343
+5da8d15_20230326_143533
+5da8d15_20230326_005207
+5da8d15_20230326_004940
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;2、安装插件&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;系统管理 -&amp;gt; 插件管理 -&amp;gt;Active Choices&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3、级联变量的方式来提取对应的 tag&lt;/strong&gt;&lt;br /&gt;
+&lt;strong&gt; 变量：Harbor_Url&lt;/strong&gt;&lt;br /&gt;
+ 项目 -&amp;gt; 配置 -&amp;gt; 参数化构建 -&amp;gt;Active Choices Parameter&lt;br /&gt;
+ 语法：return [&amp;quot;&lt;a href=&#34;http://s.hmallleasing.com&#34;&gt;s.hmallleasing.com&lt;/a&gt;&amp;quot;,&amp;quot;&lt;a href=&#34;http://harbor.hmallleasing.com&#34;&gt;harbor.hmallleasing.com&lt;/a&gt;&amp;quot;]&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/pTJQ8re.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;变量：Harbor_Pro&lt;/strong&gt;&lt;br /&gt;
+ 项目 -&amp;gt; 配置 -&amp;gt; 参数化构建 -&amp;gt;&lt;strong&gt;Active Choices Parameter&lt;/strong&gt;&lt;br /&gt;
+ 语法：return [&amp;quot;base&amp;quot;,&amp;quot;nf-flms&amp;quot;,&amp;quot;ops&amp;quot;,&amp;quot;xx&amp;quot;]&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/TVJfqv7.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;变量：Image_Name&lt;/strong&gt;&lt;br /&gt;
+ 项目 -&amp;gt; 配置 -&amp;gt; 参数化构建 -&amp;gt;&lt;strong&gt;Active Choices Parameter&lt;/strong&gt;&lt;br /&gt;
+ 语法：return [&amp;quot;springboot&amp;quot;,&amp;quot;nf-flms-statistics&amp;quot;,&amp;quot;nf-flms-order&amp;quot;,&amp;quot;xx&amp;quot;]&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/zDHvJft.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;级联变量：Image_Tag&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;项目 -&amp;gt; 配置 -&amp;gt; 参数化构建 -&amp;gt;&lt;strong&gt;Active Choices Reactive Parameter&lt;/strong&gt;&lt;br /&gt;
+ 语法：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;def get_tag = [ &amp;quot;bash&amp;quot;, &amp;quot;-c&amp;quot;, &amp;quot;curl -s -uadmin:passwd -H&#39;Content-Type: application/json&#39; -X GET https://s.hmallleasing.com/v2/base/springboot/tags/list | sed -r &#39;s#(\\&amp;#123;.*\\[)(.*)(\\]\\&amp;#125;)#\\2#g&#39; | xargs -d &#39;,&#39; -n1 | xargs -n1 | sort -t &#39;_&#39; -k2 -k3 -nr | head -5&amp;quot;]
+
+return get_tag.execute().text.tokenize(&amp;quot;\n&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/TnMaVGW.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;级联变量：Harbor_Url,Harbor_Pro,Image_Name&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/gpzEcvH.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/xwYX0Db.png&#34; alt=&#34;5.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4、编写 pipeline 输出完整的镜像名称&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pipeline &amp;#123;
+  agent &amp;#123;
+    kubernetes &amp;#123;
+      cloud &#39;kubernetes&#39;
+      yaml &#39;&#39;&#39;
+        apiVersion: v1
+        kind: Pod
+        spec:
+          imagePullSecrets:
+          - name: harbor-admin
+          containers:
+          - name: kubectl
+            image: s.hmallleasing.com/base/kubectl:1.32.3
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+      &#39;&#39;&#39;
+    &amp;#125;
+  &amp;#125;
+
+  environment &amp;#123;
+      Full_Image = &amp;quot;$&amp;#123;Harbor_Url&amp;#125;/$&amp;#123;Harbor_Pro&amp;#125;/$&amp;#123;Image_Name&amp;#125;:$&amp;#123;Image_Tag&amp;#125;&amp;quot;
+    &amp;#125;
+  stages &amp;#123;
+    stage(&#39;输出完整的镜像名称&#39;) &amp;#123;
+      steps &amp;#123;
+        sh &#39;echo 镜像名称-tag: $&amp;#123;Full_Image&amp;#125;&#39;
+      &amp;#125;
+    &amp;#125;
+  &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;6png&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#6png&#34;&gt;#&lt;/a&gt; &lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/KjO5RQx.png&#34; alt=&#34;6.png&#34; /&gt;&lt;/h5&gt;
+&lt;h5 id=&#34;32-生产环境中部署对应至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#32-生产环境中部署对应至k8s&#34;&gt;#&lt;/a&gt; 3.2 生产环境中部署对应至 K8S&lt;/h5&gt;
+&lt;p&gt;1、编写 yaml&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cat deploy-prod.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot
+  namespace: prod			#修改为&amp;#123;&amp;#125;特殊字符，后期好替换
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: spring
+  template:
+    metadata:
+      labels:
+        app: spring
+    spec:
+      imagePullSecrets:
+      - name: harbor-admin
+      containers:
+      - name: springboot
+        image: s.hmallleasing.com/base/springboot:f04e3f0_20250611_185645			# 修改为&amp;#123;&amp;#125;特殊字符，后期好替换
+        ports:
+        - name: http
+          containerPort: 8080
+        env:            # 传递初始堆内存和最大堆内存占用
+        - name: XMS_OPTS
+          valueFrom:
+            resourceFieldRef:
+              resource: requests.memory
+        - name: XMX_OPTS
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.memory
+        resources:
+          requests:
+            memory: 150Mi
+          limits:
+            memory: 300Mi
+        readinessProbe:         # 就绪探针；如果端口不存活，则从负载均衡中移除
+          tcpSocket:
+            port: http          # http是一个名字；它会获取这个名字对应的端口；
+          initialDelaySeconds: 10
+          failureThreshold: 3
+        livenessProbe:          # 存活探针；获取url，状态码不对那么则触发重启操作
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 10
+          failureThreshold: 3
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-svc
+  namespace: prod
+spec:
+  selector:
+    app: spring
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: springboot-ingress
+  namespace: prod
+spec:
+  ingressClassName: &amp;quot;nginx&amp;quot;
+  rules:
+  - host: &amp;quot;spring-prod.hmallleasing.com&amp;quot;
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: spring-svc
+            port:
+              number: 8080
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;2、部署应用&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@k8s-master01 java]# kubectl create ns prod
+[root@k8s-master01 java]# kubectl create secret docker-registry harbor-admin --docker-server=s.hmallleasing.com --docker-username=admin --docker-password=passwd -n prod
+[root@k8s-master01 java]# kubectl apply -f deploy-prod.yaml 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;33-cd流水线部署指定tag版本到k8s生产环境&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#33-cd流水线部署指定tag版本到k8s生产环境&#34;&gt;#&lt;/a&gt; 3.3 CD 流水线部署指定 Tag 版本到 K8S 生产环境&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;pipeline &amp;#123;
+  agent &amp;#123;
+    kubernetes &amp;#123;
+      cloud &#39;kubernetes&#39;
+      yaml &#39;&#39;&#39;
+        apiVersion: v1
+        kind: Pod
+        spec:
+          imagePullSecrets:
+          - name: harbor-admin
+          containers:
+          - name: kubectl
+            image: s.hmallleasing.com/ops/kubectl:1.22.6
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+      &#39;&#39;&#39;
+    &amp;#125;
+  &amp;#125;
+
+  environment &amp;#123;
+      Full_Image = &amp;quot;$&amp;#123;Harbor_Url&amp;#125;/$&amp;#123;Harbor_Pro&amp;#125;/$&amp;#123;Image_Name&amp;#125;:$&amp;#123;Image_Tag&amp;#125;&amp;quot;
+    &amp;#125;
+  stages &amp;#123;
+    stage(&#39;输出完整的镜像名称&#39;) &amp;#123;
+      steps &amp;#123;
+        sh &#39;echo 镜像名称-tag: $&amp;#123;Full_Image&amp;#125;&#39;
+      &amp;#125;
+    &amp;#125;
+    stage(&#39;部署应用至K8S&#39;) &amp;#123;
+      steps &amp;#123;
+          withCredentials([file(credentialsId: &#39;kubeconfig&#39;, variable: &#39;KUBECONFIG&#39;)]) &amp;#123;
+            container(&#39;kubectl&#39;)&amp;#123;
+              sh &#39;mkdir -p ~/.kube &amp;amp;&amp;amp; echo $&amp;#123;KUBECONFIG&amp;#125; &amp;gt;&amp;gt; ~/.kube/config&#39;
+              sh &#39;kubectl set image deployment/$&amp;#123;Image_Name&amp;#125; $&amp;#123;Image_Name&amp;#125;=$&amp;#123;Full_Image&amp;#125; -n prod&#39;
+            &amp;#125;
+          &amp;#125;
+      &amp;#125;
+    &amp;#125;
+  &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/n1DHjdK.png&#34; alt=&#34;7.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/n1DHjdK.png&#34; alt=&#34;7.png&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;34-询问是否需要回退&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#34-询问是否需要回退&#34;&gt;#&lt;/a&gt; 3.4 询问是否需要回退&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;pipeline &amp;#123;
+  agent &amp;#123;
+    kubernetes &amp;#123;
+      cloud &#39;kubernetes&#39;
+      yaml &#39;&#39;&#39;
+        apiVersion: v1
+        kind: Pod
+        spec:
+          imagePullSecrets:
+          - name: harbor-admin
+          containers:
+          - name: kubectl
+            image: s.hmallleasing.com/ops/kubectl:1.22.6
+            imagePullPolicy: IfNotPresent
+            command: [&amp;quot;cat&amp;quot;]
+            tty: true
+      &#39;&#39;&#39;
+    &amp;#125;
+  &amp;#125;
+
+  environment &amp;#123;
+      Full_Image = &amp;quot;$&amp;#123;Harbor_Url&amp;#125;/$&amp;#123;Harbor_Pro&amp;#125;/$&amp;#123;Image_Name&amp;#125;:$&amp;#123;Image_Tag&amp;#125;&amp;quot;
+    &amp;#125;
+  stages &amp;#123;
+    stage(&#39;输出完整的镜像名称&#39;) &amp;#123;
+      steps &amp;#123;
+        sh &#39;echo 镜像名称-tag: $&amp;#123;Full_Image&amp;#125;&#39;
+      &amp;#125;
+    &amp;#125;
+    stage(&#39;部署应用至K8S&#39;) &amp;#123;
+      steps &amp;#123;
+          withCredentials([file(credentialsId: &#39;kubeconfig&#39;, variable: &#39;KUBECONFIG&#39;)]) &amp;#123;
+            container(&#39;kubectl&#39;)&amp;#123;
+              sh &#39;mkdir -p ~/.kube &amp;amp;&amp;amp; echo $&amp;#123;KUBECONFIG&amp;#125; &amp;gt;&amp;gt; ~/.kube/config&#39;
+              sh &#39;kubectl set image deployment/$&amp;#123;Image_Name&amp;#125; $&amp;#123;Image_Name&amp;#125;=$&amp;#123;Full_Image&amp;#125; -n prod&#39;
+            &amp;#125;
+          &amp;#125;
+      &amp;#125;
+    &amp;#125;
+	
+    stage(&#39;快速回滚&#39;) &amp;#123;
+      steps &amp;#123;
+          withCredentials([file(credentialsId: &#39;kubeconfig&#39;, variable: &#39;KUBECONFIG&#39;)]) &amp;#123;
+            container(&#39;kubectl&#39;)&amp;#123;
+              script &amp;#123;
+                timeout(time:1 , unit: &#39;HOURS&#39;)&amp;#123;
+                  def UserInput = input message: &#39;是否回退至上一个版本&#39;, parameters: [choice(choices: [&#39;No&#39;, &#39;Yes&#39;], name: &#39;rollback&#39;)]
+                  if (UserInput == &amp;quot;Yes&amp;quot;)&amp;#123;
+                    sh &#39;mkdir -p ~/.kube &amp;amp;&amp;amp; echo $&amp;#123;KUBECONFIG&amp;#125; &amp;gt;&amp;gt; ~/.kube/config&#39;
+                    sh &#39;kubectl rollout undo deployment $&amp;#123;Image_Name&amp;#125; -n prod&#39;
+                  &amp;#125;else &amp;#123;
+                    echo &amp;quot;没有选择回退&amp;quot;
+                  &amp;#125;
+                &amp;#125;
+              &amp;#125;
+            &amp;#125;
+          &amp;#125;
+      &amp;#125;
+    &amp;#125;
+	
+  &amp;#125;
+&amp;#125;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/Z6xxgHC.png&#34; alt=&#34;9.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;#如果选择 “Yes” 继续，则回退至上一个版本，等待时间为 1 小时&lt;/p&gt;
+&lt;p&gt;#如果选择 “No” 继续，则不回退至上一个版本&lt;/p&gt;
+&lt;p&gt;#如果没有选择，则不回退至上一个版本&lt;/p&gt;
+</content>
         <category term="DevOps" />
         <updated>2025-06-10T13:57:00.000Z</updated>
     </entry>
