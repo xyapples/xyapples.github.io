@@ -4,30 +4,30 @@
     <title>LinuxSre云原生 • Posts by &#34;devops&#34; tag</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-10T13:57:00.000Z</updated>
-    <category term="DevOps" />
     <category term="Aliyun" />
     <category term="Docker" />
+    <category term="DevOps" />
     <category term="ELKStack" />
     <category term="Harbor" />
-    <category term="Kubernetes" />
-    <category term="Redis" />
     <category term="Linux" />
     <category term="rsync" />
+    <category term="Kubernetes" />
+    <category term="Redis" />
     <category term="MySQL" />
+    <category term="Openvpn" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
-    <category term="Openvpn" />
-    <category term="Windows" />
     <category term="Tomcat" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/1366748664.html</id>
         <title>K8S基于Jenkins实现Java项目CI与CD实践（二）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/1366748664.html"/>
         <content type="html">&lt;p&gt;&lt;strong&gt;&lt;u&gt;场景 1：常规 java 应用，使用 jenkins pipeline 交付到 Kubernetes 集群中&lt;/u&gt;&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;CI 阶段：开发人员 -&amp;gt; 提交代码 -&amp;gt;gitlab 仓库 -&amp;gt;Jenkins/CI 抓取代码 -&amp;gt; 漏洞扫描 -&amp;gt; 编译 -&amp;gt; 构建镜像 -&amp;gt; 推送 Harbor-&amp;gt; 部署应用至 K8S 测试环境；&lt;br /&gt;
+&lt;p&gt;CI 阶段：开发人员 -&amp;gt; 提交代码 -&amp;gt;Gitlab 仓库 -&amp;gt;Jenkins/CI 抓取代码 -&amp;gt; 漏洞扫描 -&amp;gt; 编译 -&amp;gt; 构建镜像 -&amp;gt; 推送 Harbor-&amp;gt; 部署应用至 K8S 测试环境；&lt;br /&gt;
 CD 阶段：Jenkins/CD-&amp;gt; 拉取 Harbor 仓库对应项目镜像 -&amp;gt; 部署应用至 K8S 生产环境；&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/reddUL2.jpeg&#34; alt=&#34;1.jpg&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;一-环境准备&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-环境准备&#34;&gt;#&lt;/a&gt; 一、环境准备&lt;/h4&gt;
+&lt;h4 id=&#34;一-提交代码&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-提交代码&#34;&gt;#&lt;/a&gt; 一、提交代码&lt;/h4&gt;
 &lt;p&gt;准备好 Java 代码、Dockerfile、deploy.yaml 资源清单文件  提交到 Gitlab 服务器；&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;$ git config --global user.name &amp;quot;xuyong&amp;quot;
 $ git config --global user.email &amp;quot;373370405@qq.com&amp;quot;
