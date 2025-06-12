@@ -4,18 +4,18 @@
     <title>LinuxSre云原生 • Posts by &#34;openvpn&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-05T13:50:22.000Z</updated>
-    <category term="DevOps" />
     <category term="Aliyun" />
     <category term="Docker" />
+    <category term="DevOps" />
     <category term="ELKStack" />
     <category term="Harbor" />
-    <category term="Linux" />
-    <category term="rsync" />
     <category term="Kubernetes" />
     <category term="Redis" />
-    <category term="Prometheus" />
-    <category term="Openvpn" />
+    <category term="Linux" />
     <category term="MySQL" />
+    <category term="rsync" />
+    <category term="Openvpn" />
+    <category term="Prometheus" />
     <category term="Rabbitmq" />
     <category term="Tomcat" />
     <category term="Windows" />
