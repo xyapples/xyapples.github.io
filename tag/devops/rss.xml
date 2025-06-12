@@ -9,19 +9,19 @@
         <lastBuildDate>Tue, 10 Jun 2025 21:57:00 +0800</lastBuildDate>
         <category>DevOps</category>
         <category>Aliyun</category>
-        <category>ELKStack</category>
         <category>Docker</category>
-        <category>Kubernetes</category>
+        <category>ELKStack</category>
         <category>Harbor</category>
-        <category>Redis</category>
-        <category>rsync</category>
-        <category>Rabbitmq</category>
         <category>Linux</category>
+        <category>rsync</category>
+        <category>Kubernetes</category>
+        <category>Redis</category>
         <category>Prometheus</category>
+        <category>Openvpn</category>
         <category>MySQL</category>
+        <category>Rabbitmq</category>
         <category>Tomcat</category>
         <category>Windows</category>
-        <category>Openvpn</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1366748664.html</guid>
             <title>K8S基于Jenkins实现Java项目CI与CD实践（二）</title>
@@ -1247,7 +1247,7 @@ return get_tag.execute().text.tokenize(&amp;quot;\n&amp;quot;)
   &amp;#125;
 &amp;#125;
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;6png&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#6png&#34;&gt;#&lt;/a&gt; &lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/KjO5RQx.png&#34; alt=&#34;6.png&#34; /&gt;&lt;/h5&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/KjO5RQx.png&#34; alt=&#34;6.png&#34; /&gt;&lt;/p&gt;
 &lt;h5 id=&#34;32-生产环境中部署对应至k8s&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#32-生产环境中部署对应至k8s&#34;&gt;#&lt;/a&gt; 3.2 生产环境中部署对应至 K8S&lt;/h5&gt;
 &lt;p&gt;1、编写 yaml&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# cat deploy-prod.yaml 

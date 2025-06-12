@@ -9,19 +9,19 @@
         <lastBuildDate>Thu, 10 Apr 2025 21:32:09 +0800</lastBuildDate>
         <category>DevOps</category>
         <category>Aliyun</category>
-        <category>ELKStack</category>
         <category>Docker</category>
-        <category>Kubernetes</category>
+        <category>ELKStack</category>
         <category>Harbor</category>
-        <category>Redis</category>
-        <category>rsync</category>
-        <category>Rabbitmq</category>
         <category>Linux</category>
+        <category>rsync</category>
+        <category>Kubernetes</category>
+        <category>Redis</category>
         <category>Prometheus</category>
+        <category>Openvpn</category>
         <category>MySQL</category>
+        <category>Rabbitmq</category>
         <category>Tomcat</category>
         <category>Windows</category>
-        <category>Openvpn</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/3071070979.html</guid>
             <title>一键永久激活Window、office教程</title>
