@@ -8,20 +8,20 @@
         <pubDate>Wed, 09 Apr 2025 22:02:40 +0800</pubDate>
         <lastBuildDate>Wed, 09 Apr 2025 22:02:40 +0800</lastBuildDate>
         <category>DevOps</category>
-        <category>Docker</category>
         <category>Aliyun</category>
         <category>ELKStack</category>
-        <category>Harbor</category>
+        <category>Docker</category>
         <category>Kubernetes</category>
+        <category>Harbor</category>
         <category>Redis</category>
-        <category>Linux</category>
         <category>rsync</category>
-        <category>MySQL</category>
-        <category>Openvpn</category>
-        <category>Prometheus</category>
         <category>Rabbitmq</category>
+        <category>Linux</category>
+        <category>Prometheus</category>
+        <category>MySQL</category>
         <category>Tomcat</category>
         <category>Windows</category>
+        <category>Openvpn</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2628187572.html</guid>
             <title>MySQL运维DBA应用与实践</title>

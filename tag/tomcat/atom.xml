@@ -5,20 +5,20 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-06-08T02:51:57.000Z</updated>
     <category term="DevOps" />
-    <category term="Docker" />
     <category term="Aliyun" />
     <category term="ELKStack" />
-    <category term="Harbor" />
+    <category term="Docker" />
     <category term="Kubernetes" />
+    <category term="Harbor" />
     <category term="Redis" />
-    <category term="Linux" />
     <category term="rsync" />
-    <category term="MySQL" />
-    <category term="Openvpn" />
-    <category term="Prometheus" />
     <category term="Rabbitmq" />
+    <category term="Linux" />
+    <category term="Prometheus" />
+    <category term="MySQL" />
     <category term="Tomcat" />
     <category term="Windows" />
+    <category term="Openvpn" />
     <entry>
         <id>http://ixuyong.cn/posts/754945111.html</id>
         <title>Tomcat JVM调优实践</title>

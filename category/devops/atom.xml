@@ -5,20 +5,20 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-06-10T13:57:00.000Z</updated>
     <category term="DevOps" />
-    <category term="Docker" />
     <category term="Aliyun" />
     <category term="ELKStack" />
-    <category term="Harbor" />
+    <category term="Docker" />
     <category term="Kubernetes" />
+    <category term="Harbor" />
     <category term="Redis" />
-    <category term="Linux" />
     <category term="rsync" />
-    <category term="MySQL" />
-    <category term="Openvpn" />
-    <category term="Prometheus" />
     <category term="Rabbitmq" />
+    <category term="Linux" />
+    <category term="Prometheus" />
+    <category term="MySQL" />
     <category term="Tomcat" />
     <category term="Windows" />
+    <category term="Openvpn" />
     <entry>
         <id>http://ixuyong.cn/posts/1366748664.html</id>
         <title>K8S基于Jenkins实现Java项目CI与CD实践（二）</title>
@@ -1171,7 +1171,7 @@ spec:
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/odZ46yy.png&#34; alt=&#34;4.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/UEqybx9.png&#34; alt=&#34;6.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/KBeFU1v.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;3-cd阶段&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-cd阶段&#34;&gt;#&lt;/a&gt; 3. CD 阶段&lt;/h4&gt;
+&lt;h4 id=&#34;三-cd阶段&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#三-cd阶段&#34;&gt;#&lt;/a&gt; 三、CD 阶段&lt;/h4&gt;
 &lt;p&gt;CD 阶段：Jenkins/CD-&amp;gt; 拉取 Harbor 仓库对应项目镜像 -&amp;gt; 部署应用至 K8S 生产环境；&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/reddUL2.jpeg&#34; alt=&#34;1.jpg&#34; /&gt;&lt;/p&gt;
 &lt;h5 id=&#34;31-获取完整的镜像名称&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#31-获取完整的镜像名称&#34;&gt;#&lt;/a&gt; 3.1 获取完整的镜像名称&lt;/h5&gt;
