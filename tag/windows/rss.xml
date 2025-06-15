@@ -7,21 +7,21 @@
         <language>zh-CN</language>
         <pubDate>Thu, 10 Apr 2025 21:32:09 +0800</pubDate>
         <lastBuildDate>Thu, 10 Apr 2025 21:32:09 +0800</lastBuildDate>
-        <category>DevOps</category>
         <category>Aliyun</category>
-        <category>Docker</category>
+        <category>DevOps</category>
         <category>ELKStack</category>
-        <category>Kubernetes</category>
-        <category>Redis</category>
+        <category>Docker</category>
         <category>Harbor</category>
         <category>Linux</category>
         <category>rsync</category>
-        <category>MySQL</category>
-        <category>Prometheus</category>
+        <category>Kubernetes</category>
         <category>Openvpn</category>
-        <category>Rabbitmq</category>
+        <category>Prometheus</category>
+        <category>MySQL</category>
         <category>Tomcat</category>
+        <category>Redis</category>
         <category>Windows</category>
+        <category>Rabbitmq</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/3071070979.html</guid>
             <title>一键永久激活Window、office教程</title>
@@ -30,15 +30,11 @@
             <pubDate>Thu, 10 Apr 2025 21:32:09 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;一键永久激活window-office教程&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一键永久激活window-office教程&#34;&gt;#&lt;/a&gt; 一键永久激活 Window、office 教程&lt;/h3&gt;
 &lt;p&gt;1、按下 Win 键 + R，调出运行对话框，输入 powershell 并回车，启动命令提示符窗口。接着输入以下指令执行激活：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;irm https://get.activated.win | iex
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/ilMT403.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;irm https://get.activated.win &lt;span class=&#34;token operator&#34;&gt;|&lt;/span&gt; iex&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/ilMT403.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;该脚本包含四个功能：首个命令用于 Windows 系统永久激活，第二个用于 Office 永久激活，第三个将系统有效期延长至 2038 年，第四个则实现每 180 天自动循环激活。&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/taJbKQr.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;2. 我们再次使用 Windows 徽标 + R 快捷键打开运行框，输入 slmgr.vbs/xpr 就可以看到系统已经永久激活了。&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;slmgr.vbs /xpr
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/JMWlUpc.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;slmgr.vbs /xpr&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/JMWlUpc.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;以上，既然看到这里了，如果觉得不错，随手点个赞、打赏一下吧，⭐～谢谢你看我的文章，我们下次再见。&lt;/p&gt;
  ]]></description>
         </item>
