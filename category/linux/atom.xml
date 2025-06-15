@@ -4,21 +4,21 @@
     <title>LinuxSre云原生 • Posts by &#34;linux&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-07T02:40:25.000Z</updated>
-    <category term="Aliyun" />
     <category term="DevOps" />
-    <category term="ELKStack" />
     <category term="Docker" />
+    <category term="Aliyun" />
     <category term="Harbor" />
+    <category term="ELKStack" />
+    <category term="Kubernetes" />
     <category term="Linux" />
     <category term="rsync" />
-    <category term="Kubernetes" />
     <category term="Openvpn" />
-    <category term="Prometheus" />
     <category term="MySQL" />
-    <category term="Tomcat" />
-    <category term="Redis" />
-    <category term="Windows" />
+    <category term="Prometheus" />
     <category term="Rabbitmq" />
+    <category term="Redis" />
+    <category term="Tomcat" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/2260957686.html</id>
         <title>Linux—Centos7修改网卡名称</title>
