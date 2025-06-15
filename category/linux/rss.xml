@@ -11,17 +11,17 @@
         <category>Aliyun</category>
         <category>Docker</category>
         <category>ELKStack</category>
-        <category>Harbor</category>
         <category>Kubernetes</category>
         <category>Redis</category>
+        <category>Harbor</category>
         <category>Linux</category>
         <category>rsync</category>
-        <category>Prometheus</category>
-        <category>Rabbitmq</category>
         <category>MySQL</category>
+        <category>Prometheus</category>
+        <category>Openvpn</category>
+        <category>Rabbitmq</category>
         <category>Tomcat</category>
         <category>Windows</category>
-        <category>Openvpn</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2260957686.html</guid>
             <title>Linux—Centos7修改网卡名称</title>

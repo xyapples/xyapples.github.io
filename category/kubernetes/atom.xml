@@ -8,17 +8,17 @@
     <category term="Aliyun" />
     <category term="Docker" />
     <category term="ELKStack" />
-    <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="Redis" />
+    <category term="Harbor" />
     <category term="Linux" />
     <category term="rsync" />
-    <category term="Prometheus" />
-    <category term="Rabbitmq" />
     <category term="MySQL" />
+    <category term="Prometheus" />
+    <category term="Openvpn" />
+    <category term="Rabbitmq" />
     <category term="Tomcat" />
     <category term="Windows" />
-    <category term="Openvpn" />
     <entry>
         <id>http://ixuyong.cn/posts/626047790.html</id>
         <title>消费租赁系统微服务应用交付实践</title>
