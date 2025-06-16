@@ -7,21 +7,21 @@
         <language>zh-CN</language>
         <pubDate>Sun, 08 Jun 2025 10:55:56 +0800</pubDate>
         <lastBuildDate>Sun, 08 Jun 2025 10:55:56 +0800</lastBuildDate>
-        <category>DevOps</category>
         <category>ELKStack</category>
-        <category>Kubernetes</category>
+        <category>Aliyun</category>
+        <category>DevOps</category>
         <category>Docker</category>
+        <category>Kubernetes</category>
+        <category>Harbor</category>
         <category>Linux</category>
         <category>rsync</category>
-        <category>Harbor</category>
-        <category>Aliyun</category>
         <category>MySQL</category>
+        <category>Openvpn</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
         <category>Redis</category>
         <category>Tomcat</category>
         <category>Windows</category>
-        <category>Openvpn</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1528713798.html</guid>
             <title>阿里云ECS、SLB、RDS、CDN、ESS应用与实践</title>
