@@ -7,21 +7,21 @@
         <language>zh-CN</language>
         <pubDate>Thu, 19 Jun 2025 21:16:37 +0800</pubDate>
         <lastBuildDate>Thu, 19 Jun 2025 21:16:37 +0800</lastBuildDate>
-        <category>DevOps</category>
         <category>Aliyun</category>
+        <category>DevOps</category>
         <category>Docker</category>
         <category>ELKStack</category>
-        <category>Harbor</category>
-        <category>Kubernetes</category>
         <category>Linux</category>
+        <category>Harbor</category>
         <category>rsync</category>
-        <category>MySQL</category>
+        <category>Kubernetes</category>
         <category>Openvpn</category>
+        <category>MySQL</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
         <category>Redis</category>
-        <category>Tomcat</category>
         <category>Windows</category>
+        <category>Tomcat</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/581151773.html</guid>
             <title>100个运维相关技术官网大汇总</title>
