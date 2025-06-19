@@ -8,20 +8,20 @@
         <pubDate>Sun, 08 Jun 2025 10:51:57 +0800</pubDate>
         <lastBuildDate>Sun, 08 Jun 2025 10:51:57 +0800</lastBuildDate>
         <category>Aliyun</category>
+        <category>Docker</category>
         <category>DevOps</category>
         <category>ELKStack</category>
-        <category>Docker</category>
-        <category>Kubernetes</category>
         <category>Harbor</category>
         <category>Linux</category>
         <category>rsync</category>
-        <category>Prometheus</category>
-        <category>Rabbitmq</category>
+        <category>Kubernetes</category>
         <category>MySQL</category>
-        <category>Redis</category>
+        <category>Prometheus</category>
         <category>Openvpn</category>
-        <category>Windows</category>
+        <category>Rabbitmq</category>
+        <category>Redis</category>
         <category>Tomcat</category>
+        <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/754945111.html</guid>
             <title>Tomcat JVM调优实践</title>
