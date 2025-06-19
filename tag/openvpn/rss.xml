@@ -10,16 +10,16 @@
         <category>DevOps</category>
         <category>Aliyun</category>
         <category>Docker</category>
+        <category>ELKStack</category>
         <category>Harbor</category>
         <category>Kubernetes</category>
-        <category>ELKStack</category>
-        <category>rsync</category>
         <category>Linux</category>
+        <category>rsync</category>
         <category>MySQL</category>
         <category>Openvpn</category>
-        <category>Redis</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
+        <category>Redis</category>
         <category>Tomcat</category>
         <category>Windows</category>
         <item>

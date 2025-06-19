@@ -7,16 +7,16 @@
     <category term="DevOps" />
     <category term="Aliyun" />
     <category term="Docker" />
+    <category term="ELKStack" />
     <category term="Harbor" />
     <category term="Kubernetes" />
-    <category term="ELKStack" />
-    <category term="rsync" />
     <category term="Linux" />
+    <category term="rsync" />
     <category term="MySQL" />
     <category term="Openvpn" />
-    <category term="Redis" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
+    <category term="Redis" />
     <category term="Tomcat" />
     <category term="Windows" />
     <entry>
