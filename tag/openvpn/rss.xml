@@ -7,21 +7,21 @@
         <language>zh-CN</language>
         <pubDate>Thu, 05 Jun 2025 21:50:22 +0800</pubDate>
         <lastBuildDate>Thu, 05 Jun 2025 21:50:22 +0800</lastBuildDate>
-        <category>Aliyun</category>
         <category>DevOps</category>
         <category>Docker</category>
+        <category>Aliyun</category>
         <category>ELKStack</category>
-        <category>Linux</category>
-        <category>Harbor</category>
-        <category>rsync</category>
         <category>Kubernetes</category>
+        <category>Linux</category>
+        <category>rsync</category>
+        <category>Harbor</category>
         <category>Openvpn</category>
-        <category>MySQL</category>
         <category>Prometheus</category>
+        <category>MySQL</category>
         <category>Rabbitmq</category>
         <category>Redis</category>
-        <category>Windows</category>
         <category>Tomcat</category>
+        <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2126514413.html</guid>
             <title>虚拟隧道网络Openvpn</title>
