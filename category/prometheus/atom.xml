@@ -4,19 +4,19 @@
     <title>LinuxSre云原生 • Posts by &#34;prometheus&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-08T02:33:49.000Z</updated>
+    <category term="DevOps" />
     <category term="Aliyun" />
     <category term="Docker" />
-    <category term="DevOps" />
-    <category term="ELKStack" />
     <category term="Harbor" />
-    <category term="Linux" />
-    <category term="rsync" />
     <category term="Kubernetes" />
+    <category term="ELKStack" />
+    <category term="rsync" />
+    <category term="Linux" />
     <category term="MySQL" />
-    <category term="Prometheus" />
     <category term="Openvpn" />
-    <category term="Rabbitmq" />
     <category term="Redis" />
+    <category term="Prometheus" />
+    <category term="Rabbitmq" />
     <category term="Tomcat" />
     <category term="Windows" />
     <entry>
