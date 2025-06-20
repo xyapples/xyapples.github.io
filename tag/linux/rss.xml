@@ -5,23 +5,41 @@
         <link>http://ixuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Thu, 19 Jun 2025 21:16:37 +0800</pubDate>
-        <lastBuildDate>Thu, 19 Jun 2025 21:16:37 +0800</lastBuildDate>
+        <pubDate>Fri, 20 Jun 2025 22:12:07 +0800</pubDate>
+        <lastBuildDate>Fri, 20 Jun 2025 22:12:07 +0800</lastBuildDate>
         <category>DevOps</category>
-        <category>ELKStack</category>
         <category>Aliyun</category>
-        <category>Kubernetes</category>
         <category>Docker</category>
+        <category>ELKStack</category>
+        <category>Kubernetes</category>
         <category>Linux</category>
+        <category>Harbor</category>
         <category>rsync</category>
         <category>MySQL</category>
-        <category>Harbor</category>
-        <category>Rabbitmq</category>
-        <category>Redis</category>
-        <category>Prometheus</category>
-        <category>Tomcat</category>
         <category>Openvpn</category>
+        <category>Prometheus</category>
+        <category>Redis</category>
+        <category>Rabbitmq</category>
         <category>Windows</category>
+        <category>Tomcat</category>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/269104229.html</guid>
+            <title>Samba服务实践</title>
+            <link>http://ixuyong.cn/posts/269104229.html</link>
+            <category>Linux</category>
+            <pubDate>Fri, 20 Jun 2025 22:12:07 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;samba服务实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#samba服务实践&#34;&gt;#&lt;/a&gt; Samba 服务实践&lt;/h3&gt;
+ ]]></description>
+        </item>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/2889248111.html</guid>
+            <title>Vsftp服务实践</title>
+            <link>http://ixuyong.cn/posts/2889248111.html</link>
+            <category>Linux</category>
+            <pubDate>Fri, 20 Jun 2025 22:12:00 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;vsftp服务实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#vsftp服务实践&#34;&gt;#&lt;/a&gt; Vsftp 服务实践&lt;/h3&gt;
+ ]]></description>
+        </item>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/581151773.html</guid>
             <title>100个运维相关技术官网大汇总</title>

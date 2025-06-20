@@ -5,20 +5,20 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-05-29T12:48:49.000Z</updated>
     <category term="DevOps" />
-    <category term="ELKStack" />
     <category term="Aliyun" />
-    <category term="Kubernetes" />
     <category term="Docker" />
+    <category term="ELKStack" />
+    <category term="Kubernetes" />
     <category term="Linux" />
+    <category term="Harbor" />
     <category term="rsync" />
     <category term="MySQL" />
-    <category term="Harbor" />
-    <category term="Rabbitmq" />
-    <category term="Redis" />
-    <category term="Prometheus" />
-    <category term="Tomcat" />
     <category term="Openvpn" />
+    <category term="Prometheus" />
+    <category term="Redis" />
+    <category term="Rabbitmq" />
     <category term="Windows" />
+    <category term="Tomcat" />
     <entry>
         <id>http://ixuyong.cn/posts/1384812626.html</id>
         <title>Kubenetes部署Rabbitmq集群</title>

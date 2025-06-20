@@ -8,20 +8,20 @@
         <pubDate>Thu, 05 Jun 2025 19:06:21 +0800</pubDate>
         <lastBuildDate>Thu, 05 Jun 2025 19:06:21 +0800</lastBuildDate>
         <category>DevOps</category>
-        <category>ELKStack</category>
         <category>Aliyun</category>
-        <category>Kubernetes</category>
         <category>Docker</category>
+        <category>ELKStack</category>
+        <category>Kubernetes</category>
         <category>Linux</category>
+        <category>Harbor</category>
         <category>rsync</category>
         <category>MySQL</category>
-        <category>Harbor</category>
-        <category>Rabbitmq</category>
-        <category>Redis</category>
-        <category>Prometheus</category>
-        <category>Tomcat</category>
         <category>Openvpn</category>
+        <category>Prometheus</category>
+        <category>Redis</category>
+        <category>Rabbitmq</category>
         <category>Windows</category>
+        <category>Tomcat</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/570469260.html</guid>
             <title>ELK收集Kubernetes组件日志分析与实践</title>
