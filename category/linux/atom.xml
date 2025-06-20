@@ -6,19 +6,19 @@
     <updated>2025-06-20T14:12:07.000Z</updated>
     <category term="DevOps" />
     <category term="Aliyun" />
-    <category term="Docker" />
     <category term="ELKStack" />
+    <category term="Docker" />
+    <category term="Harbor" />
+    <category term="MySQL" />
     <category term="Kubernetes" />
     <category term="Linux" />
-    <category term="Harbor" />
     <category term="rsync" />
-    <category term="MySQL" />
     <category term="Openvpn" />
     <category term="Prometheus" />
-    <category term="Redis" />
     <category term="Rabbitmq" />
-    <category term="Windows" />
+    <category term="Redis" />
     <category term="Tomcat" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/269104229.html</id>
         <title>Samba服务实践</title>
@@ -39,7 +39,7 @@
     </entry>
     <entry>
         <id>http://ixuyong.cn/posts/581151773.html</id>
-        <title>100个运维相关技术官网大汇总</title>
+        <title>100个运维相关技术官网汇总</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/581151773.html"/>
         <content type="html">&lt;h3 id=&#34;100个运维相关技术官网大汇总&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#100个运维相关技术官网大汇总&#34;&gt;#&lt;/a&gt; 100 个运维相关技术官网大汇总&lt;/h3&gt;
 &lt;h4 id=&#34;1-操作系统官网&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-操作系统官网&#34;&gt;#&lt;/a&gt; &lt;strong&gt;1. 操作系统官网&lt;/strong&gt;&lt;/h4&gt;
@@ -552,6 +552,29 @@
 &lt;tr&gt;
 &lt;td style=&#34;text-align:left&#34;&gt;RedisInsight&lt;/td&gt;
 &lt;td style=&#34;text-align:left&#34;&gt;&lt;a href=&#34;https://redis.com/redis-enterprise/redis-insight/&#34;&gt;https://redis.com/redis-enterprise/redis-insight/&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;12-实用工具&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#12-实用工具&#34;&gt;#&lt;/a&gt; 12. 实用工具&lt;/h4&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;工具名称&lt;/th&gt;
+&lt;th&gt;官网链接&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;图床工具&lt;/td&gt;
+&lt;td&gt;&lt;a href=&#34;https://wp-cdn.4ce.cn/&#34;&gt;https://wp-cdn.4ce.cn/&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;科学上网&lt;/td&gt;
+&lt;td&gt;&lt;a href=&#34;https://ikuuu.one/auth/register&#34;&gt;https://ikuuu.one/auth/register&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;截图工具&lt;/td&gt;
+&lt;td&gt;&lt;a href=&#34;https://pixpin.cn/&#34;&gt;https://pixpin.cn/&lt;/a&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
