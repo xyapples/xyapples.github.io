@@ -8,19 +8,19 @@
         <pubDate>Thu, 19 Jun 2025 21:16:37 +0800</pubDate>
         <lastBuildDate>Thu, 19 Jun 2025 21:16:37 +0800</lastBuildDate>
         <category>DevOps</category>
-        <category>Docker</category>
-        <category>Aliyun</category>
         <category>ELKStack</category>
+        <category>Aliyun</category>
         <category>Kubernetes</category>
+        <category>Docker</category>
         <category>Linux</category>
         <category>rsync</category>
-        <category>Harbor</category>
-        <category>Openvpn</category>
-        <category>Prometheus</category>
         <category>MySQL</category>
+        <category>Harbor</category>
         <category>Rabbitmq</category>
         <category>Redis</category>
+        <category>Prometheus</category>
         <category>Tomcat</category>
+        <category>Openvpn</category>
         <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/581151773.html</guid>
