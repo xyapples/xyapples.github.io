@@ -7,22 +7,22 @@
         <language>zh-CN</language>
         <pubDate>Sun, 18 May 2025 21:42:46 +0800</pubDate>
         <lastBuildDate>Sun, 18 May 2025 21:42:46 +0800</lastBuildDate>
-        <category>Docker</category>
-        <category>ELKStack</category>
-        <category>DevOps</category>
-        <category>Harbor</category>
         <category>Aliyun</category>
         <category>Kubernetes</category>
+        <category>Docker</category>
         <category>Linux</category>
+        <category>rsync</category>
+        <category>Harbor</category>
         <category>LVS</category>
         <category>Prometheus</category>
-        <category>rsync</category>
-        <category>Openvpn</category>
-        <category>Redis</category>
-        <category>Tomcat</category>
-        <category>Rabbitmq</category>
-        <category>Windows</category>
         <category>MySQL</category>
+        <category>Redis</category>
+        <category>ELKStack</category>
+        <category>Windows</category>
+        <category>Rabbitmq</category>
+        <category>Tomcat</category>
+        <category>DevOps</category>
+        <category>Openvpn</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/626047790.html</guid>
             <title>消费租赁系统微服务应用交付实践</title>

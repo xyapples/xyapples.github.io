@@ -4,22 +4,22 @@
     <title>LinuxSre云原生 • Posts by &#34;windows&#34; tag</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-04-10T13:32:09.000Z</updated>
-    <category term="Docker" />
-    <category term="ELKStack" />
-    <category term="DevOps" />
-    <category term="Harbor" />
     <category term="Aliyun" />
     <category term="Kubernetes" />
+    <category term="Docker" />
     <category term="Linux" />
+    <category term="rsync" />
+    <category term="Harbor" />
     <category term="LVS" />
     <category term="Prometheus" />
-    <category term="rsync" />
-    <category term="Openvpn" />
-    <category term="Redis" />
-    <category term="Tomcat" />
-    <category term="Rabbitmq" />
-    <category term="Windows" />
     <category term="MySQL" />
+    <category term="Redis" />
+    <category term="ELKStack" />
+    <category term="Windows" />
+    <category term="Rabbitmq" />
+    <category term="Tomcat" />
+    <category term="DevOps" />
+    <category term="Openvpn" />
     <entry>
         <id>http://ixuyong.cn/posts/3071070979.html</id>
         <title>一键永久激活Window、office教程</title>
