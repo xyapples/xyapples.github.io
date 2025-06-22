@@ -6,20 +6,20 @@
     <updated>2025-06-20T14:28:55.000Z</updated>
     <category term="Aliyun" />
     <category term="DevOps" />
-    <category term="ELKStack" />
     <category term="Docker" />
+    <category term="ELKStack" />
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="LVS" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Openvpn" />
-    <category term="Prometheus" />
     <category term="MySQL" />
-    <category term="Rabbitmq" />
+    <category term="Prometheus" />
     <category term="Redis" />
-    <category term="Tomcat" />
+    <category term="Rabbitmq" />
     <category term="Windows" />
+    <category term="Tomcat" />
     <entry>
         <id>http://ixuyong.cn/posts/1598774589.html</id>
         <title>负载均衡LVS入门与实践</title>
