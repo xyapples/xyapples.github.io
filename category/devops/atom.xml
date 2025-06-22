@@ -5,21 +5,21 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-06-19T12:54:54.000Z</updated>
     <category term="Aliyun" />
-    <category term="Kubernetes" />
+    <category term="DevOps" />
+    <category term="ELKStack" />
     <category term="Docker" />
+    <category term="Harbor" />
+    <category term="Kubernetes" />
+    <category term="LVS" />
     <category term="Linux" />
     <category term="rsync" />
-    <category term="Harbor" />
-    <category term="LVS" />
+    <category term="Openvpn" />
     <category term="Prometheus" />
     <category term="MySQL" />
-    <category term="Redis" />
-    <category term="ELKStack" />
-    <category term="Windows" />
     <category term="Rabbitmq" />
+    <category term="Redis" />
     <category term="Tomcat" />
-    <category term="DevOps" />
-    <category term="Openvpn" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/2330853882.html</id>
         <title>K8S基于Jenkins实现微服务应用CICD实践（四）</title>
