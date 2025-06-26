@@ -4,22 +4,24 @@
     <title>LinuxSre云原生 • Posts by &#34;devops&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-19T12:54:54.000Z</updated>
-    <category term="Aliyun" />
-    <category term="ELKStack" />
     <category term="Docker" />
-    <category term="Harbor" />
-    <category term="Kubernetes" />
-    <category term="LVS" />
+    <category term="Aliyun" />
     <category term="DevOps" />
+    <category term="Harbor" />
+    <category term="ELKStack" />
+    <category term="LVS" />
+    <category term="Kubernetes" />
     <category term="Linux" />
     <category term="rsync" />
-    <category term="Openvpn" />
+    <category term="Samba" />
+    <category term="Vsftp" />
     <category term="Prometheus" />
-    <category term="Rabbitmq" />
-    <category term="Redis" />
+    <category term="Openvpn" />
     <category term="MySQL" />
-    <category term="Windows" />
+    <category term="Redis" />
+    <category term="Rabbitmq" />
     <category term="Tomcat" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/2330853882.html</id>
         <title>K8S基于Jenkins实现微服务应用CICD实践（四）</title>
