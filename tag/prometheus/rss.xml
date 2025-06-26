@@ -5,26 +5,50 @@
         <link>http://ixuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Sun, 08 Jun 2025 10:33:49 +0800</pubDate>
-        <lastBuildDate>Sun, 08 Jun 2025 10:33:49 +0800</lastBuildDate>
-        <category>Docker</category>
+        <pubDate>Thu, 26 Jun 2025 10:33:41 +0800</pubDate>
+        <lastBuildDate>Thu, 26 Jun 2025 10:33:41 +0800</lastBuildDate>
         <category>Aliyun</category>
         <category>DevOps</category>
+        <category>Docker</category>
         <category>Harbor</category>
         <category>ELKStack</category>
-        <category>LVS</category>
         <category>Kubernetes</category>
         <category>Linux</category>
         <category>rsync</category>
         <category>Samba</category>
         <category>Vsftp</category>
         <category>Prometheus</category>
-        <category>Openvpn</category>
         <category>MySQL</category>
-        <category>Redis</category>
+        <category>LVS</category>
         <category>Rabbitmq</category>
+        <category>Openvpn</category>
+        <category>Redis</category>
         <category>Tomcat</category>
         <category>Windows</category>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/1595025559.html</guid>
+            <title>Prometheus监控实战</title>
+            <link>http://ixuyong.cn/posts/1595025559.html</link>
+            <category>Prometheus</category>
+            <pubDate>Thu, 26 Jun 2025 10:33:41 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;prometheus监控实战&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#prometheus监控实战&#34;&gt;#&lt;/a&gt; Prometheus 监控实战&lt;/h3&gt;
+&lt;h4 id=&#34;一-prometheus介绍&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-prometheus介绍&#34;&gt;#&lt;/a&gt; 一、Prometheus 介绍&lt;/h4&gt;
+&lt;h5 id=&#34;11-prometheus是什么&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-prometheus是什么&#34;&gt;#&lt;/a&gt; 1.1 Prometheus 是什么&lt;/h5&gt;
+&lt;p&gt;Prometheus 是由 SoundCloud 使⽤ Go 语⾔开发的时序数据库（简称 TSDB）但它的功能并⾮局限于 TSDB，因为它还⽀持对⽬标（如服务器、应⽤程序等）进⾏监控；&lt;/p&gt;
+&lt;p&gt;因此，我们也可以理解 Prometheus 是⼀款开源的 “监控系统”，但仅仅依托 Prometheus 不⾜以⽀撑整个监控系统，它需要结合⽣态内其他的组件来构建⼀个完整的 IT 监控系统。例如： AleartManager、Grafana、PushGateway 等等。&lt;/p&gt;
+&lt;h5 id=&#34;12-什么是时序数据&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#12-什么是时序数据&#34;&gt;#&lt;/a&gt; 1.2 什么是时序数据&lt;/h5&gt;
+&lt;p&gt;所谓时序数据，指的是，按照固定时间周期对 “某个或某些指标” 进⾏ “反复测量” 从⽽得到测量的 “数据集合”。这些数据随着时间的推移，会形成⼀个连续的序列，因此被称为时序数据。如果我们将这些数据绘制在图形上，通常会有⼀个 数据轴（Y 轴） 表示数据值，⼀个 时间轴（X 轴） 表示测量的时间点。&lt;/p&gt;
+&lt;h5 id=&#34;13-prometheus时序数据&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#13-prometheus时序数据&#34;&gt;#&lt;/a&gt; 1.3 Prometheus 时序数据&lt;/h5&gt;
+&lt;p&gt;在 Prometheus 中，时序数据主要包括三个部分：指标名称、标签集、时序数据（时间戳、数据）。&lt;/p&gt;
+&lt;p&gt;1、指标名称&lt;/p&gt;
+&lt;p&gt;例如，监控服务器的 CPU 使⽤率，对应的指标名称可以是 cpu_usage、memory_MemTotal 等指标名称是被监控端提供的。&lt;/p&gt;
+&lt;p&gt;2、标签集&lt;/p&gt;
+&lt;p&gt;标签集⽤于区分不同的数据源或实例。&lt;/p&gt;
+&lt;p&gt;假设我们有两台服务器，⼀台是 Web 服务器，另⼀台是 db 数据库服务器。为了区分这两台服务器的 CPU 使⽤率数据，我们可以为它们添加不同的标签，例如： cpu_usage {type=&amp;quot;web&amp;quot;} 和 cpu_usage {type=&amp;quot;db&amp;quot;} 。&lt;/p&gt;
+&lt;p&gt;3、时序数据&lt;/p&gt;
+&lt;p&gt;指按照按固定时间间隔，采集对应指标名称，从⽽获取到对应指标的数据。例如，每分钟采集⼀次 CPU 使⽤率（ cpu_usage ）。每个数据点包括采集 CPU 使⽤率的时间戳（ 2023.03.30 10:00:01 ），以及该时间点采集到的样本值（ 50% ）。&lt;/p&gt;
+ ]]></description>
+        </item>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2041568856.html</guid>
             <title>Prometheus监控Kubernetes</title>
@@ -32,15 +56,6 @@
             <category>Prometheus</category>
             <pubDate>Sun, 08 Jun 2025 10:33:49 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;prometheus监控kubernetes&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#prometheus监控kubernetes&#34;&gt;#&lt;/a&gt; Prometheus 监控 Kubernetes&lt;/h3&gt;
- ]]></description>
-        </item>
-        <item>
-            <guid isPermalink="true">http://ixuyong.cn/posts/1595025559.html</guid>
-            <title>Prometheus监控实战</title>
-            <link>http://ixuyong.cn/posts/1595025559.html</link>
-            <category>Prometheus</category>
-            <pubDate>Sun, 08 Jun 2025 10:33:41 +0800</pubDate>
-            <description><![CDATA[ &lt;h3 id=&#34;prometheus监控实战&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#prometheus监控实战&#34;&gt;#&lt;/a&gt; Prometheus 监控实战&lt;/h3&gt;
  ]]></description>
         </item>
     </channel>
