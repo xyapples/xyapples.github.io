@@ -10,8 +10,8 @@
         <category>Aliyun</category>
         <category>Docker</category>
         <category>DevOps</category>
-        <category>Harbor</category>
         <category>ELKStack</category>
+        <category>Harbor</category>
         <category>Kubernetes</category>
         <category>LVS</category>
         <category>Linux</category>
@@ -19,10 +19,10 @@
         <category>Samba</category>
         <category>Vsftp</category>
         <category>MySQL</category>
-        <category>Prometheus</category>
         <category>Openvpn</category>
-        <category>Rabbitmq</category>
+        <category>Prometheus</category>
         <category>Redis</category>
+        <category>Rabbitmq</category>
         <category>Tomcat</category>
         <category>Windows</category>
         <item>
