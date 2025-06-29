@@ -4,24 +4,24 @@
     <title>LinuxSre云原生 • Posts by &#34;harbor&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-03-30T08:17:00.000Z</updated>
-    <category term="Aliyun" />
-    <category term="Docker" />
     <category term="DevOps" />
     <category term="ELKStack" />
-    <category term="Harbor" />
+    <category term="Aliyun" />
+    <category term="Docker" />
     <category term="Kubernetes" />
+    <category term="Harbor" />
     <category term="LVS" />
     <category term="Linux" />
+    <category term="MySQL" />
     <category term="rsync" />
     <category term="Samba" />
-    <category term="Vsftp" />
-    <category term="MySQL" />
-    <category term="Openvpn" />
     <category term="Prometheus" />
-    <category term="Redis" />
+    <category term="Vsftp" />
     <category term="Rabbitmq" />
-    <category term="Tomcat" />
+    <category term="Redis" />
+    <category term="Openvpn" />
     <category term="Windows" />
+    <category term="Tomcat" />
     <entry>
         <id>http://ixuyong.cn/posts/3071070978.html</id>
         <title>企业级私有仓库Harbor搭建</title>

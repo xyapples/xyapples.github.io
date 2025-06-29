@@ -7,24 +7,24 @@
         <language>zh-CN</language>
         <pubDate>Thu, 19 Jun 2025 21:16:37 +0800</pubDate>
         <lastBuildDate>Thu, 19 Jun 2025 21:16:37 +0800</lastBuildDate>
-        <category>Aliyun</category>
-        <category>Docker</category>
         <category>DevOps</category>
         <category>ELKStack</category>
-        <category>Harbor</category>
+        <category>Aliyun</category>
+        <category>Docker</category>
         <category>Kubernetes</category>
+        <category>Harbor</category>
         <category>LVS</category>
         <category>Linux</category>
+        <category>MySQL</category>
         <category>rsync</category>
         <category>Samba</category>
-        <category>Vsftp</category>
-        <category>MySQL</category>
-        <category>Openvpn</category>
         <category>Prometheus</category>
-        <category>Redis</category>
+        <category>Vsftp</category>
         <category>Rabbitmq</category>
-        <category>Tomcat</category>
+        <category>Redis</category>
+        <category>Openvpn</category>
         <category>Windows</category>
+        <category>Tomcat</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/581151773.html</guid>
             <title>100个运维相关技术官网汇总</title>
@@ -569,6 +569,14 @@
 &lt;tr&gt;
 &lt;td&gt;FileZilla&lt;/td&gt;
 &lt;td&gt;&lt;a href=&#34;https://www.filezilla.cn/download/client&#34;&gt;https://www.filezilla.cn/download/client&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;在线工具&lt;/td&gt;
+&lt;td&gt;&lt;a href=&#34;https://tool.lu/&#34;&gt;https://tool.lu/&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;LOGO&lt;/td&gt;
+&lt;td&gt;&lt;a href=&#34;https://favicon.io/&#34;&gt;https://favicon.io/&lt;/a&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;

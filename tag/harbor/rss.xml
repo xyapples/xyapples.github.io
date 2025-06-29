@@ -7,24 +7,24 @@
         <language>zh-CN</language>
         <pubDate>Sun, 30 Mar 2025 16:17:00 +0800</pubDate>
         <lastBuildDate>Sun, 30 Mar 2025 16:17:00 +0800</lastBuildDate>
-        <category>Aliyun</category>
-        <category>Docker</category>
         <category>DevOps</category>
         <category>ELKStack</category>
-        <category>Harbor</category>
+        <category>Aliyun</category>
+        <category>Docker</category>
         <category>Kubernetes</category>
+        <category>Harbor</category>
         <category>LVS</category>
         <category>Linux</category>
+        <category>MySQL</category>
         <category>rsync</category>
         <category>Samba</category>
-        <category>Vsftp</category>
-        <category>MySQL</category>
-        <category>Openvpn</category>
         <category>Prometheus</category>
-        <category>Redis</category>
+        <category>Vsftp</category>
         <category>Rabbitmq</category>
-        <category>Tomcat</category>
+        <category>Redis</category>
+        <category>Openvpn</category>
         <category>Windows</category>
+        <category>Tomcat</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/3071070978.html</guid>
             <title>企业级私有仓库Harbor搭建</title>
