@@ -1,4 +1,2385 @@
-<!-- build time:Sun Jun 29 2025 21:51:12 GMT+0800 (中国标准时间) --><!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2"><meta name="theme-color" content="#222"><meta http-equiv="X-UA-COMPATIBLE" content="IE=edge,chrome=1"><meta name="renderer" content="webkit"><link rel="icon" type="image/ico" sizes="32x32" href="/assets/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon.ico"><link rel="alternate" href="/rss.xml" title="LinuxSre云原生" type="application/rss+xml"><link rel="alternate" href="/atom.xml" title="LinuxSre云原生" type="application/atom+xml"><link rel="alternate" type="application/json" title="LinuxSre云原生" href="http://ixuyong.cn/feed.json"><link rel="preconnect" href="https://s4.zstatic.net"><link rel="preconnect" href="https://at.alicdn.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic%7CFredericka%20the%20Great:400,400italic,700,700italic%7CNoto%20Serif%20JP:400,400italic,700,700italic%7CNoto%20Serif%20SC:400,400italic,700,700italic%7CInconsolata:400,400italic,700,700italic&display=swap&subset=latin,latin-ext" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/app.css?v=0.4.17"><link rel="modulepreload" href="/js/chunk-GV364XSK.js"><link rel="modulepreload" href="/js/chunk-NYSE5UKM.js"><link rel="modulepreload" href="/js/chunk-RONCYO2S.js"><link rel="modulepreload" href="/js/chunk-THHXCRSX.js"><link rel="modulepreload" href="/js/chunk-WIQECBEN.js"><link rel="modulepreload" href="/js/comments-DL2IYMPZ.js"><link rel="modulepreload" href="/js/copy-tex-NADCTXPG.js"><link rel="modulepreload" href="/js/post-DA635IH6.js"><link rel="modulepreload" href="/js/quicklink-WEDHL4BA.js"><link rel="modulepreload" href="/js/search-VCZRKTM5.js"><link rel="modulepreload" href="/js/siteInit.js"><link rel="modulepreload" href="/js/waline-NNBYRQEE.js"><link rel="stylesheet" href="/css/comments-F4ZGS7LD.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/siteInit.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/waline-IDNZKML2.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="preload" href="https://s21.ax1x.com/2025/03/29/pEsS0hD.png" as="image" fetchpriority="high"><meta name="keywords" content="Prometheus"><meta name="description" content="专注于 Linux 运维、云计算、云原⽣等技术"><link rel="canonical" href="http://ixuyong.cn/posts/4081185381.html"><title>Prometheus监控实战（三）</title><meta name="generator" content="Hexo 7.3.0"></head><body itemscope itemtype="http://schema.org/WebPage"><div id="loading"><div class="cat"><div class="body"></div><div class="head"><div class="face"></div></div><div class="foot"><div class="tummy-end"></div><div class="bottom"></div><div class="legs left"></div><div class="legs right"></div></div><div class="paw"><div class="hands left"></div><div class="hands right"></div></div></div></div><div id="container"><header id="header" itemscope itemtype="http://schema.org/WPHeader"><div class="inner"><div id="brand"><div class="pjax"><h1 itemprop="name headline">Prometheus监控实战（三）</h1><div class="meta"><span class="item" title="创建时间：2025-06-28 22:17:01"><span class="icon"><i class="ic i-calendar"></i></span><span class="text">发表于</span><time itemprop="dateCreated datePublished" datetime="2025-06-28T22:17:01+08:00">2025-06-28</time></span><span class="item" title="本文字数"><span class="icon"><i class="ic i-pen"></i></span><span class="text">本文字数</span><span>23</span><span class="text">字</span></span><span class="item" title="阅读时长"><span class="icon"><i class="ic i-clock"></i></span><span class="text">阅读时长</span><span>1 分钟</span></span></div></div></div><nav id="nav"><div class="inner"><div class="toggle"><div class="lines" aria-label="切换导航栏"><span class="line"></span><span class="line"></span><span class="line"></span></div></div><ul class="menu"><li class="item title"><a href="/" rel="start">LinuxSre云原生</a></li></ul><ul class="right" id="rightNav"><li class="item theme"><i class="ic i-sun"></i></li><li class="item search"><i class="ic i-search"></i></li></ul></div></nav></div><div class="pjax" id="imgs"><img src="https://s21.ax1x.com/2025/03/29/pEsS0hD.png" loading="eager" decoding="async" fetchpriority="high" alt="LinuxSre云原生"></div></header><div id="waves"><svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path></defs><g class="parallax"><use xlink:href="#gentle-wave" x="48" y="0"></use><use xlink:href="#gentle-wave" x="48" y="3"></use><use xlink:href="#gentle-wave" x="48" y="5"></use><use xlink:href="#gentle-wave" x="48" y="7"></use></g></svg></div><main><div class="inner"><div class="pjax" id="main"><div class="article wrap"><div class="breadcrumb" itemlistelement itemscope itemtype="https://schema.org/BreadcrumbList"><i class="ic i-home"></i><span><a href="/">首页</a></span><i class="ic i-angle-right"></i><span class="current" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a href="/categories/Prometheus/" itemprop="item" rel="index" title="分类于Prometheus"><span itemprop="name">Prometheus<meta itemprop="position" content="0"></span></a></span></div><article class="post block" itemscope itemtype="http://schema.org/Article" lang="zh-CN"><link itemprop="mainEntityOfPage" href="http://ixuyong.cn/posts/4081185381.html"><span hidden itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="image" content="/assets/avatar.png"><meta itemprop="name" content="Xu Yong"><meta itemprop="description" content="致力于技术布道、普及前沿技术、打造云原生系列标杆博客, 专注于 Linux 运维、云计算、云原⽣等技术"></span><span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="LinuxSre云原生"></span><div class="body md" itemprop="articleBody"><h3 id="prometheus监控实战三"><a class="anchor" href="#prometheus监控实战三">#</a> Prometheus 监控实战（三）</h3><div class="tags"><a href="/tags/Prometheus/" rel="tag"><i class="ic i-tag"></i>Prometheus</a></div></div><footer><div class="meta"><span class="icon"><i class="ic i-eye"></i></span><span>此文章已被阅读次数:</span><span class="waline-pageview-count" id="twikoo_visitors" data-path="/posts/4081185381.html">正在加载...</span><span class="item"><span class="icon"><i class="ic i-calendar-check"></i></span><span class="text">更新于</span><time title="修改时间：2025-06-28 22:20:11" itemprop="dateModified" datetime="2025-06-28T22:20:11+08:00">2025-06-28</time></span></div><div class="reward"><button><i class="ic i-heartbeat"></i>赞赏</button><p>请我喝[茶]~(￣▽￣)~*</p><div id="qr"><div><img loading="lazy" data-src="/assets/wechatpay.png" alt="Xu Yong 微信支付"><p>微信支付</p></div><div><img loading="lazy" data-src="/assets/alipay.png" alt="Xu Yong 支付宝"><p>支付宝</p></div></div></div><div id="copyright"><ul><li class="author"><strong>本文作者：</strong>Xu Yong<i class="ic i-at"><em>@</em></i>LinuxSre云原生</li><li class="link"><strong>本文链接：</strong><a href="http://ixuyong.cn/posts/4081185381.html" title="Prometheus监控实战（三）">http://ixuyong.cn/posts/4081185381.html</a></li><li class="license"><strong>版权声明：</strong>本站所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh"><i class="ic i-creative-commons"><em>(CC)</em></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li></ul></div></footer></article></div><div class="post-nav"><div class="item left"><a href="/posts/3386060324.html" rel="prev" itemprop="url" data-background-image="https:&#x2F;&#x2F;wp-cdn.4ce.cn&#x2F;v2&#x2F;oApfFnU.jpeg" title="PromQL快速入门（二）"><span class="type">上一篇</span><span class="category"><i class="ic i-flag"></i>Prometheus</span><h3>PromQL快速入门（二）</h3></a></div><div class="item right"><a href="/posts/2041568856.html" rel="next" itemprop="url" data-background-image="https:&#x2F;&#x2F;wp-cdn.4ce.cn&#x2F;v2&#x2F;el5JHV9.jpeg" title="Prometheus监控Kubernetes"><span class="type">下一篇</span><span class="category"><i class="ic i-flag"></i>Prometheus</span><h3>Prometheus监控Kubernetes</h3></a></div></div><div class="wrap" id="comments"></div></div><div id="sidebar"><div class="inner"><div class="panels"><div class="inner"><div class="contents panel pjax" data-title="文章目录"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#prometheus%E7%9B%91%E6%8E%A7%E5%AE%9E%E6%88%98%E4%B8%89"><span class="toc-number">1.</span> <span class="toc-text">Prometheus 监控实战（三）</span></a></li></ol></div><div class="related panel pjax" data-title="系列文章"><ul><li><a href="/posts/1595025559.html" rel="bookmark" title="Prometheus监控实战（一）">Prometheus监控实战（一）</a></li><li><a href="/posts/3386060324.html" rel="bookmark" title="PromQL快速入门（二）">PromQL快速入门（二）</a></li><li class="active"><a href="/posts/4081185381.html" rel="bookmark" title="Prometheus监控实战（三）">Prometheus监控实战（三）</a></li><li><a href="/posts/2041568856.html" rel="bookmark" title="Prometheus监控Kubernetes">Prometheus监控Kubernetes</a></li></ul></div><div class="overview panel" data-title="站点概览"><div class="author" itemprop="author" itemscope itemtype="http://schema.org/Person"><img class="image" loading="lazy" decoding="async" itemprop="image" alt="Xu Yong" src="/assets/avatar.png"><p class="name" itemprop="name">Xu Yong</p><div class="description" itemprop="description">专注于 Linux 运维、云计算、云原⽣等技术</div></div><nav class="state"><div class="item posts"><a href="/archives/"><span class="count">47</span><span class="name">文章</span></a></div><div class="item categories"><a href="/categories/"><span class="count">15</span><span class="name">分类</span></a></div><div class="item tags"><a href="/tags/"><span class="count">18</span><span class="name">标签</span></a></div></nav><div class="social"><a target="_blank" rel="noopener" href="https://github.com/xyapples" class="item github" title="https:&#x2F;&#x2F;github.com&#x2F;xyapples"><i class="ic i-github"></i></a><a target="_blank" rel="noopener" href="https://gitee.com/chinagei" class="item gitee" title="https:&#x2F;&#x2F;gitee.com&#x2F;chinagei"><i class="ic i-gitee"></i></a><a href="mailto:373370405@qq.com" class="item email" title="mailto:373370405@qq.com"><i class="ic i-envelope"></i></a></div><div class="menu"><li class="item"><a href="/" rel="section"><i class="ic i-home"></i>首页</a></li><li class="item"><a href="/categories/" rel="section"><i class="ic i-th"></i>分类</a></li><li class="item"><a href="/archives/" rel="section"><i class="ic i-list-alt"></i>归档</a></li><li class="item"><a href="/tags/" rel="section"><i class="ic i-tags"></i>标签</a></li><li class="item"><a href="/about/" rel="section"><i class="ic i-about"></i>关于</a></li><li class="item"><a href="/friends/" rel="section"><i class="ic i-heart"></i>友链</a></li></div></div></div></div><ul id="quick"><li class="prev pjax"><a href="/posts/2041568856.html" rel="prev" title="上一篇"><i class="ic i-chevron-left"></i></a></li><li class="up"><i class="ic i-arrow-up"></i></li><li class="down"><i class="ic i-arrow-down"></i></li><li class="next pjax"><a href="/posts/3386060324.html" rel="next" title="下一篇"><i class="ic i-chevron-right"></i></a></li><li class="percent"></li></ul></div></div><div class="dimmer"></div></div></main><footer id="footer"><div class="inner"><div class="widgets"><div class="rpost pjax"><h2>随机文章</h2><ul><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/3254599477.html">K8s容忍和污点</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/985149017.html">二进制高可用安装K8S集群</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Linux/" title="分类于Linux">Linux</a></div><span><a href="/posts/581151773.html">100个运维相关技术官网汇总</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Prometheus/" title="分类于Prometheus">Prometheus</a></div><span><a href="/posts/2041568856.html">Prometheus监控Kubernetes</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/2771271649.html">云原生K8s安全专家CKS认证考题详解</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/ELKStack/" title="分类于ELKStack">ELKStack</a></div><span><a href="/posts/570469260.html">ELK收集Kubernetes组件日志分析与实践</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Tomcat/" title="分类于Tomcat">Tomcat</a></div><span><a href="/posts/754945111.html">Tomcat JVM调优实践</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Linux/" title="分类于Linux">Linux</a></div><span><a href="/posts/269104229.html">Samba服务实践</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Linux/" title="分类于Linux">Linux</a></div><span><a href="/posts/2889248111.html">Vsftp服务实践</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/108692210.html">K8s资源调度deployment、statefulset、daemonset</a></span></li></ul></div><div class="rpost pjax"><h2>最新评论</h2><ul class="leancloud-recent-comment" id="new-comment"></ul></div></div><div class="status"><div class="copyright">&copy; 2022 -<span itemprop="copyrightYear">2025</span><span class="with-love"><i class="ic i-sakura rotate"></i></span><span class="author" itemprop="copyrightHolder">Xu Yong @ LinuxSre云原生</span></div><div class="count"><span class="post-meta-item-icon"><i class="ic i-chart-area"></i></span><span title="站点总字数">1.1m 字</span><span class="post-meta-divider"> | </span><span class="post-meta-item-icon"><i class="ic i-coffee"></i></span><span title="站点阅读时长">16:20</span></div><div class="powered-by">基于 <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & Theme.<a target="_blank" rel="noopener" href="https://github.com/theme-shoka-x/hexo-theme-shokaX/">ShokaX</a></div></div></div></footer></div><script data-config type="text/javascript">var LOCAL = {
+<!-- build time:Sun Jun 29 2025 21:57:37 GMT+0800 (中国标准时间) --><!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2"><meta name="theme-color" content="#222"><meta http-equiv="X-UA-COMPATIBLE" content="IE=edge,chrome=1"><meta name="renderer" content="webkit"><link rel="icon" type="image/ico" sizes="32x32" href="/assets/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon.ico"><link rel="alternate" href="/rss.xml" title="LinuxSre云原生" type="application/rss+xml"><link rel="alternate" href="/atom.xml" title="LinuxSre云原生" type="application/atom+xml"><link rel="alternate" type="application/json" title="LinuxSre云原生" href="http://ixuyong.cn/feed.json"><link rel="preconnect" href="https://s4.zstatic.net"><link rel="preconnect" href="https://at.alicdn.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic%7CFredericka%20the%20Great:400,400italic,700,700italic%7CNoto%20Serif%20JP:400,400italic,700,700italic%7CNoto%20Serif%20SC:400,400italic,700,700italic%7CInconsolata:400,400italic,700,700italic&display=swap&subset=latin,latin-ext" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/app.css?v=0.4.17"><link rel="modulepreload" href="/js/chunk-GV364XSK.js"><link rel="modulepreload" href="/js/chunk-NYSE5UKM.js"><link rel="modulepreload" href="/js/chunk-RONCYO2S.js"><link rel="modulepreload" href="/js/chunk-THHXCRSX.js"><link rel="modulepreload" href="/js/chunk-WIQECBEN.js"><link rel="modulepreload" href="/js/comments-DL2IYMPZ.js"><link rel="modulepreload" href="/js/copy-tex-NADCTXPG.js"><link rel="modulepreload" href="/js/post-DA635IH6.js"><link rel="modulepreload" href="/js/quicklink-WEDHL4BA.js"><link rel="modulepreload" href="/js/search-VCZRKTM5.js"><link rel="modulepreload" href="/js/siteInit.js"><link rel="modulepreload" href="/js/waline-NNBYRQEE.js"><link rel="stylesheet" href="/css/comments-F4ZGS7LD.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/siteInit.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="stylesheet" href="/css/waline-IDNZKML2.css" media="none" onload="this.media&#x3D;&#39;all&#39;"><link rel="preload" href="https://s21.ax1x.com/2025/03/29/pEsS0hD.png" as="image" fetchpriority="high"><meta name="keywords" content="Prometheus"><meta name="description" content="专注于 Linux 运维、云计算、云原⽣等技术"><link rel="canonical" href="http://ixuyong.cn/posts/4081185381.html"><title>Prometheus监控实战（三）</title><meta name="generator" content="Hexo 7.3.0"></head><body itemscope itemtype="http://schema.org/WebPage"><div id="loading"><div class="cat"><div class="body"></div><div class="head"><div class="face"></div></div><div class="foot"><div class="tummy-end"></div><div class="bottom"></div><div class="legs left"></div><div class="legs right"></div></div><div class="paw"><div class="hands left"></div><div class="hands right"></div></div></div></div><div id="container"><header id="header" itemscope itemtype="http://schema.org/WPHeader"><div class="inner"><div id="brand"><div class="pjax"><h1 itemprop="name headline">Prometheus监控实战（三）</h1><div class="meta"><span class="item" title="创建时间：2025-06-28 22:17:01"><span class="icon"><i class="ic i-calendar"></i></span><span class="text">发表于</span><time itemprop="dateCreated datePublished" datetime="2025-06-28T22:17:01+08:00">2025-06-28</time></span><span class="item" title="本文字数"><span class="icon"><i class="ic i-pen"></i></span><span class="text">本文字数</span><span>89k</span><span class="text">字</span></span><span class="item" title="阅读时长"><span class="icon"><i class="ic i-clock"></i></span><span class="text">阅读时长</span><span>1:21</span></span></div></div></div><nav id="nav"><div class="inner"><div class="toggle"><div class="lines" aria-label="切换导航栏"><span class="line"></span><span class="line"></span><span class="line"></span></div></div><ul class="menu"><li class="item title"><a href="/" rel="start">LinuxSre云原生</a></li></ul><ul class="right" id="rightNav"><li class="item theme"><i class="ic i-sun"></i></li><li class="item search"><i class="ic i-search"></i></li></ul></div></nav></div><div class="pjax" id="imgs"><img src="https://s21.ax1x.com/2025/03/29/pEsS0hD.png" loading="eager" decoding="async" fetchpriority="high" alt="LinuxSre云原生"></div></header><div id="waves"><svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path></defs><g class="parallax"><use xlink:href="#gentle-wave" x="48" y="0"></use><use xlink:href="#gentle-wave" x="48" y="3"></use><use xlink:href="#gentle-wave" x="48" y="5"></use><use xlink:href="#gentle-wave" x="48" y="7"></use></g></svg></div><main><div class="inner"><div class="pjax" id="main"><div class="article wrap"><div class="breadcrumb" itemlistelement itemscope itemtype="https://schema.org/BreadcrumbList"><i class="ic i-home"></i><span><a href="/">首页</a></span><i class="ic i-angle-right"></i><span class="current" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a href="/categories/Prometheus/" itemprop="item" rel="index" title="分类于Prometheus"><span itemprop="name">Prometheus<meta itemprop="position" content="0"></span></a></span></div><article class="post block" itemscope itemtype="http://schema.org/Article" lang="zh-CN"><link itemprop="mainEntityOfPage" href="http://ixuyong.cn/posts/4081185381.html"><span hidden itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="image" content="/assets/avatar.png"><meta itemprop="name" content="Xu Yong"><meta itemprop="description" content="致力于技术布道、普及前沿技术、打造云原生系列标杆博客, 专注于 Linux 运维、云计算、云原⽣等技术"></span><span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="LinuxSre云原生"></span><div class="body md" itemprop="articleBody"><h3 id="prometheus监控实战三"><a class="anchor" href="#prometheus监控实战三">#</a> Prometheus 监控实战（三）</h3><h4 id="一-promtheus节点监控"><a class="anchor" href="#一-promtheus节点监控">#</a> 一. Promtheus 节点监控</h4><h5 id="11-配置prometheus"><a class="anchor" href="#11-配置prometheus">#</a> 1.1 配置 Prometheus</h5><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+# rules配置文件路径
+rule_files:
+  - &quot;/etc/prometheus/rules/*.yml&quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &quot;prometheus&quot; # 定义一个抓取任务，名为 'prometheus'。
+    metrics_path: &quot;/metrics&quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 '/metrics'。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&quot;prom-node01.oldxu.net:9090&quot;]
+
+  - job_name: &quot;grafana&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:3000&quot;]
+
+  - job_name: &quot;node_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:9100&quot;,&quot;prom-node02.oldxu.net:9100&quot;,&quot;prom-node03.oldxu.net:9100&quot;]
+</code></pre><h5 id="12-创建rules目录并重载prometheus"><a class="anchor" href="#12-创建rules目录并重载prometheus">#</a> 1.2 创建 rules 目录并重载 Prometheus</h5><pre><code>[root@prom-node01 ~]# mkdir /etc/prometheus/rules
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h5 id="13-promtheus配置告警规则"><a class="anchor" href="#13-promtheus配置告警规则">#</a> 1.3 Promtheus 配置告警规则</h5><h6 id="131-cpu监控案例实践"><a class="anchor" href="#131-cpu监控案例实践">#</a> 1.3.1 CPU 监控案例实践</h6><pre><code>#1.配置CPU告警规则
+[root@prom-node01 ~]# cat /etc/prometheus/rules/node_rules.yml 
+groups:
+- name: CPU告警规则
+  rules:
+  - alert: 节点CPU使率超过80%
+    expr: ( 1 - avg(irate(node_cpu_seconds_total&#123;mode=&quot;idle&quot;&#125;[1m])) by (instance,job) ) * 100 &gt; 80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;主机CPU利率过高，实例：&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的CPU利用率低于20%，当前利用率：&#123;&#123; $value &#125;&#125;%。可能存在CPU资源浪费情况。&quot;
+      
+  - alert: CPU饱和度过⾼
+    expr: sum(node_load1) by (instance,job) / (count(node_cpu_seconds_total&#123;mode=&quot;idle&quot;&#125;) by (instance,job) * 2) * 100 &gt; 80
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;CPU饱和度过高，实例：&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的1分钟平均CPU负载超过了核心数的两倍，已经持续2分钟，当前CPU饱和度：&#123;&#123; $value &#125;&#125;%。需要立即检查系统负载情况。&quot;
+      
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/node_rules.yml
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h6 id="132-内存监控案例实践"><a class="anchor" href="#132-内存监控案例实践">#</a> 1.3.2 内存监控案例实践</h6><pre><code>#1.配置内存告警规则
+[root@prom-node01 ~]# cat /etc/prometheus/rules/node_rules.yml 
+groups:
+- name: CPU告警规则
+  rules:
+  - alert: 节点CPU使率超过80%
+    expr: ( 1 - avg(irate(node_cpu_seconds_total&#123;mode=&quot;idle&quot;&#125;[1m])) by (instance,job) ) * 100 &gt; 80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;主机CPU利率过高，实例：&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的CPU利用率低于20%，当前利用率：&#123;&#123; $value &#125;&#125;%。可能存在CPU资源浪费情况。&quot;
+
+  - alert: CPU饱和度过⾼
+    expr: sum(node_load1) by (instance,job) / (count(node_cpu_seconds_total&#123;mode=&quot;idle&quot;&#125;) by (instance,job) * 2) * 100 &gt; 80
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;CPU饱和度过高，实例：&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的1分钟平均CPU负载超过了核心数的两倍，已经持续2分钟，当前CPU饱和度：&#123;&#123; $value &#125;&#125;%。需要立即检查系统负载情况。&quot;
+
+- name: 内存告警规则
+  rules:
+  - alert: 主机内存不⾜
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 &gt; 80
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;主机内存使用率较高, 实例:&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的内存使用率持续2分钟高于80%，当前利用率：&#123;&#123; $value&#125;&#125;%&quot;
+  - alert: 内存饱和度⾼
+    expr: ( 1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes) * 100 &gt; 10
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;主机内存内存饱和度高, 实例:&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;SWAP内存使用率已连续2分钟超过10%，表明内存饱和度过⾼，当前SWAP使用率为：&#123;&#123; $value &#125;&#125;%。&quot;
+      
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/node_rules.yml
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h6 id="133-磁盘监控案例实践"><a class="anchor" href="#133-磁盘监控案例实践">#</a> 1.3.3 磁盘监控案例实践</h6><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/rules/node_rules.yml 
+groups:
+- name: CPU告警规则
+  rules:
+  - alert: 节点CPU使率超过80%
+    expr: ( 1 - avg(irate(node_cpu_seconds_total&#123;mode=&quot;idle&quot;&#125;[1m])) by (instance,job) ) * 100 &gt; 80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;主机CPU利率过高，实例：&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的CPU利用率低于20%，当前利用率：&#123;&#123; $value &#125;&#125;%。可能存在CPU资源浪费情况。&quot;
+
+  - alert: CPU饱和度过⾼
+    expr: sum(node_load1) by (instance,job) / (count(node_cpu_seconds_total&#123;mode=&quot;idle&quot;&#125;) by (instance,job) * 2) * 100 &gt; 80
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;CPU饱和度过高，实例：&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的1分钟平均CPU负载超过了核心数的两倍，已经持续2分钟，当前CPU饱和度：&#123;&#123; $value &#125;&#125;%。需要立即检查系统负载情况。&quot;
+
+  - alert: 主机内存不⾜
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 &gt; 80
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;主机内存使用率较高, 实例:&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的内存使用率持续2分钟高于80%，当前利用率：&#123;&#123; $value&#125;&#125;%&quot;
+
+  - alert: 内存饱和度⾼
+    expr: ( 1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes) * 100 &gt; 10
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;主机内存内存饱和度高, 实例:&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;SWAP内存使用率已连续2分钟超过10%，表明内存饱和度过⾼，当前SWAP使用率为：&#123;&#123; $value &#125;&#125;%。&quot;
+
+- name: 磁盘告警规则
+  rules:
+  - alert: 磁盘空间告急
+    expr: ( node_filesystem_size_bytes&#123;device!=&quot;tmpfs&quot;&#125; - node_filesystem_avail_bytes&#123;device!=&quot;tmpfs&quot;&#125; ) / node_filesystem_size_bytes&#123;device!=&quot;tmpfs&quot;&#125; * 100 &gt; 70
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘 &#123;&#123; $labels.mountpoint &#125;&#125;分区空间不足&quot;
+      description: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘 &#123;&#123; $labels.mountpoint&#125;&#125; 分区空间使用率已超过 70%，当前使用率为 &#123;&#123; $value &#125;&#125;%，请及时处理。&quot;
+          
+  - alert: 磁盘Inode空间告急
+    expr: (node_filesystem_files&#123;device!=&quot;tmpfs&quot;&#125; - node_filesystem_files_free&#123;device!=&quot;tmpfs&quot;&#125; ) / node_filesystem_files&#123;device!=&quot;tmpfs&quot;&#125; * 100 &gt; 70
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘 &#123;&#123; $labels.mountpoint &#125;&#125;分区Inode空间不足&quot;
+      description: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘 &#123;&#123; $labels.mountpoint&#125;&#125; 分区的Inode空间使用率已超过 70%，，当前使用率为 &#123;&#123; $value &#125;&#125;%，请及时处理。&quot;
+          
+  - alert: 磁盘IOPS写入较高
+    #expr: sum(rate(node_disk_writes_completed_total[1m])) by (instance,job) / 120 * 100 &gt;60
+    #round函数可以对值进行四舍五入，磁盘最大IOPS为120次/s
+    expr: round(max(irate(node_disk_writes_completed_total[1m])) by (instance,job) / 120 * 100) &gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; IOPS每秒写入次数超过120次/s&quot;
+      description: 
+        当前磁盘IOPS写入饱和度是 &#123;&#123; $value &#125;&#125;%
+        当前磁盘IOPS每秒写入最大 &#123;&#123; printf `max(rate(node_disk_writes_completed_total&#123;instance="%s",job="%s"&#125;[1m]))` $labels.instance $labels.job | query | first | value | printf "%.2f" &#125;&#125; 次/s
+                
+  - alert: 磁盘IOPS读取较高
+    expr: round(max(irate(node_disk_reads_completed_total[1m])) by (instance,job) / 120 * 100) &gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; IOPS每秒读取次数超过120次/s&quot;
+      description:
+        当前磁盘IOPS读取饱和度是 &#123;&#123; $value &#125;&#125;%
+        当前磁盘IOPS每秒读取最⼤ &#123;&#123; printf `max(rate(node_disk_reads_completed_total&#123;instance="%s",job="%s"&#125;[1m]))` $labels.instance $labels.job | query | first | value | printf "%.2f" &#125;&#125; 次/s
+  
+  - alert: 磁盘IO写入吞吐较高
+    expr: round(max(rate(node_disk_written_bytes_total[1m])) by (instance,job) / 1024 /1024 / 30 * 100) &gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘IO写入每秒超过最高30MB/s&quot;
+      description:
+        当前磁盘IO写入吞吐量的饱和度是 &#123;&#123; $value &#125;&#125;%。
+        当前磁盘IO写入吞吐量每秒最大是 &#123;&#123; printf `max(rate(node_disk_written_bytes_total&#123;instance="%s",job="%s"&#125;[1m])) /1024/1024` $labels.instance $labels.job | query | first | value | printf "%.2f" &#125;&#125;MB/s
+
+  - alert: 磁盘IO读取吞吐较高
+    expr: round(max(rate(node_disk_read_bytes_total[1m])) by (instance,job) / 1024 /1024 /30 * 100 ) &gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘IO读取每秒超过最大30MB/s&quot;
+      description:
+        当前磁盘IO读取吞吐量的饱和度是 &#123;&#123; $value &#125;&#125;%。
+        当前磁盘IO读取吞吐量每秒最大是 &#123;&#123; printf `max(rate(node_disk_read_bytes_total&#123;instance="%s",job="%s"&#125;[1m])) /1024/1024` $labels.instance $labels.job | query | first | value | printf "%.2f" &#125;&#125;MB/s
+[root@prom-node01 ~]# vim /etc/prometheus/rules/node_rules.yml 
+[root@prom-node01 ~]# cat /etc/prometheus/rules/node_rules.yml 
+groups:
+- name: CPU告警规则
+  rules:
+  - alert: 节点CPU使率超过80%
+    expr: ( 1 - avg(irate(node_cpu_seconds_total&#123;mode=&quot;idle&quot;&#125;[1m])) by (instance,job) ) * 100 &gt; 80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;主机CPU利率过高，实例：&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的CPU利用率低于20%，当前利用率：&#123;&#123; $value &#125;&#125;%。可能存在CPU资源浪费情况。&quot;
+
+  - alert: CPU饱和度过高
+    expr: sum(node_load1) by (instance,job) / (count(node_cpu_seconds_total&#123;mode=&quot;idle&quot;&#125;) by (instance,job) * 2) * 100 &gt; 80
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;CPU饱和度过高，实例：&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的1分钟平均CPU负载超过了核心数的两倍，已经持续2分钟，当前CPU饱和度：&#123;&#123; $value &#125;&#125;%。需要立即检查系统负载情况。&quot;
+
+  - alert: 主机内存不足
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 &gt; 80
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;主机内存使用率较高, 实例:&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的内存使用率持续2分钟高于80%，当前利用率：&#123;&#123; $value&#125;&#125;%&quot;
+
+  - alert: 内存饱和度高
+    expr: ( 1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes) * 100 &gt; 10
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;主机内存内存饱和度高, 实例:&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;SWAP内存使用率已连续2分钟超过10%，表明内存饱和度过高，当前SWAP使用率为：&#123;&#123; $value &#125;&#125;%。&quot;
+
+- name: 磁盘告警规则
+  rules:
+  - alert: 磁盘空间告急
+    expr: ( node_filesystem_size_bytes&#123;device!=&quot;tmpfs&quot;&#125; - node_filesystem_avail_bytes&#123;device!=&quot;tmpfs&quot;&#125; ) / node_filesystem_size_bytes&#123;device!=&quot;tmpfs&quot;&#125; * 100 &gt; 70
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘 &#123;&#123; $labels.mountpoint &#125;&#125;分区空间不足&quot;
+      description: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘 &#123;&#123; $labels.mountpoint&#125;&#125; 分区空间使用率已超过 70%，当前使用率为 &#123;&#123; $value &#125;&#125;%，请及时处理。&quot;
+          
+  - alert: 磁盘Inode空间告急
+    expr: (node_filesystem_files&#123;device!=&quot;tmpfs&quot;&#125; - node_filesystem_files_free&#123;device!=&quot;tmpfs&quot;&#125; ) / node_filesystem_files&#123;device!=&quot;tmpfs&quot;&#125; * 100 &gt; 70
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘 &#123;&#123; $labels.mountpoint &#125;&#125;分区Inode空间不足&quot;
+      description: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘 &#123;&#123; $labels.mountpoint&#125;&#125; 分区的Inode空间使用率已超过 70%，，当前使用率为 &#123;&#123; $value &#125;&#125;%，请及时处理。&quot;
+          
+  - alert: 磁盘IOPS写入较高
+    #expr: sum(rate(node_disk_writes_completed_total[1m])) by (instance,job) / 120 * 100 &gt;60
+    #round函数可以对值进行四舍五入，磁盘最大IOPS为120次/s
+    expr: round(max(irate(node_disk_writes_completed_total[1m])) by (instance,job) / 120 * 100) &gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; IOPS每秒写入次数超过120次/s&quot;
+      description: 
+        当前磁盘IOPS写入饱和度是 &#123;&#123; $value &#125;&#125;%
+        当前磁盘IOPS每秒写入最大 &#123;&#123; printf `max(rate(node_disk_writes_completed_total&#123;instance="%s",job="%s"&#125;[1m]))` $labels.instance $labels.job | query | first | value | printf "%.2f" &#125;&#125; 次/s
+                
+  - alert: 磁盘IOPS读取较高
+    expr: round(max(irate(node_disk_reads_completed_total[1m])) by (instance,job) / 120 * 100) &gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; IOPS每秒读取次数超过120次/s&quot;
+      description:
+        当前磁盘IOPS读取饱和度是 &#123;&#123; $value &#125;&#125;%
+        当前磁盘IOPS每秒读取最⼤ &#123;&#123; printf `max(rate(node_disk_reads_completed_total&#123;instance="%s",job="%s"&#125;[1m]))` $labels.instance $labels.job | query | first | value | printf "%.2f" &#125;&#125; 次/s
+  
+  - alert: 磁盘IO写入吞吐较高
+    expr: round(max(rate(node_disk_written_bytes_total[1m])) by (instance,job) / 1024 /1024 / 30 * 100) &gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘IO写入每秒超过最高30MB/s&quot;
+      description:
+        当前磁盘IO写入吞吐量的饱和度是 &#123;&#123; $value &#125;&#125;%。
+        当前磁盘IO写入吞吐量每秒最大是 &#123;&#123; printf `max(rate(node_disk_written_bytes_total&#123;instance="%s",job="%s"&#125;[1m])) /1024/1024` $labels.instance $labels.job | query | first | value | printf "%.2f" &#125;&#125;MB/s
+
+  - alert: 磁盘IO读取吞吐较高
+    expr: round(max(rate(node_disk_read_bytes_total[1m])) by (instance,job) / 1024 /1024 /30 * 100 ) &gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘IO读取每秒超过最大30MB/s&quot;
+      description:
+        当前磁盘IO读取吞吐量的饱和度是 &#123;&#123; $value &#125;&#125;%。
+        当前磁盘IO读取吞吐量每秒最大是 &#123;&#123; printf `max(rate(node_disk_read_bytes_total&#123;instance="%s",job="%s"&#125;[1m])) /1024/1024` $labels.instance $labels.job | query | first | value | printf "%.2f" &#125;&#125;MB/s
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/node_rules.yml
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+
+#根据过去24小时磁盘使用情况，计算未来30天磁盘使用空间
+predict_linear(node_filesystem_avail_bytes&#123;device!~&quot;tmpfs|rootfs&quot;&#125;[24h],60*60*24*30) /1024/1024/1024
+</code></pre><h6 id="134-网络监控案例实践"><a class="anchor" href="#134-网络监控案例实践">#</a> 1.3.4 ⽹络监控案例实践</h6><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/rules/node_rules.yml 
+groups:
+- name: 节点告警规则
+  rules:
+  - alert: 节点CPU使率超过80%
+    expr: ( 1 - avg(irate(node_cpu_seconds_total&#123;mode=&quot;idle&quot;&#125;[1m])) by (instance,job) ) * 100 &gt; 80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;主机CPU利率过高，实例：&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的CPU利用率低于20%，当前利用率：&#123;&#123; $value &#125;&#125;%。可能存在CPU资源浪费情况。&quot;
+
+  - alert: CPU饱和度过高
+    expr: sum(node_load1) by (instance,job) / (count(node_cpu_seconds_total&#123;mode=&quot;idle&quot;&#125;) by (instance,job) * 2) * 100 &gt; 80
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;CPU饱和度过高，实例：&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的1分钟平均CPU负载超过了核心数的两倍，已经持续2分钟，当前CPU饱和度：&#123;&#123; $value &#125;&#125;%。需要立即检查系统负载情况。&quot;
+
+  - alert: 主机内存不足
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 &gt; 80
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;主机内存使用率较高, 实例:&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;该实例的内存使用率持续2分钟高于80%，当前利用率：&#123;&#123; $value&#125;&#125;%&quot;
+
+  - alert: 内存饱和度高
+    expr: ( 1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes) * 100 &gt; 10
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;主机内存内存饱和度高, 实例:&#123;&#123; $labels.instance &#125;&#125;, 任务:&#123;&#123; $labels.job &#125;&#125;&quot;
+      description: &quot;SWAP内存使用率已连续2分钟超过10%，表明内存饱和度过高，当前SWAP使用率为：&#123;&#123; $value &#125;&#125;%。&quot;
+
+  - alert: 磁盘空间告急
+    expr: ( node_filesystem_size_bytes&#123;device!=&quot;tmpfs&quot;&#125; - node_filesystem_avail_bytes&#123;device!=&quot;tmpfs&quot;&#125; ) / node_filesystem_size_bytes&#123;device!=&quot;tmpfs&quot;&#125; * 100 &gt; 70
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘 &#123;&#123; $labels.mountpoint &#125;&#125;分区空间不足&quot;
+      description: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘 &#123;&#123; $labels.mountpoint&#125;&#125; 分区空间使用率已超过 70%，当前使用率为 &#123;&#123; $value &#125;&#125;%，请及时处理。&quot;
+          
+  - alert: 磁盘Inode空间告急
+    expr: (node_filesystem_files&#123;device!=&quot;tmpfs&quot;&#125; - node_filesystem_files_free&#123;device!=&quot;tmpfs&quot;&#125; ) / node_filesystem_files&#123;device!=&quot;tmpfs&quot;&#125; * 100 &gt; 70
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘 &#123;&#123; $labels.mountpoint &#125;&#125;分区Inode空间不足&quot;
+      description: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘 &#123;&#123; $labels.mountpoint&#125;&#125; 分区的Inode空间使用率已超过 70%，，当前使用率为 &#123;&#123; $value &#125;&#125;%，请及时处理。&quot;
+          
+  - alert: 磁盘IOPS写入较高
+    #expr: sum(rate(node_disk_writes_completed_total[1m])) by (instance,job) / 120 * 100 &gt;60
+    #round函数可以对值进行四舍五入，磁盘最大IOPS为120次/s
+    expr: round(max(irate(node_disk_writes_completed_total[1m])) by (instance,job) / 120 * 100) &gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; IOPS每秒写入次数超过120次/s&quot;
+      description: 
+        当前磁盘IOPS写入饱和度是 &#123;&#123; $value &#125;&#125;%
+        当前磁盘IOPS每秒写入最大 &#123;&#123; printf `max(rate(node_disk_writes_completed_total&#123;instance="%s",job="%s"&#125;[1m]))` $labels.instance $labels.job | query | first | value | printf "%.2f" &#125;&#125; 次/s
+                
+  - alert: 磁盘IOPS读取较高
+    expr: round(max(irate(node_disk_reads_completed_total[1m])) by (instance,job) / 120 * 100) &gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; IOPS每秒读取次数超过120次/s&quot;
+      description:
+        当前磁盘IOPS读取饱和度是 &#123;&#123; $value &#125;&#125;%
+        当前磁盘IOPS每秒读取最⼤ &#123;&#123; printf `max(rate(node_disk_reads_completed_total&#123;instance="%s",job="%s"&#125;[1m]))` $labels.instance $labels.job | query | first | value | printf "%.2f" &#125;&#125; 次/s
+  
+  - alert: 磁盘IO写入吞吐较高
+    expr: round(max(rate(node_disk_written_bytes_total[1m])) by (instance,job) / 1024 /1024 / 30 * 100) &gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘IO写入每秒超过最高30MB/s&quot;
+      description:
+        当前磁盘IO写入吞吐量的饱和度是 &#123;&#123; $value &#125;&#125;%。
+        当前磁盘IO写入吞吐量每秒最大是 &#123;&#123; printf `max(rate(node_disk_written_bytes_total&#123;instance="%s",job="%s"&#125;[1m])) /1024/1024` $labels.instance $labels.job | query | first | value | printf "%.2f" &#125;&#125;MB/s
+
+  - alert: 磁盘IO读取吞吐较高
+    expr: round(max(rate(node_disk_read_bytes_total[1m])) by (instance,job) / 1024 /1024 /30 * 100 ) &gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 磁盘IO读取每秒超过最大30MB/s&quot;
+      description:
+        当前磁盘IO读取吞吐量的饱和度是 &#123;&#123; $value &#125;&#125;%。
+        当前磁盘IO读取吞吐量每秒最大是 &#123;&#123; printf `max(rate(node_disk_read_bytes_total&#123;instance="%s",job="%s"&#125;[1m])) /1024/1024` $labels.instance $labels.job | query | first | value | printf "%.2f" &#125;&#125;MB/s
+
+  - alert: 网络下载带宽异常
+    expr: max(irate(node_network_receive_bytes_total[1m]) * 8 / 1024 / 1024) by (instance,job,device) / 50 * 100 &gt;= 80
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 的 &#123;&#123; $labels.device &#125;&#125; 接口下载流量已经超过公司实际50Mbps&quot;
+      description:
+        当前下载带宽已经达到 &#123;&#123; printf `(irate(node_network_receive_bytes_total&#123;instance="%s",job="%s",device="%s"&#125;[1m]) * 8 / 1024 / 1024)` $labels.instance $labels.job $labels.device | query | first | value | printf "%.2f"&#125;&#125; Mbps/s
+        当前下载带宽使用率在 &#123;&#123; $value &#125;&#125;%
+  
+  - alert: 网络上传带宽异常
+    expr: max(irate(node_network_transmit_bytes_total[1m]) * 8 / 1024 / 1024) by (instance,job,device) / 50 * 100 &gt;= 80
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 的 &#123;&#123; $labels.device &#125;&#125; 接口上传流量已经超过公司实际50Mbps&quot;
+      description:
+        当前上传带宽已经达到 &#123;&#123; printf `(irate(node_network_transmit_bytes_total&#123;instance="%s",job="%s",device="%s"&#125;[1m]) * 8 / 1024 / 1024)` $labels.instance $labels.job $labels.device | query | first | value | printf "%.2f"&#125;&#125; Mbps/s
+        当前上传带宽使用率在 &#123;&#123; $value &#125;&#125;%
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/node_rules.yml
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h4 id="二-prometheus监控rabbitmq"><a class="anchor" href="#二-prometheus监控rabbitmq">#</a> 二. Prometheus 监控 RabbitmQ</h4><h5 id="21-配置prometheus"><a class="anchor" href="#21-配置prometheus">#</a> 2.1 配置 Prometheus</h5><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &quot;/etc/prometheus/rules/*.yml&quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &quot;prometheus&quot; # 定义一个抓取任务，名为 'prometheus'。
+    metrics_path: &quot;/metrics&quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 '/metrics'。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&quot;prom-node01.oldxu.net:9090&quot;]
+
+  - job_name: &quot;grafana&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:3000&quot;]
+
+  - job_name: &quot;node_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:9100&quot;,&quot;prom-node02.oldxu.net:9100&quot;,&quot;prom-node03.oldxu.net:9100&quot;]
+
+  - job_name: &quot;weather_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7001&quot;]
+
+  - job_name: &quot;webserver&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7002&quot;]
+
+  - job_name: &quot;rabbitmq&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:15692&quot;]
+
+#2.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h5 id="22-rabbitmq告警规则文件"><a class="anchor" href="#22-rabbitmq告警规则文件">#</a> 2.2 RabbitMQ 告警规则文件</h5><pre><code>#1.配置rabbitmq告警规则
+[root@prom-node01 ~]# cat /etc/prometheus/rules/rabbitmq_rules.yml
+groups:
+- name: rabbitmq告警规则
+  rules:
+  - alert: RabbitMQDown
+    expr: up&#123;instance=&quot;prom-node02.oldxu.net:15692&quot;, job=&quot;rabbitmq&quot;&#125; != 1
+    labels:
+      severity: High
+    annotations:
+      summary: &quot;Rabbitmq Down,实例:&#123;&#123;$labels.instance &#125;&#125;&quot;
+      description: &quot;Rabbitmq_exporter连不上RabbitMQ!&quot;
+  
+  - alert: RabbitMQ队列已就绪的消息过多
+    expr: avg_over_time(rabbitmq_queue_messages_ready[5m]) &gt; 500
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: '&#123;&#123; $labels.instance &#125;&#125; RabbitMQ实例的队列消息准备过多'
+      description: '&#123;&#123; $labels.instance &#125;&#125;实例中平均准备好待消费的消息数量超过500，当前平均值为&#123;&#123; $value &#125;&#125;。'
+          
+  - alert: RabbitMQ队列中已消费但未确认的消息过多
+    expr: avg_over_time(rabbitmq_queue_messages_unacked[5m]) &gt; 500
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: '&#123;&#123; $labels.instance &#125;&#125; RabbitMQ实例的队列消息确认存在延迟'
+      description: '&#123;&#123; $labels.instance &#125;&#125; 实例中平均已被消费但未被确认的消息数量超过500，当前平均值为&#123;&#123; $value &#125;&#125;。'
+          
+  - alert: RabbitMQ磁盘空间预测不足
+    expr: predict_linear(rabbitmq_disk_space_available_bytes[24h], 60*60*24*10) &lt; rabbitmq_disk_space_available_limit_bytes
+    for: 1h
+    labels:
+      severity: critical
+    annotations:
+      summary: '&#123;&#123; $labels.instance &#125;&#125; RabbitMQ实例的磁盘空间预测不足。'
+      description: '基于过去24小时磁盘可用空间数据预测，未来10天内磁盘的可用空间可能低于默认配置的50MB。'
+ 
+  - alert: RabbitMQ文件描述符使用率过高
+    expr: max_over_time(rabbitmq_process_open_fds[5m]) / rabbitmq_process_max_fds * 100 &gt; 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: '&#123;&#123; $labels.instance &#125;&#125; RabbitMQ实例的文件描述符使用率过高'
+      description: '&#123;&#123; $labels.instance &#125;&#125; 实例打开的文件描述符数量最大值，占文件描述限制的比率超过80%，当前比率为&#123;&#123; $value &#125;&#125;%。'
+          
+  - alert: RabbitMQ TCP套接字使用率过高
+    expr: max_over_time(rabbitmq_process_open_tcp_sockets[5m]) / rabbitmq_process_max_tcp_sockets * 100 &gt; 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: '&#123;&#123; $labels.instance &#125;&#125; RabbitMQ实例的TCP套接字使用率过高'
+      description: '&#123;&#123; $labels.instance &#125;&#125; 实例打开的TCP套接字数量最大值，占操作系统允许的TCP连接数限制的比率超过80%，当前比率为&#123;&#123; $value &#125;&#125;%。'
+      
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/rabbitmq_rules.yml 
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h4 id="三-prometheus监控nginx"><a class="anchor" href="#三-prometheus监控nginx">#</a> 三. Prometheus 监控 Nginx</h4><h5 id="31-安装并配置nginx"><a class="anchor" href="#31-安装并配置nginx">#</a> 3.1 安装并配置 Nginx</h5><pre><code>#1.安装Nginx
+[root@prom-node03 ~]# yum install nginx -y
+[root@prom-node03 ~]# cat /etc/nginx/conf.d/mointor.oldxu.net.conf
+server &#123;
+	 listen 8888;
+	 server_name monitor.oldxu.net;
+	 location /nginx_status &#123;
+		 stub_status on;
+ 	 &#125;
+&#125;
+[root@prom-node03 ~]# nginx -t
+[root@prom-node03 ~]# systemctl enable nginx &amp;&amp; systemctl start nginx
+
+#2.检查Nginx的状态⻚⾯
+[root@prom-node03 ~]#  curl http://localhost:8888/nginx_status
+Active connections: 1 
+server accepts handled requests
+ 1 1 1 
+Reading: 0 Writing: 1 Waiting: 0 
+</code></pre><h5 id="32-安装并配置nginx-exporter"><a class="anchor" href="#32-安装并配置nginx-exporter">#</a> 3.2 安装并配置 Nginx-exporter</h5><pre><code>#1.下载Nginx-exporter
+[root@prom-node03 ~]# wget https://github.com/nginxinc/nginx-prometheus-exporter/releases/download/v1.1.0/nginx-prometheus-exporter_1.1.0_linux_amd64.tar.gz
+#加速地址
+[root@prom-node03 ~]# wget https://mirror.ghproxy.com/https://github.com/nginxinc/nginx-prometheus-exporter/releases/download/v1.1.0/nginx-prometheus-exporter_1.1.0_linux_amd64.tar.gz
+
+#2.将Nginx_exporter安装到指定的路径
+[root@prom-node03 ~]# mkdir /etc/nginx_exporter_1.1.0
+[root@prom-node03 ~]# tar xf nginx-prometheus-exporter_1.1.0_linux_amd64.tar.gz -C /etc/nginx_exporter_1.1.0/
+[root@prom-node03 ~]# ln -s /etc/nginx_exporter_1.1.0/ /etc/nginx_exporter
+[root@prom-node03 nginx_exporter]# ./nginx-prometheus-exporter --web.listen-address=:9113 --nginx.scrape-uri=http://127.0.0.1:8888/nginx_status
+
+#3.为nginx_exporter准备system启停⽂件
+[root@prom-node03 ~]# cat /usr/lib/systemd/system/nginx_exporter.service
+[Unit]
+Description=nginx-exporter
+Documentation=https://prometheus.io/
+After=network.target
+
+[Service]
+ExecStart=/etc/nginx_exporter/nginx-prometheus-exporter \
+  --web.listen-address=:9113 \
+  --web.telemetry-path=&quot;/metrics&quot; \
+  --nginx.scrape-uri=http://127.0.0.1:8888/nginx_status
+Restart=on-failure
+RestartSec=20
+[Install]
+WantedBy=multi-user.target
+
+#4.启动nginx_exporter服务，它默认监听在 9113 端⼝上
+[root@prom-node03 ~]#  systemctl daemon-reload &amp;&amp; systemctl enable nginx_exporter &amp;&amp; systemctl start nginx_exporter
+[root@prom-node03 ~]# netstat -lntp|grep 9113
+tcp6       0      0 :::9113                 :::*                    LISTEN      1829/nginx-promethe 
+
+#5.访问nginx_exporter暴露的metrics，检查是否能获取到对应的指标数据
+[root@prom-node03 nginx_exporter]#  curl http://127.0.0.1:9113/metrics
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds&#123;quantile=&quot;0&quot;&#125; 0
+go_gc_duration_seconds&#123;quantile=&quot;0.25&quot;&#125; 0
+go_gc_duration_seconds&#123;quantile=&quot;0.5&quot;&#125; 0
+go_gc_duration_seconds&#123;quantile=&quot;0.75&quot;&#125; 0
+</code></pre><h5 id="33-配置prometheus"><a class="anchor" href="#33-配置prometheus">#</a> 3.3 配置 Prometheus</h5><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &quot;/etc/prometheus/rules/*.yml&quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &quot;prometheus&quot; # 定义一个抓取任务，名为 'prometheus'。
+    metrics_path: &quot;/metrics&quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 '/metrics'。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&quot;prom-node01.oldxu.net:9090&quot;]
+
+  - job_name: &quot;grafana&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:3000&quot;]
+
+  - job_name: &quot;node_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:9100&quot;,&quot;prom-node02.oldxu.net:9100&quot;,&quot;prom-node03.oldxu.net:9100&quot;]
+
+  - job_name: &quot;weather_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7001&quot;]
+
+  - job_name: &quot;webserver&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7002&quot;]
+
+  - job_name: &quot;rabbitmq&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:15692&quot;]
+
+  - job_name: &quot;nginx&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9113&quot;]
+
+#2.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h5 id="34-nginx告警规则文件"><a class="anchor" href="#34-nginx告警规则文件">#</a> 3.4 Nginx 告警规则⽂件</h5><pre><code>#1.具体的告警规则示例⽂件（需要根据公司实际情况进⾏调整）
+[root@prom-node01 ~]# cat /etc/prometheus/rules/nginx_rules.yml
+groups:
+- name: nginx告警规则
+  rules:
+  - alert: Nginx Server Down
+    expr: nginx_up == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;Nginx 服务不存活, 实例:&#123;&#123; $labels.instance &#125;&#125;&quot;
+      description: &quot;nginx_exporter连不上Nginx了，当前状态为: &#123;&#123; $value &#125;&#125;&quot;
+          
+  - alert: Nginx活跃连接数过高
+    expr: avg_over_time(nginx_connections_active[5m]) &gt; 500
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;Nginx 活跃连接数过高, 实例:&#123;&#123; $labels.instance &#125;&#125;&quot;
+      description: &quot; Nginx 的平均活跃连接数超过了设定的500阈值，当前值为 &#123;&#123; $value &#125;&#125;。&quot;
+          
+  - alert: Nginx等待连接数高
+    expr: max_over_time(nginx_connections_waiting[5m]) &gt; 100
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;Nginx 等待连接数过高, 实例:&#123;&#123; $labels.instance &#125;&#125;&quot;
+      description: &quot;Nginx 的等待连接数超过了设定的100阈值，当前最大值为 &#123;&#123; $value &#125;&#125;。可能后端服务存在瓶颈。&quot;
+          
+  - alert: Nginx读写入率异常
+    expr: (nginx_connections_reading - nginx_connections_writing) / nginx_connections_reading * 100 &gt; 10
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;Nginx 读写入率异常, 实例:&#123;&#123; $labels.instance &#125;&#125;&quot;
+      description: &quot;Nginx 读取请求的数量高于写请求的数量，当前读请求高于写请求比率是: &#123;&#123; $value &#125;&#125;&quot;
+  - alert: Nginx⼤量TCP连接处理失败
+    expr: nginx_connections_accepted - nginx_connections_handled &gt; 50
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;Nginx 大量TCP连接处理失败, 实例:&#123;&#123; $labels.instance &#125;&#125;&quot;
+      description: &quot;Nginx 接受的连接数与处理成功的连接数之差超过了50，当前差值为&#123;&#123; $value &#125;&#125;&quot;
+      
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/node_rules.yml
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h4 id="四-prometheus监控tomcat"><a class="anchor" href="#四-prometheus监控tomcat">#</a> 四. Prometheus 监控 Tomcat</h4><h5 id="41-安装并配置tomcat"><a class="anchor" href="#41-安装并配置tomcat">#</a> 4.1 安装并配置 tomcat</h5><pre><code>#1.安装tomcat
+[root@prom-node03 nginx_exporter]# yum install tomcat tomcat-webapps -y
+
+#2.下载所依赖的 jar包
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=io/prometheus/simpleclient/0.12.0/simpleclient-0.12.0.jar
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=io/prometheus/simpleclient_common/0.12.0/simpleclient_common-0.12.0.jar
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=io/prometheus/simpleclient_hotspot/0.12.0/simpleclient_hotspot-0.12.0.jar
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=io/prometheus/simpleclient_servlet/0.12.0/simpleclient_servlet-0.12.0.jar
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=io/prometheus/simpleclient_servlet_common/0.12.0/simpleclient_servlet_common-0.12.0.jar
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=nl/nlighten/tomcat_exporter_client/0.0.15/tomcat_exporter_client-0.0.15.jar
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=nl/nlighten/tomcat_exporter_servlet/0.0.15/tomcat_exporter_servlet-0.0.15.war
+# 整合包的下载地址
+[root@prom-node03 ~]# wget https://mirror.ghproxy.com/https://github.com/Im-oldxu/tomcat-exporter/releases/download/tomcat_exporter-0.0.17/tomcat_exporter.tar.gz
+
+#3.将jar包和war包分别拷⻉⾄对应的⽬录下
+[root@prom-node03 ~]# cp tomcat_exporter/*.jar /usr/share/tomcat/lib/
+[root@prom-node03 ~]# cp tomcat_exporter/*.war /usr/share/tomcat/webapps/
+
+#4.启动Tomcat
+[root@prom-node03 ~]# systemctl start tomcat &amp;&amp; systemctl enable tomcat
+
+#5.访问tomcat的metrics
+[root@prom-node03 ~]# curl http://localhost:8080/metrics/
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 7.37
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.70921425481E9
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 65.0
+</code></pre><h5 id="42-配置prometheus"><a class="anchor" href="#42-配置prometheus">#</a> 4.2 配置 Prometheus</h5><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &quot;/etc/prometheus/rules/*.yml&quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &quot;prometheus&quot; # 定义一个抓取任务，名为 'prometheus'。
+    metrics_path: &quot;/metrics&quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 '/metrics'。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&quot;prom-node01.oldxu.net:9090&quot;]
+
+  - job_name: &quot;grafana&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:3000&quot;]
+
+  - job_name: &quot;node_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:9100&quot;,&quot;prom-node02.oldxu.net:9100&quot;,&quot;prom-node03.oldxu.net:9100&quot;]
+
+  - job_name: &quot;weather_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7001&quot;]
+
+  - job_name: &quot;webserver&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7002&quot;]
+
+  - job_name: &quot;rabbitmq&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:15692&quot;]
+
+  - job_name: &quot;nginx&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9113&quot;]
+
+  - job_name: &quot;tomcat&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:8080&quot;]
+
+#.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h5 id="43-tomcat告警规则文件"><a class="anchor" href="#43-tomcat告警规则文件">#</a> 4.3 Tomcat 告警规则⽂件</h5><pre><code>#1.具体的告警规则示例⽂件
+[root@prom-node01 ~]# cat /etc/prometheus/rules/tomcat_rules.yml
+groups:
+- name: tomcat告警规则
+  rules:
+  - alert: Tomcat活跃连接数过⾼
+    expr: tomcat_connections_active_total / tomcat_connections_active_max* 100 &gt;=80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;Tomcat服务器活跃连接数过高, 实例:&#123;&#123; $labels.instance &#125;&#125;&quot;
+      description:
+        Tomcat最大连接数是 &#123;&#123; printf `tomcat_connections_active_max&#123;instance="%s",job="%s",name="%s"&#125;` $labels.instance $labels.job $labels.name | query | first | value &#125;&#125;
+        Tomcat目前连接数是 &#123;&#123; printf `tomcat_connections_active_total&#123;instance="%s",job="%s",name="%s"&#125;` $labels.instance $labels.job $labels.name | query | first | value &#125;&#125;
+        Tomcat活跃连接数已超过最大活跃连接数的80%, 当前值为 &#123;&#123; $value &#125;&#125;%
+                
+  - alert: Tomcat处理请求超过5秒
+    expr: rate(tomcat_requestprocessor_time_seconds[5m]) &gt; 5
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;Tomcat处理请求时间过长, 实例:&#123;&#123; $labels.instance &#125;&#125;&quot;
+      description: &quot;Tomcat在过去5分钟的平均处理请求时间超过5秒，当前值 &#123;&#123; $value&#125;&#125;。&quot;
+          
+  - alert: &quot;Tomcat会话拒绝率超过20%&quot;
+    expr: (tomcat_session_rejected_total / (tomcat_session_created_total +tomcat_session_rejected_total)) * 100 &gt; 20
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;Tomcat会话拒绝率过高, 实例:&#123;&#123; $labels.instance &#125;&#125;&quot;
+      description: &quot;Tomcat在Host:&#123;&#123; $labels.host &#125;&#125; 的 &#123;&#123; $labels.context&#125;&#125; 的上下文中的会话拒绝率超过20%，当前值 &#123;&#123; $value &#125;&#125;。&quot;
+          
+  - alert: &quot;Tomcat线程使用率过高&quot;
+    expr: (tomcat_threads_active_total / tomcat_threads_max) * 100 &gt; 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;Tomcat线程使⽤率过⾼, 实例:&#123;&#123; $labels.instance &#125;&#125;&quot;
+      description:
+        Tmcat最大线程数是 &#123;&#123; printf `tomcat_threads_max&#123;instance="%s",job="%s",name="%s"&#125;` $labels.instance $labels.job $labels.name | query | first| value &#125;&#125;
+        Tomcat目前线程数是 &#123;&#123; printf `tomcat_threads_active_total&#123;instance="%s",job="%s",name="%s"&#125;` $labels.instance $labels.job $labels.name | query | first | value &#125;&#125;
+        Tomcat线程数已超过最大活跃连接数的80%, 当前值为 &#123;&#123; $value &#125;&#125;%
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/node_rules.yml
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h4 id="五-prometheus监控springboot"><a class="anchor" href="#五-prometheus监控springboot">#</a> 五. Prometheus 监控 SpringBoot</h4><h5 id="51-下载jmx-exporter"><a class="anchor" href="#51-下载jmx-exporter">#</a> 5.1 下载 jmx-exporter</h5><p>1、访问 github， <a target="_blank" rel="noopener" href="https://github.com/prometheus/jmx_exporter/releases">https://github.com/prometheus/jmx_exporter/releases</a> ，下载 java-expoter</p><pre><code>[root@prom-node03 ~]# mkdir /etc/jmx_exporter
+[root@prom-node03 ~]# cd /etc/jmx_exporter
+[root@prom-node03 springboot]# wget https://repo.maven.apache.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.20.0/jmx_prometheus_javaagent-0.20.0.jar
+</code></pre><p>2、准备 config.yml 配置⽂件（规则⽂件可以定义要暴露哪些指标给 Prometheus）</p><pre><code>[root@prom-node03 ~]# cat /etc/jmx_exporter/config.yaml
+rules:
+- pattern: &quot;.*&quot;
+</code></pre><h5 id="52-运行springboot应用"><a class="anchor" href="#52-运行springboot应用">#</a> 5.2 运⾏ SpringBoot 应⽤</h5><pre><code>#1、安装java基础环境
+[root@prom-node03 ~]#  yum install java-11-openjdk maven -y
+[root@prom-node03 ~]# wget -O /etc/maven/settings.xml https://linux.oldxu.net/settings.xml
+
+#2、下载java应⽤然后进⾏编译
+[root@prom-node03 ~]# wget http://file.oldxu.net/jenkins/springboot-devops-myapp-java11-jar.tar.gz
+[root@prom-node03 ~]# tar xf springboot-devops-myapp-java11-jar.tar.gz
+[root@prom-node03 ~]# cd springboot-devops-myapp-jar/
+[root@prom-node03 springboot-devops-myapp-jar]# mvn package
+
+#3、运⾏java应⽤，并加载jmx监控，监听12345端⼝， &lt;path_to_jmx_exporter.jar&gt;=&lt;exporter_port&gt;:&lt;path_to_config.yaml&gt;
+[root@prom-node03 springboot-devops-myapp-jar]# java \
+ -javaagent:/etc/jmx_exporter/jmx_prometheus_javaagent-0.20.0.jar=12345:/etc/jmx_exporter/config.yaml \
+ -jar -Xms50m -Xmx50m target/devops-myapp-1.0.jar \
+ --server.port=8081 &amp;&gt;/var/log/springboot.log &amp;
+ 
+ #4、检查对应的端⼝是否正常
+ [root@prom-node03 springboot-devops-myapp-jar]# curl http://localhost:12345/metrics
+# HELP jmx_scrape_error Non-zero if this scrape failed.
+# TYPE jmx_scrape_error gauge
+jmx_scrape_error 0.0
+# HELP jmx_scrape_cached_beans Number of beans with their matching rule cached
+</code></pre><h5 id="53-配置prometheus"><a class="anchor" href="#53-配置prometheus">#</a> 5.3 配置 Prometheus</h5><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &quot;/etc/prometheus/rules/*.yml&quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &quot;prometheus&quot; # 定义一个抓取任务，名为 'prometheus'。
+    metrics_path: &quot;/metrics&quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 '/metrics'。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&quot;prom-node01.oldxu.net:9090&quot;]
+
+  - job_name: &quot;grafana&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:3000&quot;]
+
+  - job_name: &quot;node_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:9100&quot;,&quot;prom-node02.oldxu.net:9100&quot;,&quot;prom-node03.oldxu.net:9100&quot;]
+
+  - job_name: &quot;weather_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7001&quot;]
+
+  - job_name: &quot;webserver&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7002&quot;]
+
+  - job_name: &quot;rabbitmq&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:15692&quot;]
+
+  - job_name: &quot;nginx&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9113&quot;]
+
+  - job_name: &quot;tomcat&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:8080&quot;]
+
+  - job_name: &quot;jmx_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:12345&quot;]
+
+#2.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h5 id="54-jmx告警规则文件"><a class="anchor" href="#54-jmx告警规则文件">#</a> 5.4 JMX 告警规则⽂件</h5><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/rules/jvm_rules.yml
+groups:
+- name: &quot;JVM告警规则&quot;
+  rules:
+  - alert: JVM堆内存使用率过高
+    expr: jvm_memory_bytes_used&#123;area=&quot;heap&quot;,&#125; / jvm_memory_bytes_max&#123;area=&quot;heap&quot;,&#125; * 100 &gt; 80
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;JVM 堆内存使用率过高, 实例:&#123;&#123; $labels.instance &#125;&#125;, job:&#123;&#123; $labels.job &#125;&#125; &quot;
+      description: &quot;JVM堆内存使用率超过80%, 当前值 &#123;&#123; $value &#125;&#125;%&quot;
+          
+  - alert: JVMGC时间过长
+    expr: sum (rate(jvm_gc_collection_seconds_sum[5m]) / rate(jvm_gc_collection_seconds_count[5m])) by (gc, instance, job) &gt; 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;JVM GC时间过长, 实例:&#123;&#123; $labels.instance &#125;&#125;, job:&#123;&#123; $labels.job &#125;&#125; &quot;
+      description: &quot;JVM &#123;&#123; $labels.gc &#125;&#125; 的回收时间超过1s，当前值 &#123;&#123; $value&#125;&#125;s&quot;
+          
+  - alert: JVM死锁线程过多
+    expr: min_over_time(jvm_threads_deadlocked[5m]) &gt; 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;JVM检测到死锁线程&quot;
+      description: &quot;在过去5分钟内JVM检测到存在死锁线程, 当前值 &#123;&#123; $value &#125;&#125;。&quot;
+      
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/jvm_rules.yml 
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h4 id="六-安装并配置mysql_master"><a class="anchor" href="#六-安装并配置mysql_master">#</a> 六。安装并配置 mysql_master</h4><h5 id="61-安装并配置mysql_master"><a class="anchor" href="#61-安装并配置mysql_master">#</a> 6.1 安装并配置 mysql_master</h5><pre><code>#1、安装Mysql5.7
+[root@prom-node03 ~]# yum install -y mysql-community-server
+[root@prom-node03 ~]# systemctl start mysqld &amp;&amp; systemctl enable mysqld
+[root@prom-node03 ~]# mysql -uroot -p$(awk '/temporary password/&#123;print $NF&#125;' /var/log/mysqld.log)
+mysql&gt;  ALTER USER 'root'@'localhost' IDENTIFIED BY 'Superman*2023';
+
+#2、创建⼀个 mysql_exporter 专属的监控账户
+mysql&gt; create user 'exporter'@'localhost' identified by 'Superman*2023' WITH MAX_USER_CONNECTIONS 3;
+mysql&gt; grant process,replication client,select on *.* to 'exporter'@'localhost';
+
+#3、创建MySQL从库复制的账户
+mysql&gt; grant replication slave on *.* to 'repl'@'%' identified by 'Superman*2023';
+mysql&gt; flush privileges;
+
+#4.配置主库
+[root@prom-node03 ~]# vim /etc/my.cnf
+server-id=1
+log-bin=mysql-bin
+read-only=0
+[root@prom-node03 ~]# systemctl restart mysqld
+</code></pre><h5 id="62-安装并配置mysql_slave"><a class="anchor" href="#62-安装并配置mysql_slave">#</a> 6.2 安装并配置 mysql_slave</h5><pre><code>#1、从库配置
+[root@prom-node04 ~]# yum install -y mysql-community-server
+[root@db02 ~]# vim /etc/my.cnf
+server-id=2
+read-only=1
+
+#2、创建⼀个 mysql_exporter 专属的监控账户
+grant all on *.* to 'exporter'@'localhost' identified by 'Superman*2023';
+
+#3、获取主库的信息，⽽后配置从库的change master
+mysql&gt; show master status;
++------------------+----------+--------------+------------------+-------------------+
+| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
++------------------+----------+--------------+------------------+-------------------+
+| mysql-bin.000007 |      154 |              |                  |                   |
++------------------+----------+--------------+------------------+-------------------+
+1 row in set (0.01 sec)
+
+#4、配置从服务器，连接主服务器
+mysql&gt; change master to master_host='192.168.40.223',master_user='repl',master_password='Superman*2023',master_log_file='mysql-bin.000007',master_log_pos=154;
+
+#5.开启从库
+mysql&gt; start slave;
+
+#6.检查主从复制状态
+mysql&gt; show slave status\G
+</code></pre><h5 id="63-安装并配置mysqld_exporter"><a class="anchor" href="#63-安装并配置mysqld_exporter">#</a> 6.3 安装并配置 mysqld_exporter</h5><p>1、访问 mysqld_exporter 的 github 地址， <a target="_blank" rel="noopener" href="https://github.com/prometheus/mysqld_exporter/releases">https://github.com/prometheus/mysqld_exporter/releases</a> 下载 mysqld-exporter</p><pre><code>#1、下载mysqld_expor
+[root@prom-node03 ~]# wget https://github.com/prometheus/mysqld_exporter/releases/download/v0.15.0/mysqld_exporter-0.15.0.linux-amd64.tar.gz
+# 加速地址
+[root@prom-node03 ~]# wget https://mirror.ghproxy.com/https://github.com/prometheus/mysqld_exporter/releases/download/v0.15.0/mysqld_exporter-0.15.0.linux-amd64.tar.gz
+
+#2、解压mysqld_expor
+[root@prom-node03 ~]# tar xf mysqld_exporter-0.15.0.linux-amd64.tar.gz -C /etc/
+[root@prom-node03 ~]# ln -s /etc/mysqld_exporter-0.15.0.linux-amd64/ /etc/mysqld_exporter
+
+#3、启动mysqld_expor
+[root@prom-node03 ~]# export MYSQLD_EXPORTER_PASSWORD=Superman*2023
+[root@prom-node03 ~]# /etc/mysqld_exporter/mysqld_exporter --mysqld.address=localhost:3306 --mysqld.username=exporter
+
+#4、编写mysqld_exporter启动⽂件
+[root@prom-node03 ~]# cat /usr/lib/systemd/system/mysqld_exporter.service
+[Unit]
+Description=mysqld_exporter
+Documentation=https://prometheus.io/
+After=network.target
+
+[Service]
+Environment='MYSQLD_EXPORTER_PASSWORD=Superman*2023'
+ExecStart=/etc/mysqld_exporter/mysqld_exporter \
+        --mysqld.address=localhost:3306 \
+        --mysqld.username=exporter \
+        --web.listen-address=:9104 \
+        --web.telemetry-path=&quot;/metrics&quot; \
+        --collect.info_schema.processlist \
+        --collect.info_schema.innodb_tablespaces \
+        --collect.info_schema.innodb_metrics \
+        --collect.info_schema.query_response_time \
+        --collect.info_schema.userstats \
+        --collect.info_schema.tables \
+        --collect.global_status \
+        --collect.global_variables \
+        --collect.slave_status \
+        --collect.binlog_size \
+        --collect.engine_innodb_status
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+#4、启动mysqld_exporter，并检查服务
+[root@prom-node03 ~]# systemctl daemon-reload
+[root@prom-node03 ~]# systemctl start mysqld_exporter
+
+#5、测试mysqld_exporter能否获取到对应的指标
+[root@prom-node03 ~]# netstat -lntp |grep 9104
+tcp6       0      0 :::9104                 :::*                    LISTEN      2863/mysqld_exporte 
+[root@prom-node03 ~]#  curl http://localhost:9104/metrics
+</code></pre><h5 id="64-配置prometheus"><a class="anchor" href="#64-配置prometheus">#</a> 6.4 配置 Prometheus</h5><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &quot;/etc/prometheus/rules/*.yml&quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &quot;prometheus&quot; # 定义一个抓取任务，名为 'prometheus'。
+    metrics_path: &quot;/metrics&quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 '/metrics'。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&quot;prom-node01.oldxu.net:9090&quot;]
+
+  - job_name: &quot;grafana&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:3000&quot;]
+
+  - job_name: &quot;node_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:9100&quot;,&quot;prom-node02.oldxu.net:9100&quot;,&quot;prom-node03.oldxu.net:9100&quot;]
+
+  - job_name: &quot;weather_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7001&quot;]
+
+  - job_name: &quot;webserver&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7002&quot;]
+
+  - job_name: &quot;rabbitmq&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:15692&quot;]
+
+  - job_name: &quot;nginx&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9113&quot;]
+
+  - job_name: &quot;tomcat&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:8080&quot;]
+
+  - job_name: &quot;jmx_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:12345&quot;]
+
+  - job_name: &quot;mysqld_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9104&quot;]
+      labels:
+        service: database
+        role: master
+    - targets: [&quot;prom-node04.oldxu.net:9104&quot;]
+      labels:
+        service: database
+        role: slave
+
+#2.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h5 id="65-mysql告警规则文件"><a class="anchor" href="#65-mysql告警规则文件">#</a> 6.5 MySQL 告警规则⽂件</h5><pre><code>#1、编写MySQL告警规则⽂件
+[root@prom-node01 ~]# cat /etc/prometheus/rules/mysql_rules.yml
+groups:
+- name: mysql告警规则
+  rules:
+  - alert: MySQL主库实例宕机
+    expr: mysql_up&#123;role=&quot;master&quot;&#125; == 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;MySQL实例宕机, 实例: &#123;&#123; $labels.instance &#125;&#125;&quot;
+      description: &quot;服务:&#123;&#123; $labels.service &#125;&#125; ⻆⾊: &#123;&#123; $labels.role &#125;&#125; 已经宕机。&quot;
+          
+  - alert: MySQL从库实例宕机
+    expr: mysql_up&#123;role=&quot;slave&quot;&#125; == 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;MySQL实例宕机, 实例: &#123;&#123; $labels.instance &#125;&#125;&quot;
+      description: &quot;服务:&#123;&#123; $labels.service &#125;&#125; ⻆⾊: &#123;&#123; $labels.role &#125;&#125; 已经宕机。&quot;
+          
+  - alert: MySQL实例重启
+    expr: sum(mysql_global_status_uptime) by (instance,job,service,role)&lt; 60
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;MySQL实例重启, 实例 &#123;&#123; $labels.instance &#125;&#125;&quot;
+      description: &quot;服务:&#123;&#123; $labels.service &#125;&#125; ⻆⾊: &#123;&#123; $labels.role &#125;&#125; 运行时间小于60s。当前值 &#123;&#123; $value &#125;&#125;&quot;
+
+  - alert: MySQL连接数使用率超过80%
+    expr: max_over_time(mysql_global_status_threads_connected[5m]) / mysql_global_variables_max_connections * 100 &gt; 80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;MySQL连接数过高, 实例 &#123;&#123; $labels.instance &#125;&#125;,服务:&#123;&#123; $labels.service &#125;&#125; ⻆⾊: &#123;&#123; $labels.role &#125;&#125;&quot;
+      description: &quot;该实例MySQL的连接数在过去5分钟内超过了最大连接数的80%, 当前值 &#123;&#123; $value &#125;&#125;%。&quot;
+          
+  - alert: MySQL活跃线程数高
+    expr: avg_over_time(mysql_global_status_threads_running[5m]) / mysql_global_variables_max_connections * 100 &gt; 60
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;MySQL活跃线程数过高, 实例 &#123;&#123; $labels.instance &#125;&#125;,服务:&#123;&#123; $labels.service &#125;&#125; 角色: &#123;&#123; $labels.role &#125;&#125;&quot;
+      description: &quot;该实例MySQL的活跃线程数在过去5分钟内持续超过了最大连接数的60%, 当前值 &#123;&#123; $value &#125;&#125;%。&quot;
+          
+  - alert: MySQL查询率(QPS)过高
+    expr: irate(mysql_global_status_queries[5m]) &gt; 1000
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;MySQL查询率(QPS)超标, 实例 &#123;&#123; $labels.instance &#125;&#125;,服务:&#123;&#123; $labels.service &#125;&#125; 角色: &#123;&#123; $labels.role &#125;&#125;&quot;
+      description: &quot;该实例MySQL的查询率(QPS)在过去5分钟内超过1000, 当前值 &#123;&#123; $value &#125;&#125;。&quot;
+          
+  - alert: MySQL事务率(TPS)过高
+    expr: sum(rate(mysql_global_status_commands_total&#123;command=~&quot;(commit|rollback)&quot;&#125;[5m])) without (command) &gt; 100
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;MySQL事务率(TPS)超标, 实例 &#123;&#123; $labels.instance &#125;&#125;,服务:&#123;&#123; $labels.service &#125;&#125; 角色: &#123;&#123; $labels.role &#125;&#125;&quot;
+      description: &quot;该实例MySQL的事务率(TPS)在过去5分钟内超过100, 当前值 &#123;&#123; $value &#125;&#125;。&quot;
+          
+  - alert: MySQL文件描述符使用率过高
+    expr: mysql_global_status_open_files / mysql_global_variables_open_files_limit * 100 &gt; 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;MySQL活跃线程数过高, 实例 &#123;&#123; $labels.instance &#125;&#125;,服务:&#123;&#123; $labels.service &#125;&#125; 角色: &#123;&#123; $labels.role &#125;&#125;&quot;
+      description: &quot;该实例MySQL的文件描述符使用率超过80%，当前值 &#123;&#123; $value &#125;&#125;%可能需要增加文件描述符限制。&quot;
+          
+  - alert: Mysql从库IO线程未运行
+    expr: mysql_slave_status_slave_io_running == 0
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;MySQL从库IO线程已停止, 实例 &#123;&#123; $labels.instance &#125;&#125;&quot;
+      description: &quot;该MySQL实例IO线程已停止，当前值 &#123;&#123; $value &#125;&#125;&quot;
+          
+  - alert: Mysql从库SQL线程未运行
+    expr: mysql_slave_status_slave_sql_running == 0
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;MySQL从库SQL线程已停止, 实例 &#123;&#123; $labels.instance &#125;&#125;&quot;
+      description: &quot;该MySQL实例SQL线程已停止，当前值 &#123;&#123; $value &#125;&#125;&quot;
+          
+  - alert: Mysql从库复制延迟过高
+    expr: mysql_slave_status_seconds_behind_master - mysql_slave_status_sql_delay &gt; 5
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;MySQL从库复制延迟过高, 实例 &#123;&#123; $labels.instance &#125;&#125;&quot;
+      description: &quot;该实例MySQL的复制延迟超过5s，当前值 &#123;&#123; $value &#125;&#125;s&quot;
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/mysql_rules.yml 
+Checking /etc/prometheus/rules/mysql_rules.yml
+  SUCCESS: 11 rules found
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h4 id="七-prometheus监控redis"><a class="anchor" href="#七-prometheus监控redis">#</a> 七. Prometheus 监控 Redis</h4><h5 id="71-安装并配置redis"><a class="anchor" href="#71-安装并配置redis">#</a> 7.1 安装并配置 Redis</h5><pre><code>[root@prom-node03 ~]# yum install redis -y
+[root@prom-node03 ~]# vim /etc/redis.conf 
+maxmemory 200mb
+[root@prom-node03 ~]# systemctl start redis &amp;&amp; systemctl enable redis
+[root@prom-node03 ~]# netstat -lntp|grep redis
+tcp        0      0 127.0.0.1:6379          0.0.0.0:*               LISTEN      2532/redis-server 1 
+</code></pre><h5 id="72-安装并配置redis_exporter"><a class="anchor" href="#72-安装并配置redis_exporter">#</a> 7.2 安装并配置 redis_exporter</h5><p>1、访问 redis_exporter 的 github 地址， <a target="_blank" rel="noopener" href="https://github.com/oliver006/redis_exporter/releases">https://github.com/oliver006/redis_exporter/releases</a> ，下载 redis_exporter</p><pre><code>#1、下载redis_exporter
+[root@prom-node03 ~]# wget https://github.com/oliver006/redis_exporter/releases/download/v1.57.0/redis_exporter-v1.57.0.linux-amd64.tar.gz
+#加速地址
+[root@prom-node03 ~]# wget https://mirror.ghproxy.com/https://github.com/oliver006/redis_exporter/releases/download/v1.57.0/redis_exporter-v1.57.0.linux-amd64.tar.gz
+
+#2、解压redis_exporter
+[root@prom-node03 ~]# tar xf redis_exporter-v1.57.0.linux-amd64.tar.gz -C /etc
+[root@prom-node03 ~]# ln -s /etc/redis_exporter-v1.57.0.linux-amd64/ /etc/redis_exporter
+
+#3、配置redis_exporter启动⽂件
+[root@prom-node03 ~]# cat /usr/lib/systemd/system/redis_exporter.service
+[Unit]
+Description=redis_exporter
+Documentation=https://prometheus.io/
+After=network.target
+
+[Service]
+ExecStart=/etc/redis_exporter/redis_exporter \
+  -redis.addr=&quot;redis://localhost:6379&quot;
+  -redis.password=&quot;&quot;
+  -web.listen-address=&quot;:9121&quot; \
+  -web.telemetry-path=&quot;/metrics&quot; \
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+#4、启动redis_exporter
+[root@prom-node03 ~]# systemctl daemon-reload
+[root@prom-node03 ~]# systemctl start redis_exporter
+[root@prom-node03 ~]# systemctl enable redis_exporter
+[root@prom-node03 ~]# netstat -lntp|grep 9121
+tcp6       0      0 :::9121                 :::*                    LISTEN      2600/redis_exporter 
+
+#5、访问redis的metrics
+[root@prom-node03 ~]# curl http://localhost:9121/metrics
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds&#123;quantile=&quot;0&quot;&#125; 4.7772e-05
+go_gc_duration_seconds&#123;quantile=&quot;0.25&quot;&#125; 4.7772e-05
+go_gc_duration_seconds&#123;quantile=&quot;0.5&quot;&#125; 9.3206e-05
+go_gc_duration_seconds&#123;quantile=&quot;0.75&quot;&#125; 9.3206e-05
+go_gc_duration_seconds&#123;quantile=&quot;1&quot;&#125; 9.3206e-05
+go_gc_duration_seconds_sum 0.000140978
+go_gc_duration_seconds_count 2
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 8
+</code></pre><h5 id="73-配置prometheus"><a class="anchor" href="#73-配置prometheus">#</a> 7.3 配置 Prometheus</h5><pre><code>#1、修改Prometheus配置
+[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &quot;/etc/prometheus/rules/*.yml&quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &quot;prometheus&quot; # 定义一个抓取任务，名为 'prometheus'。
+    metrics_path: &quot;/metrics&quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 '/metrics'。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&quot;prom-node01.oldxu.net:9090&quot;]
+
+  - job_name: &quot;grafana&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:3000&quot;]
+
+  - job_name: &quot;node_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:9100&quot;,&quot;prom-node02.oldxu.net:9100&quot;,&quot;prom-node03.oldxu.net:9100&quot;]
+
+  - job_name: &quot;weather_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7001&quot;]
+
+  - job_name: &quot;webserver&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7002&quot;]
+
+  - job_name: &quot;rabbitmq&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:15692&quot;]
+
+  - job_name: &quot;nginx&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9113&quot;]
+
+  - job_name: &quot;tomcat&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:8080&quot;]
+
+  - job_name: &quot;jmx_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:12345&quot;]
+
+  - job_name: &quot;mysqld_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9104&quot;]
+      labels:
+        service: database
+        role: master
+    - targets: [&quot;prom-node04.oldxu.net:9104&quot;]
+      labels:
+        service: database
+        role: slave
+
+  - job_name: &quot;redis_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9121&quot;]
+
+#2.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h5 id="74-redis告警规则文件"><a class="anchor" href="#74-redis告警规则文件">#</a> 7.4 Redis 告警规则⽂件</h5><pre><code>#1、编写Redis告警规则⽂件
+[root@prom-node01 ~]# cat /etc/prometheus/rules/redis_rules.yml
+groups:
+- name: redis告警规则
+  rules:
+  - alert: Redis实例宕机
+    expr: sum(redis_up) by (instance, job) == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;Redis实例宕机, &#123;&#123; $labels.instance &#125;&#125; &quot;
+      description: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 在过去1分钟内无法连接。&quot;
+          
+  - alert: Redis实例重启
+    expr: sum(redis_uptime_in_seconds) by (instance, job) &lt; 60
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 重启&quot;
+      description: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 出现重启。当前运行时间:&#123;&#123; $value &#125;&#125; 秒。&quot;
+          
+  - alert: Redis连接数过高
+    expr: redis_connected_clients / redis_config_maxclients * 100 &gt; 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 连接数超过80%&quot;
+      description: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 当前连接数占最大连接数的比率超过80%。当前比率: &#123;&#123; $value &#125;&#125;%。&quot;
+          
+  - alert: Redis连接被拒绝
+    expr: increase(redis_rejected_connections_total[1h]) &gt; 0
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 有连接被拒绝&quot;
+      description: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 在过去1小时内有连接被拒绝。当前被拒绝的连接数: &#123;&#123; $value &#125;&#125;。&quot;
+          
+  - alert: Redis内存使用率过高
+    expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 &gt; 80 
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 内存使用率超过80%&quot;
+      description: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 当前内存使用率超过配置的最大内存值的80%。当前内存使用率: &#123;&#123; $value &#125;&#125;%。&quot;
+          
+  - alert: Redis缓存命中率低
+    expr: |
+      irate(redis_keyspace_hits_total[5m]) /
+      (irate(redis_keyspace_hits_total[5m]) + irate(redis_keyspace_misses_total[5m])) * 100 &lt; 90
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 缓存命中率低于90%&quot;
+      description: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 最近5分钟内的缓存命中率低于90%。当前命中率: &#123;&#123; $value &#125;&#125;%。&quot;
+          
+  - alert: Redis即将过期的Key数量过多
+    expr: |
+      sum(redis_db_keys_expiring) by (instance, job, db) /
+      sum(redis_db_keys) by (instance, job, db) * 100 &gt; 50
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 中的数据库 &#123;&#123; $labels.db&#125;&#125; 有过多即将过期的Key&quot;
+      description: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 中的数据库 &#123;&#123; $labels.db &#125;&#125; 有超过50%的Key即将过期。当前比率: &#123;&#123; $value &#125;&#125;%。&quot;
+          
+  - alert: RedisRDB备份失败
+    expr: redis_rdb_last_bgsave_status == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; RDB备份失败&quot;
+      description: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 最近的RDB备份尝试失败。&quot;
+          
+  - alert: RedisRDB备份时间过长
+    expr: redis_rdb_last_bgsave_duration_sec &gt; 3 and redis_rdb_last_bgsave_status == 1
+    for: 1m
+    labels:
+       severity: warning
+    annotations:
+      summary: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; RDB备份成功但耗时超过3秒&quot;
+      description: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; RDB备份成功，但备份耗时超过了3秒。持续时间: &#123;&#123; $value &#125;&#125;秒。&quot;
+   
+  - alert: RedisRDB备份过期
+    expr: (time() - redis_rdb_last_save_timestamp_seconds) &gt; 36000
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 超过10小时未进行RDB备份&quot;
+      description: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 已超过10小时没有生成新的RDB备份文件。&quot;
+          
+  - alert: Redis命令拒绝率过高
+    expr: |
+      sum(irate(redis_commands_rejected_calls_total[5m])) by (instance, job) /
+      sum(irate(redis_commands_total[5m])) by (instance, job) * 100 &gt; 25
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 命令拒绝率超过25%&quot;
+      description: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 的命令拒绝率超过了25%。当前拒绝率: &#123;&#123; $value &#125;&#125;%。&quot;
+          
+  - alert: Redis命令平均响应时间过长
+    expr: |
+      sum(rate(redis_commands_duration_seconds_total[5m])) by (instance,job) /
+      sum(rate(redis_commands_processed_total[5m])) by (instance, job) &gt;0.250
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 命令平均响应时间超过250ms&quot;
+      description: &quot;Redis实例 &#123;&#123; $labels.instance &#125;&#125; 的执⾏命令平均响应时间超过了250毫秒。当前平均响应时间: &#123;&#123; $value &#125;&#125;秒。&quot;
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/redis_rules.yml 
+Checking /etc/prometheus/rules/redis_rules.yml
+  SUCCESS: 12 rules found
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h4 id="八-prometheus监控docker"><a class="anchor" href="#八-prometheus监控docker">#</a> 八. Prometheus 监控 Docker</h4><h4 id="九-blackbox_exporter黑盒监控"><a class="anchor" href="#九-blackbox_exporter黑盒监控">#</a> 九. Blackbox_exporter ⿊盒监控</h4><h5 id="91-安装blackbox_exporter"><a class="anchor" href="#91-安装blackbox_exporter">#</a> 9.1 安装 Blackbox_exporter</h5><p>1、访问 blackbox_exporter 的 github 地址， <a target="_blank" rel="noopener" href="https://github.com/prometheus/blackbox_exporter/releases">https://github.com/prometheus/blackbox_exporter/releases</a> ，下载 blackbox_exporter</p><pre><code>#1.下载blackbox_exporter
+[root@prom-node04 ~]# wget https://github.com/prometheus/blackbox_exporter/releases/download/v0.24.0/blackbox_exporter-0.24.0.linux-amd64.tar.gz
+#加速地址
+[root@prom-node04 ~]# wget https://mirror.ghproxy.com/https://github.com/prometheus/blackbox_exporter/releases/download/v0.24.0/blackbox_exporter-0.24.0.linux-amd64.tar.gz
+
+#2、解压blackbox_exporter
+[root@prom-node04 ~]# tar xf blackbox_exporter-0.24.0.linux-amd64.tar.gz -C /etc
+[root@prom-node04 ~]# ln -s /etc/blackbox_exporter-0.24.0.linux-amd64/ /etc/blackbox_exporter
+</code></pre><p>2、编辑 /etc/blackbox_exporter/blackbox.yml 默认配置⽂件，可以⾃⾏定义对应的模块，blackbox_exporter/example.yml</p><pre><code>[root@prom-node04 ~]# cat /etc/blackbox_exporter/blackbox.yml
+modules:
+  # http检查模块
+  http_2xx:
+    prober: http
+    http:
+      preferred_ip_protocol: &quot;ip4&quot;
+      valid_http_versions: [ &quot;HTTP/1.1&quot;, &quot;HTTP/2.0&quot; ]
+          
+  # Http Post检查模块
+  http_post_2xx:
+    prober: http
+    http:
+      method: POST
+      preferred_ip_protocol: &quot;ip4&quot;
+      valid_http_versions: [ &quot;HTTP/1.1&quot;, &quot;HTTP/2.0&quot; ]
+          
+  # TCP检查模块
+  tcp_connect:
+    prober: tcp
+    timeout: 5s
+        
+  # ICMP检查模块
+  icmp:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: &quot;ip4&quot;
+          
+  # DNS检查模块
+  dns_tcp: 
+    prober: dns
+    dns:
+      transport_protocol: &quot;tcp&quot;
+      preferred_ip_protocol: &quot;ip4&quot;
+      query_name: &quot;www.oldxu.net&quot;
+          
+  # SSH检查模块
+  ssh_banner:
+    prober: tcp
+    tcp:
+      query_response:
+      - expect: &quot;^SSH-2.0-&quot;
+      - send: &quot;SSH-2.0-blackbox-ssh-check&quot;
+</code></pre><p>3、配置 blackbox_exporter 启动⽂件</p><pre><code>[root@prom-node04 ~]# cat /usr/lib/systemd/system/blackbox_exporter.service
+[Unit]
+Description=blackbox_exporter
+Documentation=https://prometheus.io/
+After=network.target
+
+[Service]
+ExecStart=/etc/blackbox_exporter/blackbox_exporter \
+  --config.file=/etc/blackbox_exporter/blackbox.yml \
+  --web.listen-address=:9115
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+</code></pre><p>4、启动 blackbox_exporter</p><pre><code>[root@prom-node04 ~]# systemctl daemon-reload
+[root@prom-node04 ~]# systemctl start blackbox_exporter
+[root@prom-node04 ~]# systemctl enable blackbox_exporter
+[root@prom-node04 ~]# netstat -lntp|grep 9115
+tcp6       0      0 :::9115                 :::*                    LISTEN      1879/blackbox_expor
+</code></pre><p>5、访问 Blackbox_exporter</p><p>1、访问 Blackbox_exporter，通过 <a target="_blank" rel="noopener" href="http://IP:9115">http://IP:9115</a></p><p>2、使⽤ blackbox_exporter 监控站点，需要传递⽬标 target ，以及检测⽅法 module</p><p>具体的 Url 地址： <a href="http://local-blackbox.oldxu.net:9115/probe?target=https://www.xuliangwei.com&amp;module=http_2xx&amp;debug=true">http://local-blackbox.oldxu.net:9115/probe?target=https://www.xuliangwei.com&amp;module=http_2xx&amp;debug=true</a></p><p>3、针对 blackbox_exporter 的探测过程进⾏解读</p><pre><code>Logs for the probe:
+ts=2024-03-03T13:42:59.577027389Z caller=main.go:181 module=http_2xx target=https://www.xuliangwei.com level=info msg=&quot;Beginning probe&quot; probe=http timeout_seconds=119.5
+ts=2024-03-03T13:42:59.577520722Z caller=http.go:328 module=http_2xx target=https://www.xuliangwei.com level=info msg=&quot;Resolving target address&quot; target=www.xuliangwei.com ip_protocol=ip4
+ts=2024-03-03T13:42:59.842714479Z caller=http.go:328 module=http_2xx target=https://www.xuliangwei.com level=info msg=&quot;Resolved target address&quot; target=www.xuliangwei.com ip=27.152.185.120
+ts=2024-03-03T13:42:59.842996999Z caller=client.go:252 module=http_2xx target=https://www.xuliangwei.com level=info msg=&quot;Making HTTP request&quot; url=https://27.152.185.120 host=www.xuliangwei.com
+ts=2024-03-03T13:43:00.382291128Z caller=handler.go:120 module=http_2xx target=https://www.xuliangwei.com level=info msg=&quot;Received HTTP response&quot; status_code=200
+ts=2024-03-03T13:43:00.612921591Z caller=handler.go:120 module=http_2xx target=https://www.xuliangwei.com level=info msg=&quot;Response timings for roundtrip&quot; roundtrip=0 start=2024-03-03T21:42:59.843230972+08:00 dnsDone=2024-03-03T21:42:59.843230972+08:00 connectDone=2024-03-03T21:42:59.861071294+08:00 gotConn=2024-03-03T21:42:59.966743791+08:00 responseStart=2024-03-03T21:43:00.382134238+08:00 tlsStart=2024-03-03T21:42:59.861142714+08:00 tlsDone=2024-03-03T21:42:59.966579816+08:00 end=2024-03-03T21:43:00.612905768+08:00
+ts=2024-03-03T13:43:00.613022806Z caller=main.go:181 module=http_2xx target=https://www.xuliangwei.com level=info msg=&quot;Probe succeeded&quot; duration_seconds=1.035611838
+
+# 1、开始探测（msg=&quot;Beginning probe&quot;） 使⽤的是 http_2xx 模块，超时设置为119.5秒。
+# 2、解析⽬标地址（msg=&quot;Resolving target address&quot;） 正在尝试解析⽬标 www.xuliangwei.com 的IP地址，使⽤的是IPv4协议。
+# 3、已解析⽬标地址（msg=&quot;Resolved target address&quot;） 成功解析为61.241.151.57。
+# 4、发出 HTTP 请求（msg=&quot;Making HTTP request&quot;） 向 http://61.241.151.57 发出HTTP请求，请求中的 host 头设置为 www.xuliangwei.com。
+# 5、收到 HTTP 响应（msg=&quot;Received HTTP response&quot;） 已收到状态码为200的HTTP响应，这意味着⽹⻚正常，服务器成功处理了请求。
+# 6、响应时间（msg=&quot;Response timings for roundtrip&quot;） 提供了对于整个请求-响应周期中每个步骤的具体时间点，包括DNS解析完成、TLS握⼿开始和完成、连接建⽴、获得连接、响应开始等时间点。
+# 7、探测成功（msg=&quot;Probe succeeded&quot;） 探测操作成功完成，总耗时为0.355298304秒。
+</code></pre><h5 id="92-配置prometheus"><a class="anchor" href="#92-配置prometheus">#</a> 9.2 配置 Prometheus</h5><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &quot;/etc/prometheus/rules/*.yml&quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &quot;prometheus&quot; # 定义一个抓取任务，名为 'prometheus'。
+    metrics_path: &quot;/metrics&quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 '/metrics'。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&quot;prom-node01.oldxu.net:9090&quot;]
+
+  - job_name: &quot;grafana&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:3000&quot;]
+
+  - job_name: &quot;node_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:9100&quot;,&quot;prom-node02.oldxu.net:9100&quot;,&quot;prom-node03.oldxu.net:9100&quot;]
+
+  - job_name: &quot;weather_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7001&quot;]
+
+  - job_name: &quot;webserver&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7002&quot;]
+
+  - job_name: &quot;rabbitmq&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:15692&quot;]
+
+  - job_name: &quot;nginx&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9113&quot;]
+
+  - job_name: &quot;tomcat&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:8080&quot;]
+
+  - job_name: &quot;jmx_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:12345&quot;]
+
+  - job_name: &quot;mysqld_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9104&quot;]
+      labels:
+        service: database
+        role: master
+    - targets: [&quot;prom-node04.oldxu.net:9104&quot;]
+      labels:
+        service: database
+        role: slave
+
+  - job_name: &quot;redis_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9121&quot;]
+
+  - job_name: 'blackbox_http'
+    metrics_path: /probe # metrics的path这次不是/metrics，⽽是/probe
+    params: # 传递参数
+      module: [http_2xx] # 调⽤哪个模块进⾏探测
+    static_configs:
+    - targets: [&quot;https://www.xuliangwei.com&quot;,&quot;http://www.oldxu.net&quot;,&quot;https://www.baidu.com&quot;,&quot;http://httpbin.org/status/400&quot;,&quot;https://httpstat.us/500&quot;,&quot;https://httpstat.us/502&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+      
+# relabel_configs是标签重写的配置，这⾥进⾏了三次操作：
+# 1、将⽬标地址（__address__）赋予给__param_target，这是Blackbox Exporter需要的⽬标target参数。
+# 2、将__param_target的内容复制到instance标签，这样Prometheus UI中显示的instance实例名称会是⽬标站点地址，⽽不是Blackbox的地址。
+# 3、最后，将实际发送探测请求的地址（__address__）设置为运⾏Blackbox Exporter的节点地址和端⼝（prom-node04.oldxu.net:9115），这样Prometheus就会向这个地址发送探测请求。
+      
+#.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload 
+</code></pre><h5 id="93-配置tcp-ssh-icmp监控"><a class="anchor" href="#93-配置tcp-ssh-icmp监控">#</a> 9.3 配置 tcp、ssh、icmp 监控</h5><pre><code>#1、修改Prometheus配置
+[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &quot;/etc/prometheus/rules/*.yml&quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &quot;prometheus&quot; # 定义一个抓取任务，名为 'prometheus'。
+    metrics_path: &quot;/metrics&quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 '/metrics'。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&quot;prom-node01.oldxu.net:9090&quot;]
+
+  - job_name: &quot;grafana&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:3000&quot;]
+
+  - job_name: &quot;node_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:9100&quot;,&quot;prom-node02.oldxu.net:9100&quot;,&quot;prom-node03.oldxu.net:9100&quot;]
+
+  - job_name: &quot;weather_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7001&quot;]
+
+  - job_name: &quot;webserver&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7002&quot;]
+
+  - job_name: &quot;rabbitmq&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:15692&quot;]
+
+  - job_name: &quot;nginx&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9113&quot;]
+
+  - job_name: &quot;tomcat&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:8080&quot;]
+
+  - job_name: &quot;jmx_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:12345&quot;]
+
+  - job_name: &quot;mysqld_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9104&quot;]
+      labels:
+        service: database
+        role: master
+    - targets: [&quot;prom-node04.oldxu.net:9104&quot;]
+      labels:
+        service: database
+        role: slave
+
+  - job_name: &quot;redis_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9121&quot;]
+
+  - job_name: 'blackbox_http'
+    metrics_path: /probe # metrics的path这次不是/metrics，是/probe
+    params: # 传递参数
+      module: [http_2xx] # 调哪个模块进探测
+    static_configs:
+    - targets: [&quot;https://www.xuliangwei.com&quot;,&quot;http://www.oldxu.net&quot;,&quot;https://www.baidu.com&quot;,&quot;http://httpbin.org/status/400&quot;,&quot;https://httpstat.us/500&quot;,&quot;https://httpstat.us/502&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: 'blackbox_tcp'
+    metrics_path: /probe
+    params:
+      module: [tcp_connect] # 使tcp_connect模块
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:3306&quot;,&quot;prom-node03.oldxu.net:6379&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: 'blackbox_icmp'
+    metrics_path: /probe
+    params:
+      module: [icmp] # 使icmp模块
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net&quot;,&quot;prom-node02.oldxu.net&quot;,&quot;prom-node03.oldxu.net&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: 'blackbox_ssh'
+    metrics_path: /probe
+    params:
+      module: [ssh_banner] # 使⽤ssh_banner模块
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:22&quot;,&quot;prom-node02.oldxu.net:22&quot;,&quot;prom-node03.oldxu.net:22&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+#2.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload 
+</code></pre><h5 id="94-blackbox告警规则文件"><a class="anchor" href="#94-blackbox告警规则文件">#</a> 9.4 Blackbox 告警规则⽂件</h5><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/rules/blackbox_rules.yml
+groups:
+- name: Blackbox告警规则文件
+  rules:
+  - alert: 探测失败
+    expr: sum(probe_success == 0) by (instance, job)
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 探测失败&quot;
+      description: &quot;探测目标 &#123;&#123; $labels.instance &#125;&#125; 在 job &#123;&#123; $labels.job&#125;&#125; 中失败。&quot;
+          
+  - alert: 站点整体平均请求时间过长
+    expr: sum(avg_over_time(probe_http_duration_seconds[1m])) by (instance,job) &gt; 3
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 请求时间过长&quot;
+      description: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 最近1分钟的平均请求时间超过3秒。当前平均请求时间：&#123;&#123; $value &#125;&#125;秒。&quot;
+          
+  - alert: 重定向次数过多
+    expr: probe_http_redirects &gt; 5
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 重定向次数过多&quot;
+      description: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 在最近的探测中重定向次数超过5次。当前次数：&#123;&#123; $value &#125;&#125;次。&quot;
+          
+  - alert: 站点阶段耗时过⻓
+    expr: |
+      (
+        probe_http_duration_seconds&#123;phase=&quot;connect&quot;&#125; &gt; 0.5 or
+        probe_http_duration_seconds&#123;phase=&quot;processing&quot;&#125; &gt; 0.5 or
+        probe_http_duration_seconds&#123;phase=&quot;resolve&quot;&#125; &gt; 0.5 or
+        probe_http_duration_seconds&#123;phase=&quot;tls&quot;&#125; &gt; 0.5 or
+        probe_http_duration_seconds&#123;phase=&quot;transfer&quot;&#125; &gt; 0.5
+          )
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 阶段 '&#123;&#123; $labels.phase &#125;&#125;' 耗时过长&quot;
+      description: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 在阶段 '&#123;&#123; $labels.phase&#125;&#125;' 的耗时超过0.5秒。当前耗时：&#123;&#123; $value &#125;&#125;秒。&quot;
+          
+  - alert: 站点响应状态码异常
+    expr: probe_http_status_code &lt;= 199 or probe_http_status_code &gt;= 400
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 返回异常状态码&quot;
+      description: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 返回的状态码为 &#123;&#123; $value &#125;&#125;，表明请求可能存在问题。&quot;
+          
+  - alert: 证书即将过期&lt;30
+    expr: (probe_ssl_earliest_cert_expiry - time()) /86400 &lt; 30
+    for: 24h
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 的 SSL 证书即将过期&quot;
+      description: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 的 SSL 证书将在 &#123;&#123; $value&#125;&#125; 天内过期。&quot;
+          
+  - alert: 证书即将过期&lt;7
+    expr: (probe_ssl_earliest_cert_expiry - time()) /86400 &lt; 7
+    for: 24h
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 的 SSL 证书即将过期&quot;
+      description: &quot;实例 &#123;&#123; $labels.instance &#125;&#125; 的 SSL 证书将在 &#123;&#123; $value&#125;&#125; 天内过期.&quot;
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/blackbox_rules.yml 
+Checking /etc/prometheus/rules/blackbox_rules.yml
+  SUCCESS: 7 rules found
+  
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h4 id="十-domain_exporter域名监控"><a class="anchor" href="#十-domain_exporter域名监控">#</a> 十. domain_exporter 域名监控</h4><p>domain_exporter 主要⽤来监控⽹站域名的过期时间。这对于企业和个⼈都是⽐较重要的，因为域名过期可能会导致⽹站⽆法访问，进⽽影响业务的正常运⾏。因此监控 “域名的过期时间” 就显得⽐较重要了。</p><h5 id="101-安装domain_exporter"><a class="anchor" href="#101-安装domain_exporter">#</a> 10.1 安装 domain_exporter</h5><p>1、访问 domain_exporter 的 github 地址， <a target="_blank" rel="noopener" href="https://github.com/caarlos0/domain_exporter/releases">https://github.com/caarlos0/domain_exporter/releases</a> ，下载 domain_exporter</p><pre><code>#1.下载domain_exporte
+[root@prom-node04 ~]# wget https://github.com/caarlos0/domain_exporter/releases/download/v1.23.0/domain_exporter_1.23.0_linux_amd64.tar.gz
+#2.加速地址
+[root@prom-node04 ~]# wget https://mirror.ghproxy.com/https://github.com/caarlos0/domain_exporter/releases/download/v1.23.0/domain_exporter_1.23.0_linux_amd64.tar.gz
+
+#3.解压domain_exporter
+[root@prom-node04 ~]# mkdir /etc/domain_exporter_1.23.0
+[root@prom-node04 ~]# tar xf domain_exporter_1.23.0_linux_amd64.tar.gz -C /etc/domain_exporter_1.23.0
+[root@prom-node04 ~]# ln -s /etc/domain_exporter_1.23.0/ /etc/domain_exporter
+
+#4.配置domain_exporter启动⽂件
+[root@prom-node04 ~]# cat /usr/lib/systemd/system/domain_exporter.service
+[Unit]
+Description=domain_exporter
+Documentation=https://prometheus.io/
+After=network.target
+
+[Service]
+ExecStart=/etc/domain_exporter/domain_exporter --bind=&quot;:9222&quot;
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+#5.动domain_exporter
+[root@prom-node04 ~]#  systemctl daemon-reload
+[root@prom-node04 ~]# systemctl start domain_exporter.service
+[root@prom-node04 ~]# systemctl enable domain_exporter.service
+Created symlink from /etc/systemd/system/multi-user.target.wants/domain_exporter.service to /usr/lib/systemd/system/domain_exporter.service.
+[root@prom-node04 ~]# netstat -lntp|grep 9222
+tcp6       0      0 :::9222                 :::*                    LISTEN      1880/domain_exporte 
+</code></pre><p>2、通过 domain_exporter 获取域名过期时间，访问 URL <a href="http://localhost:9222/probe?target=oldxu.net">http://localhost:9222/probe?target=oldxu.net</a> 来获取特定域名（如 <a target="_blank" rel="noopener" href="http://oldxu.net">oldxu.net</a>）的过期时间。</p><pre><code>[root@prom-node04 ~]#  curl http://localhost:9222/probe?target=hmallleasing.com
+# HELP domain_expiry_days time in days until the domain expires
+# TYPE domain_expiry_days gauge
+domain_expiry_days&#123;domain=&quot;hmallleasing.com&quot;&#125; 741
+# HELP domain_probe_duration_seconds returns how long the probe took to complete in seconds
+# TYPE domain_probe_duration_seconds gauge
+domain_probe_duration_seconds&#123;domain=&quot;hmallleasing.com&quot;&#125; 1.036303946
+# HELP domain_probe_success whether the probe was successful or not
+# TYPE domain_probe_success gauge
+domain_probe_success&#123;domain=&quot;hmallleasing.com&quot;&#125; 1
+</code></pre><h5 id="102-配置prometheus"><a class="anchor" href="#102-配置prometheus">#</a> 10.2 配置 Prometheus</h5><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &quot;/etc/prometheus/rules/*.yml&quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &quot;prometheus&quot; # 定义一个抓取任务，名为 'prometheus'。
+    metrics_path: &quot;/metrics&quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 '/metrics'。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&quot;prom-node01.oldxu.net:9090&quot;]
+
+  - job_name: &quot;grafana&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:3000&quot;]
+
+  - job_name: &quot;node_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:9100&quot;,&quot;prom-node02.oldxu.net:9100&quot;,&quot;prom-node03.oldxu.net:9100&quot;]
+
+  - job_name: &quot;weather_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7001&quot;]
+
+  - job_name: &quot;webserver&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7002&quot;]
+
+  - job_name: &quot;rabbitmq&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:15692&quot;]
+
+  - job_name: &quot;nginx&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9113&quot;]
+
+  - job_name: &quot;tomcat&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:8080&quot;]
+
+  - job_name: &quot;jmx_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:12345&quot;]
+
+  - job_name: &quot;mysqld_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9104&quot;]
+      labels:
+        service: database
+        role: master
+    - targets: [&quot;prom-node04.oldxu.net:9104&quot;]
+      labels:
+        service: database
+        role: slave
+
+  - job_name: &quot;redis_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9121&quot;]
+
+  - job_name: 'blackbox_http'
+    metrics_path: /probe # metrics的path这次不是/metrics，是/probe
+    params: # 传递参数
+      module: [http_2xx] # 调哪个模块进探测
+    static_configs:
+    - targets: [&quot;https://www.xuliangwei.com&quot;,&quot;http://www.oldxu.net&quot;,&quot;https://www.baidu.com&quot;,&quot;http://httpbin.org/status/400&quot;,&quot;https://httpstat.us/500&quot;,&quot;https://httpstat.us/502&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: 'blackbox_tcp'
+    metrics_path: /probe
+    params:
+      module: [tcp_connect] # 使tcp_connect模块
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:3306&quot;,&quot;prom-node03.oldxu.net:6379&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: 'blackbox_icmp'
+    metrics_path: /probe
+    params:
+      module: [icmp] # 使icmp模块
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net&quot;,&quot;prom-node02.oldxu.net&quot;,&quot;prom-node03.oldxu.net&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: 'blackbox_ssh'
+    metrics_path: /probe
+    params:
+      module: [ssh_banner] # 使⽤ssh_banner模块
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:22&quot;,&quot;prom-node02.oldxu.net:22&quot;,&quot;prom-node03.oldxu.net:22&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: 'domain_exporter'
+    metrics_path: /probe # metrics的path不是/metrics，⽽是/probe
+    static_configs:
+    - targets: [&quot;nf-leasing.com&quot;,&quot;hmallleasing.com&quot;,&quot;jd.com&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9222
+
+#.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload 
+</code></pre><h5 id="103-domain告警规则文件"><a class="anchor" href="#103-domain告警规则文件">#</a> 10.3 domain 告警规则⽂件</h5><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/rules/domain_rules.yml
+groups:
+- name: domain告警规则文件
+  rules:
+  - alert: 域名即将过期 &lt;100
+    expr: domain_expiry_days &lt; 100
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;域名即将过期 (实例 &#123;&#123; $labels.instance &#125;&#125;)&quot;
+      description: &quot;域名 &#123;&#123; $labels.domain &#125;&#125; 还有少于100天即将过期。当前剩余天数：&#123;&#123; $value &#125;&#125;。&quot;
+          
+  - alert: 域名即将过期&lt;30
+    expr: domain_expiry_days &lt; 30
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;域名即将过期 (实例 &#123;&#123; $labels.instance &#125;&#125;)&quot;
+      description: &quot;域名 &#123;&#123; $labels.domain &#125;&#125; 还有少于30天即将过期。当前剩余天数：&#123;&#123; $value &#125;&#125;。&quot;
+ 
+  - alert: 域名检测失败
+    expr: sum(domain_probe_success) by (domain, instance, job) == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;域名检测失败 (实例 &#123;&#123; $labels.instance &#125;&#125;)&quot;
+      description: &quot;域名 &#123;&#123; $labels.domain &#125;&#125; 在 &#123;&#123; $labels.instance &#125;&#125; 上的检测失败。当前值：&#123;&#123; $value &#125;&#125;。&quot;
+      
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/domain_rules.yml 
+Checking /etc/prometheus/rules/domain_rules.yml
+  SUCCESS: 3 rules found
+  
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h4 id="十一-pushgateway推送网关服务"><a class="anchor" href="#十一-pushgateway推送网关服务">#</a> 十一. PushGateway 推送⽹关服务</h4><p>Pushgateway 允许脚本通过 Push 的⽅式来推送指标数据，但它不会像 Prometheus 那样主动去抓取指标数据。</p><p>Pushgateway 作为中间存储，仅负责接收数据，等待 Prometheus Server 进⾏数据抓取，它⾃身并不具备抓取功能。默认情况下，数据保存在内存中，但可以通过 --persistence.file 参数持久化数据⾄⽂件中，同时通过 --persistence.interval=5m 设置数据持久化间隔。</p><h5 id="111-安装pushgateway"><a class="anchor" href="#111-安装pushgateway">#</a> 11.1 安装 pushGateway</h5><p>1、访问 PushGateway 官⽹ <a target="_blank" rel="noopener" href="https://github.com/prometheus/pushgateway">https://github.com/prometheus/pushgateway</a> ，下载 PushGateway</p><pre><code>#1.下载Pushgateway 
+[root@prom-node04 ~]# wget https://github.com/prometheus/pushgateway/releases/download/v1.7.0/pushgateway-1.7.0.linux-amd64.tar.gz
+# 加速地址
+[root@prom-node04 ~]# wget https://mirror.ghproxy.com/https://github.com/prometheus/pushgateway/releases/download/v1.7.0/pushgateway-1.7.0.linux-amd64.tar.gz
+
+#2.解压PushGateway
+[root@prom-node04 ~]# tar xf pushgateway-1.7.0.linux-amd64.tar.gz -C /etc/
+[root@prom-node04 ~]# ln -s /etc/pushgateway-1.7.0.linux-amd64/ /etc/pushgateway
+
+#3.编写pushgateway启动⽂件
+[root@prom-node04 ~]# cat /usr/lib/systemd/system/pushgateway.service 
+[Unit]
+Description=pushgateway
+Documentation=https://prometheus.io/
+After=network.target
+
+[Service]
+ExecStart=/etc/pushgateway/pushgateway \
+ --web.listen-address=:9091 \
+ --web.telemetry-path=/metrics \
+ --web.enable-lifecycle
+ExecReload=/bin/kill -HUP
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+#4.启动PushGateway
+[root@prom-node04 ~]# systemctl daemon-reload
+[root@prom-node04 ~]# systemctl start pushgateway
+[root@prom-node04 ~]# systemctl enable pushgateway
+[root@prom-node04 ~]# netstat -lntp|grep 9091
+tcp6       0      0 :::9091                 :::*                    LISTEN      2421/pushgateway   
+</code></pre><p>2、是⽤ Curl 给 pushgateway 推送⼀个 some_metric 的指标，值为 3.14</p><pre><code>[root@prom-node04 ~]# echo &quot;some_metric 3.14&quot; | curl --data-binary @- http://localhost:9091/metrics/job/some_job
+</code></pre><p>3、访问 pushgateway 的 web ⻚⾯，通过 <a target="_blank" rel="noopener" href="http://IP:9091">http://IP:9091</a></p><p><img loading="lazy" data-src="C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20240304220806380.png" alt="image-20240304220806380"></p><h5 id="112-配置promethues"><a class="anchor" href="#112-配置promethues">#</a> 11.2 配置 Promethues</h5><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &quot;/etc/prometheus/rules/*.yml&quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &quot;prometheus&quot; # 定义一个抓取任务，名为 'prometheus'。
+    metrics_path: &quot;/metrics&quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 '/metrics'。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&quot;prom-node01.oldxu.net:9090&quot;]
+
+  - job_name: &quot;grafana&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:3000&quot;]
+
+  - job_name: &quot;node_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:9100&quot;,&quot;prom-node02.oldxu.net:9100&quot;,&quot;prom-node03.oldxu.net:9100&quot;]
+
+  - job_name: &quot;weather_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7001&quot;]
+
+  - job_name: &quot;webserver&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:7002&quot;]
+
+  - job_name: &quot;rabbitmq&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node02.oldxu.net:15692&quot;]
+
+  - job_name: &quot;nginx&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9113&quot;]
+
+  - job_name: &quot;tomcat&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:8080&quot;]
+
+  - job_name: &quot;jmx_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:12345&quot;]
+
+  - job_name: &quot;mysqld_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9104&quot;]
+      labels:
+        service: database
+        role: master
+    - targets: [&quot;prom-node04.oldxu.net:9104&quot;]
+      labels:
+        service: database
+        role: slave
+
+  - job_name: &quot;redis_exporter&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:9121&quot;]
+
+  - job_name: 'blackbox_http'
+    metrics_path: /probe # metrics的path这次不是/metrics，是/probe
+    params: # 传递参数
+      module: [http_2xx] # 调哪个模块进探测
+    static_configs:
+    - targets: [&quot;https://www.xuliangwei.com&quot;,&quot;http://www.oldxu.net&quot;,&quot;https://www.baidu.com&quot;,&quot;http://httpbin.org/status/400&quot;,&quot;https://httpstat.us/500&quot;,&quot;https://httpstat.us/502&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: 'blackbox_tcp'
+    metrics_path: /probe
+    params:
+      module: [tcp_connect] # 使tcp_connect模块
+    static_configs:
+    - targets: [&quot;prom-node03.oldxu.net:3306&quot;,&quot;prom-node03.oldxu.net:6379&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: 'blackbox_icmp'
+    metrics_path: /probe
+    params:
+      module: [icmp] # 使icmp模块
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net&quot;,&quot;prom-node02.oldxu.net&quot;,&quot;prom-node03.oldxu.net&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: 'blackbox_ssh'
+    metrics_path: /probe
+    params:
+      module: [ssh_banner] # 使⽤ssh_banner模块
+    static_configs:
+    - targets: [&quot;prom-node01.oldxu.net:22&quot;,&quot;prom-node02.oldxu.net:22&quot;,&quot;prom-node03.oldxu.net:22&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: 'domain_exporter'
+    metrics_path: /probe # metrics的path不是/metrics，⽽是/probe
+    static_configs:
+    - targets: [&quot;nf-leasing.com&quot;,&quot;hmallleasing.com&quot;,&quot;jd.com&quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9222
+
+  - job_name: &quot;pushgateway&quot;
+    metrics_path: &quot;/metrics&quot;
+    static_configs:
+    - targets: [&quot;prom-node04.oldxu.net:9091&quot;]
+
+#.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><h5 id="113-编写脚本并推送指标"><a class="anchor" href="#113-编写脚本并推送指标">#</a> 11.3 编写脚本并推送指标</h5><pre><code>[root@prom-node04 ~]# cat pushgateway_backup.sh
+#!/bin/bash
+[[ $# -ne 1 ]] &amp;&amp; echo &quot;给定一个备份的应用名称&quot; &amp;&amp; exit
+
+# PushGateway地址
+PUSH_ADDR=&quot;prom-node04.oldxu.net&quot;
+
+# 应用名称
+APP_NAME=&quot;$1&quot;
+
+# 备份脚本示例
+START_TIME=$(date +%s)
+
+# 模拟备份任务，随机睡眠时间1-10秒
+SLEEP_TIME=$((1 + RANDOM % 10))
+sleep $SLEEP_TIME
+
+# 随机决定备份操作是否成功
+if [ $((RANDOM % 10)) -lt 5 ]; then
+    STATUS=1 # 成功
+else
+    STATUS=0 # 失败
+fi
+
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+
+# 推送指标⾄ PushGateway
+cat &lt;&lt;EOF | curl --data-binary @- http://$PUSH_ADDR:9091/metrics/job/backup/instance/$APP_NAME
+# HELP backup_duration_seconds The duration of the last backup in seconds.
+# TYPE backup_duration_seconds gauge
+backup_duration_seconds&#123;application=&quot;$APP_NAME&quot;&#125; $DURATION
+# HELP backup_success Last backup was success(1) or ERROR(0).
+# TYPE backup_success gauge
+backup_success&#123;application=&quot;$APP_NAME&quot;&#125; $STATUS
+EOF
+</code></pre><p>1、执⾏脚本，需要传递⼀个应⽤的名称</p><pre><code>[root@prom-node04 ~]# sh pushgateway_backup.sh shop
+</code></pre><p>2、在 Prometheus UI 中检查 backup_duration_seconds 和 backup_success 指标</p><p><img loading="lazy" data-src="C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20240304221939121.png" alt="image-20240304221939121"></p><h5 id="114-配置告警规则文件"><a class="anchor" href="#114-配置告警规则文件">#</a> 11.4 配置告警规则⽂件</h5><pre><code>[root@prom-node01 ~]# cat /etc/prometheus/rules/backup_rules.yml
+groups:
+- name: backup_alerts
+  rules:
+  # 警告：在备份成功情况在，如果备份任务耗时超过了9秒则触发告警
+  - alert: 备份告警超时
+    expr: backup_duration_seconds &gt; 6 and backup_success == 1
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &quot;备份任务耗时过长&quot;
+      description: &quot;&#123;&#123; $labels.exported_instance &#125;&#125; 应⽤备份任务成功完成，但耗时超过了6秒。实际耗时: &#123;&#123; $value &#125;&#125; 秒。&quot;
+ 
+  # 严重警告：备份任务失败，并且不考虑耗时
+  - alert: 备份任务失败
+    expr: backup_success == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &quot;备份失败&quot;
+      description: &quot;&#123;&#123; $labels.exported_job &#125;&#125; 任务中 &#123;&#123; $labels.exported_instance &#125;&#125; 应用备份失败。&quot;
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/backup_rules.yml 
+Checking /etc/prometheus/rules/backup_rules.yml
+  SUCCESS: 2 rules found
+  
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+</code></pre><div class="tags"><a href="/tags/Prometheus/" rel="tag"><i class="ic i-tag"></i>Prometheus</a></div></div><footer><div class="meta"><span class="icon"><i class="ic i-eye"></i></span><span>此文章已被阅读次数:</span><span class="waline-pageview-count" id="twikoo_visitors" data-path="/posts/4081185381.html">正在加载...</span><span class="item"><span class="icon"><i class="ic i-calendar-check"></i></span><span class="text">更新于</span><time title="修改时间：2025-06-29 21:56:35" itemprop="dateModified" datetime="2025-06-29T21:56:35+08:00">2025-06-29</time></span></div><div class="reward"><button><i class="ic i-heartbeat"></i>赞赏</button><p>请我喝[茶]~(￣▽￣)~*</p><div id="qr"><div><img loading="lazy" data-src="/assets/wechatpay.png" alt="Xu Yong 微信支付"><p>微信支付</p></div><div><img loading="lazy" data-src="/assets/alipay.png" alt="Xu Yong 支付宝"><p>支付宝</p></div></div></div><div id="copyright"><ul><li class="author"><strong>本文作者：</strong>Xu Yong<i class="ic i-at"><em>@</em></i>LinuxSre云原生</li><li class="link"><strong>本文链接：</strong><a href="http://ixuyong.cn/posts/4081185381.html" title="Prometheus监控实战（三）">http://ixuyong.cn/posts/4081185381.html</a></li><li class="license"><strong>版权声明：</strong>本站所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh"><i class="ic i-creative-commons"><em>(CC)</em></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li></ul></div></footer></article></div><div class="post-nav"><div class="item left"><a href="/posts/3386060324.html" rel="prev" itemprop="url" data-background-image="https:&#x2F;&#x2F;wp-cdn.4ce.cn&#x2F;v2&#x2F;oApfFnU.jpeg" title="PromQL快速入门（二）"><span class="type">上一篇</span><span class="category"><i class="ic i-flag"></i>Prometheus</span><h3>PromQL快速入门（二）</h3></a></div><div class="item right"><a href="/posts/2041568856.html" rel="next" itemprop="url" data-background-image="https:&#x2F;&#x2F;wp-cdn.4ce.cn&#x2F;v2&#x2F;el5JHV9.jpeg" title="Prometheus监控Kubernetes"><span class="type">下一篇</span><span class="category"><i class="ic i-flag"></i>Prometheus</span><h3>Prometheus监控Kubernetes</h3></a></div></div><div class="wrap" id="comments"></div></div><div id="sidebar"><div class="inner"><div class="panels"><div class="inner"><div class="contents panel pjax" data-title="文章目录"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#prometheus%E7%9B%91%E6%8E%A7%E5%AE%9E%E6%88%98%E4%B8%89"><span class="toc-number">1.</span> <span class="toc-text">Prometheus 监控实战（三）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80-promtheus%E8%8A%82%E7%82%B9%E7%9B%91%E6%8E%A7"><span class="toc-number">1.1.</span> <span class="toc-text">一. Promtheus 节点监控</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#11-%E9%85%8D%E7%BD%AEprometheus"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 配置 Prometheus</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#12-%E5%88%9B%E5%BB%BArules%E7%9B%AE%E5%BD%95%E5%B9%B6%E9%87%8D%E8%BD%BDprometheus"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 创建 rules 目录并重载 Prometheus</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#13-promtheus%E9%85%8D%E7%BD%AE%E5%91%8A%E8%AD%A6%E8%A7%84%E5%88%99"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.3 Promtheus 配置告警规则</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#131-cpu%E7%9B%91%E6%8E%A7%E6%A1%88%E4%BE%8B%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.1.3.1.</span> <span class="toc-text">1.3.1 CPU 监控案例实践</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#132-%E5%86%85%E5%AD%98%E7%9B%91%E6%8E%A7%E6%A1%88%E4%BE%8B%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.1.3.2.</span> <span class="toc-text">1.3.2 内存监控案例实践</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#133-%E7%A3%81%E7%9B%98%E7%9B%91%E6%8E%A7%E6%A1%88%E4%BE%8B%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.1.3.3.</span> <span class="toc-text">1.3.3 磁盘监控案例实践</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#134-%E7%BD%91%E7%BB%9C%E7%9B%91%E6%8E%A7%E6%A1%88%E4%BE%8B%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.1.3.4.</span> <span class="toc-text">1.3.4 ⽹络监控案例实践</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C-prometheus%E7%9B%91%E6%8E%A7rabbitmq"><span class="toc-number">1.2.</span> <span class="toc-text">二. Prometheus 监控 RabbitmQ</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#21-%E9%85%8D%E7%BD%AEprometheus"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 配置 Prometheus</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#22-rabbitmq%E5%91%8A%E8%AD%A6%E8%A7%84%E5%88%99%E6%96%87%E4%BB%B6"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 RabbitMQ 告警规则文件</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89-prometheus%E7%9B%91%E6%8E%A7nginx"><span class="toc-number">1.3.</span> <span class="toc-text">三. Prometheus 监控 Nginx</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#31-%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AEnginx"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 安装并配置 Nginx</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#32-%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AEnginx-exporter"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 安装并配置 Nginx-exporter</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#33-%E9%85%8D%E7%BD%AEprometheus"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 配置 Prometheus</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#34-nginx%E5%91%8A%E8%AD%A6%E8%A7%84%E5%88%99%E6%96%87%E4%BB%B6"><span class="toc-number">1.3.4.</span> <span class="toc-text">3.4 Nginx 告警规则⽂件</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B-prometheus%E7%9B%91%E6%8E%A7tomcat"><span class="toc-number">1.4.</span> <span class="toc-text">四. Prometheus 监控 Tomcat</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#41-%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AEtomcat"><span class="toc-number">1.4.1.</span> <span class="toc-text">4.1 安装并配置 tomcat</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#42-%E9%85%8D%E7%BD%AEprometheus"><span class="toc-number">1.4.2.</span> <span class="toc-text">4.2 配置 Prometheus</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#43-tomcat%E5%91%8A%E8%AD%A6%E8%A7%84%E5%88%99%E6%96%87%E4%BB%B6"><span class="toc-number">1.4.3.</span> <span class="toc-text">4.3 Tomcat 告警规则⽂件</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%94-prometheus%E7%9B%91%E6%8E%A7springboot"><span class="toc-number">1.5.</span> <span class="toc-text">五. Prometheus 监控 SpringBoot</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#51-%E4%B8%8B%E8%BD%BDjmx-exporter"><span class="toc-number">1.5.1.</span> <span class="toc-text">5.1 下载 jmx-exporter</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#52-%E8%BF%90%E8%A1%8Cspringboot%E5%BA%94%E7%94%A8"><span class="toc-number">1.5.2.</span> <span class="toc-text">5.2 运⾏ SpringBoot 应⽤</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#53-%E9%85%8D%E7%BD%AEprometheus"><span class="toc-number">1.5.3.</span> <span class="toc-text">5.3 配置 Prometheus</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#54-jmx%E5%91%8A%E8%AD%A6%E8%A7%84%E5%88%99%E6%96%87%E4%BB%B6"><span class="toc-number">1.5.4.</span> <span class="toc-text">5.4 JMX 告警规则⽂件</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%AD-%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AEmysql_master"><span class="toc-number">1.6.</span> <span class="toc-text">六。安装并配置 mysql_master</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#61-%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AEmysql_master"><span class="toc-number">1.6.1.</span> <span class="toc-text">6.1 安装并配置 mysql_master</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#62-%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AEmysql_slave"><span class="toc-number">1.6.2.</span> <span class="toc-text">6.2 安装并配置 mysql_slave</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#63-%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AEmysqld_exporter"><span class="toc-number">1.6.3.</span> <span class="toc-text">6.3 安装并配置 mysqld_exporter</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#64-%E9%85%8D%E7%BD%AEprometheus"><span class="toc-number">1.6.4.</span> <span class="toc-text">6.4 配置 Prometheus</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#65-mysql%E5%91%8A%E8%AD%A6%E8%A7%84%E5%88%99%E6%96%87%E4%BB%B6"><span class="toc-number">1.6.5.</span> <span class="toc-text">6.5 MySQL 告警规则⽂件</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%83-prometheus%E7%9B%91%E6%8E%A7redis"><span class="toc-number">1.7.</span> <span class="toc-text">七. Prometheus 监控 Redis</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#71-%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AEredis"><span class="toc-number">1.7.1.</span> <span class="toc-text">7.1 安装并配置 Redis</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#72-%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AEredis_exporter"><span class="toc-number">1.7.2.</span> <span class="toc-text">7.2 安装并配置 redis_exporter</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#73-%E9%85%8D%E7%BD%AEprometheus"><span class="toc-number">1.7.3.</span> <span class="toc-text">7.3 配置 Prometheus</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#74-redis%E5%91%8A%E8%AD%A6%E8%A7%84%E5%88%99%E6%96%87%E4%BB%B6"><span class="toc-number">1.7.4.</span> <span class="toc-text">7.4 Redis 告警规则⽂件</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%AB-prometheus%E7%9B%91%E6%8E%A7docker"><span class="toc-number">1.8.</span> <span class="toc-text">八. Prometheus 监控 Docker</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B9%9D-blackbox_exporter%E9%BB%91%E7%9B%92%E7%9B%91%E6%8E%A7"><span class="toc-number">1.9.</span> <span class="toc-text">九. Blackbox_exporter ⿊盒监控</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#91-%E5%AE%89%E8%A3%85blackbox_exporter"><span class="toc-number">1.9.1.</span> <span class="toc-text">9.1 安装 Blackbox_exporter</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#92-%E9%85%8D%E7%BD%AEprometheus"><span class="toc-number">1.9.2.</span> <span class="toc-text">9.2 配置 Prometheus</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#93-%E9%85%8D%E7%BD%AEtcp-ssh-icmp%E7%9B%91%E6%8E%A7"><span class="toc-number">1.9.3.</span> <span class="toc-text">9.3 配置 tcp、ssh、icmp 监控</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#94-blackbox%E5%91%8A%E8%AD%A6%E8%A7%84%E5%88%99%E6%96%87%E4%BB%B6"><span class="toc-number">1.9.4.</span> <span class="toc-text">9.4 Blackbox 告警规则⽂件</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%81-domain_exporter%E5%9F%9F%E5%90%8D%E7%9B%91%E6%8E%A7"><span class="toc-number">1.10.</span> <span class="toc-text">十. domain_exporter 域名监控</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#101-%E5%AE%89%E8%A3%85domain_exporter"><span class="toc-number">1.10.1.</span> <span class="toc-text">10.1 安装 domain_exporter</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#102-%E9%85%8D%E7%BD%AEprometheus"><span class="toc-number">1.10.2.</span> <span class="toc-text">10.2 配置 Prometheus</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#103-domain%E5%91%8A%E8%AD%A6%E8%A7%84%E5%88%99%E6%96%87%E4%BB%B6"><span class="toc-number">1.10.3.</span> <span class="toc-text">10.3 domain 告警规则⽂件</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%81%E4%B8%80-pushgateway%E6%8E%A8%E9%80%81%E7%BD%91%E5%85%B3%E6%9C%8D%E5%8A%A1"><span class="toc-number">1.11.</span> <span class="toc-text">十一. PushGateway 推送⽹关服务</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#111-%E5%AE%89%E8%A3%85pushgateway"><span class="toc-number">1.11.1.</span> <span class="toc-text">11.1 安装 pushGateway</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#112-%E9%85%8D%E7%BD%AEpromethues"><span class="toc-number">1.11.2.</span> <span class="toc-text">11.2 配置 Promethues</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#113-%E7%BC%96%E5%86%99%E8%84%9A%E6%9C%AC%E5%B9%B6%E6%8E%A8%E9%80%81%E6%8C%87%E6%A0%87"><span class="toc-number">1.11.3.</span> <span class="toc-text">11.3 编写脚本并推送指标</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#114-%E9%85%8D%E7%BD%AE%E5%91%8A%E8%AD%A6%E8%A7%84%E5%88%99%E6%96%87%E4%BB%B6"><span class="toc-number">1.11.4.</span> <span class="toc-text">11.4 配置告警规则⽂件</span></a></li></ol></li></ol></li></ol></div><div class="related panel pjax" data-title="系列文章"><ul><li><a href="/posts/1595025559.html" rel="bookmark" title="Prometheus监控实战（一）">Prometheus监控实战（一）</a></li><li><a href="/posts/3386060324.html" rel="bookmark" title="PromQL快速入门（二）">PromQL快速入门（二）</a></li><li class="active"><a href="/posts/4081185381.html" rel="bookmark" title="Prometheus监控实战（三）">Prometheus监控实战（三）</a></li><li><a href="/posts/2041568856.html" rel="bookmark" title="Prometheus监控Kubernetes">Prometheus监控Kubernetes</a></li></ul></div><div class="overview panel" data-title="站点概览"><div class="author" itemprop="author" itemscope itemtype="http://schema.org/Person"><img class="image" loading="lazy" decoding="async" itemprop="image" alt="Xu Yong" src="/assets/avatar.png"><p class="name" itemprop="name">Xu Yong</p><div class="description" itemprop="description">专注于 Linux 运维、云计算、云原⽣等技术</div></div><nav class="state"><div class="item posts"><a href="/archives/"><span class="count">47</span><span class="name">文章</span></a></div><div class="item categories"><a href="/categories/"><span class="count">15</span><span class="name">分类</span></a></div><div class="item tags"><a href="/tags/"><span class="count">18</span><span class="name">标签</span></a></div></nav><div class="social"><a target="_blank" rel="noopener" href="https://github.com/xyapples" class="item github" title="https:&#x2F;&#x2F;github.com&#x2F;xyapples"><i class="ic i-github"></i></a><a target="_blank" rel="noopener" href="https://gitee.com/chinagei" class="item gitee" title="https:&#x2F;&#x2F;gitee.com&#x2F;chinagei"><i class="ic i-gitee"></i></a><a href="mailto:373370405@qq.com" class="item email" title="mailto:373370405@qq.com"><i class="ic i-envelope"></i></a></div><div class="menu"><li class="item"><a href="/" rel="section"><i class="ic i-home"></i>首页</a></li><li class="item"><a href="/categories/" rel="section"><i class="ic i-th"></i>分类</a></li><li class="item"><a href="/archives/" rel="section"><i class="ic i-list-alt"></i>归档</a></li><li class="item"><a href="/tags/" rel="section"><i class="ic i-tags"></i>标签</a></li><li class="item"><a href="/about/" rel="section"><i class="ic i-about"></i>关于</a></li><li class="item"><a href="/friends/" rel="section"><i class="ic i-heart"></i>友链</a></li></div></div></div></div><ul id="quick"><li class="prev pjax"><a href="/posts/2041568856.html" rel="prev" title="上一篇"><i class="ic i-chevron-left"></i></a></li><li class="up"><i class="ic i-arrow-up"></i></li><li class="down"><i class="ic i-arrow-down"></i></li><li class="next pjax"><a href="/posts/3386060324.html" rel="next" title="下一篇"><i class="ic i-chevron-right"></i></a></li><li class="percent"></li></ul></div></div><div class="dimmer"></div></div></main><footer id="footer"><div class="inner"><div class="widgets"><div class="rpost pjax"><h2>随机文章</h2><ul><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/985149017.html">二进制高可用安装K8S集群</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/2771271649.html">云原生K8s安全专家CKS认证考题详解</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/3254599477.html">K8s容忍和污点</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/LVS/" title="分类于LVS">LVS</a></div><span><a href="/posts/1598774589.html">负载均衡LVS入门与实践</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Aliyun/" title="分类于Aliyun">Aliyun</a></div><span><a href="/posts/1528713798.html">阿里云ECS、SLB、RDS、CDN、ESS应用与实践</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Kubernetes/" title="分类于Kubernetes">Kubernetes</a></div><span><a href="/posts/3142072607.html">K8s初始化容器、临时容器</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/MySQL/" title="分类于MySQL">MySQL</a></div><span><a href="/posts/2628187572.html">MySQL运维DBA应用与实践</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/ELKStack/" title="分类于ELKStack">ELKStack</a></div><span><a href="/posts/170066797.html">消费租赁项目Kubernetes基于ELK日志分析与实践</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/Linux/" title="分类于Linux">Linux</a></div><span><a href="/posts/2889248111.html">Vsftp服务实践</a></span></li><li class="item"><div class="breadcrumb"><a href="/categories/ELKStack/" title="分类于ELKStack">ELKStack</a></div><span><a href="/posts/570469260.html">ELK收集Kubernetes组件日志分析与实践</a></span></li></ul></div><div class="rpost pjax"><h2>最新评论</h2><ul class="leancloud-recent-comment" id="new-comment"></ul></div></div><div class="status"><div class="copyright">&copy; 2022 -<span itemprop="copyrightYear">2025</span><span class="with-love"><i class="ic i-sakura rotate"></i></span><span class="author" itemprop="copyrightHolder">Xu Yong @ LinuxSre云原生</span></div><div class="count"><span class="post-meta-item-icon"><i class="ic i-chart-area"></i></span><span title="站点总字数">1.2m 字</span><span class="post-meta-divider"> | </span><span class="post-meta-item-icon"><i class="ic i-coffee"></i></span><span title="站点阅读时长">17:41</span></div><div class="powered-by">基于 <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & Theme.<a target="_blank" rel="noopener" href="https://github.com/theme-shoka-x/hexo-theme-shokaX/">ShokaX</a></div></div></div></footer></div><script data-config type="text/javascript">var LOCAL = {
     ispost: true,
         path: `posts/4081185381.html`,
         favicon: {

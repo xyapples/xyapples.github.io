@@ -4,24 +4,24 @@
     <title>LinuxSre云原生 • Posts by &#34;prometheus&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-29T02:33:49.000Z</updated>
-    <category term="DevOps" />
     <category term="Aliyun" />
     <category term="ELKStack" />
+    <category term="DevOps" />
     <category term="Docker" />
     <category term="Harbor" />
     <category term="Kubernetes" />
+    <category term="LVS" />
     <category term="Linux" />
     <category term="rsync" />
-    <category term="Samba" />
     <category term="Vsftp" />
-    <category term="LVS" />
-    <category term="Prometheus" />
+    <category term="Samba" />
     <category term="MySQL" />
-    <category term="Rabbitmq" />
     <category term="Openvpn" />
+    <category term="Prometheus" />
+    <category term="Rabbitmq" />
     <category term="Redis" />
-    <category term="Windows" />
     <category term="Tomcat" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/2041568856.html</id>
         <title>Prometheus监控Kubernetes</title>
@@ -36,6 +36,2510 @@
         <title>Prometheus监控实战（三）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/4081185381.html"/>
         <content type="html">&lt;h3 id=&#34;prometheus监控实战三&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#prometheus监控实战三&#34;&gt;#&lt;/a&gt; Prometheus 监控实战（三）&lt;/h3&gt;
+&lt;h4 id=&#34;一-promtheus节点监控&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-promtheus节点监控&#34;&gt;#&lt;/a&gt; 一. Promtheus 节点监控&lt;/h4&gt;
+&lt;h5 id=&#34;11-配置prometheus&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-配置prometheus&#34;&gt;#&lt;/a&gt; 1.1  配置 Prometheus&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+# rules配置文件路径
+rule_files:
+  - &amp;quot;/etc/prometheus/rules/*.yml&amp;quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &amp;quot;prometheus&amp;quot; # 定义一个抓取任务，名为 &#39;prometheus&#39;。
+    metrics_path: &amp;quot;/metrics&amp;quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 &#39;/metrics&#39;。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&amp;quot;prom-node01.oldxu.net:9090&amp;quot;]
+
+  - job_name: &amp;quot;grafana&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:3000&amp;quot;]
+
+  - job_name: &amp;quot;node_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:9100&amp;quot;,&amp;quot;prom-node02.oldxu.net:9100&amp;quot;,&amp;quot;prom-node03.oldxu.net:9100&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;12-创建rules目录并重载prometheus&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#12-创建rules目录并重载prometheus&#34;&gt;#&lt;/a&gt; 1.2 创建 rules 目录并重载 Prometheus&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# mkdir /etc/prometheus/rules
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;13-promtheus配置告警规则&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#13-promtheus配置告警规则&#34;&gt;#&lt;/a&gt; 1.3 Promtheus 配置告警规则&lt;/h5&gt;
+&lt;h6 id=&#34;131-cpu监控案例实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#131-cpu监控案例实践&#34;&gt;#&lt;/a&gt; 1.3.1 CPU 监控案例实践&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;#1.配置CPU告警规则
+[root@prom-node01 ~]# cat /etc/prometheus/rules/node_rules.yml 
+groups:
+- name: CPU告警规则
+  rules:
+  - alert: 节点CPU使率超过80%
+    expr: ( 1 - avg(irate(node_cpu_seconds_total&amp;#123;mode=&amp;quot;idle&amp;quot;&amp;#125;[1m])) by (instance,job) ) * 100 &amp;gt; 80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;主机CPU利率过高，实例：&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的CPU利用率低于20%，当前利用率：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。可能存在CPU资源浪费情况。&amp;quot;
+      
+  - alert: CPU饱和度过⾼
+    expr: sum(node_load1) by (instance,job) / (count(node_cpu_seconds_total&amp;#123;mode=&amp;quot;idle&amp;quot;&amp;#125;) by (instance,job) * 2) * 100 &amp;gt; 80
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;CPU饱和度过高，实例：&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的1分钟平均CPU负载超过了核心数的两倍，已经持续2分钟，当前CPU饱和度：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。需要立即检查系统负载情况。&amp;quot;
+      
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/node_rules.yml
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;132-内存监控案例实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#132-内存监控案例实践&#34;&gt;#&lt;/a&gt; 1.3.2 内存监控案例实践&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;#1.配置内存告警规则
+[root@prom-node01 ~]# cat /etc/prometheus/rules/node_rules.yml 
+groups:
+- name: CPU告警规则
+  rules:
+  - alert: 节点CPU使率超过80%
+    expr: ( 1 - avg(irate(node_cpu_seconds_total&amp;#123;mode=&amp;quot;idle&amp;quot;&amp;#125;[1m])) by (instance,job) ) * 100 &amp;gt; 80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;主机CPU利率过高，实例：&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的CPU利用率低于20%，当前利用率：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。可能存在CPU资源浪费情况。&amp;quot;
+
+  - alert: CPU饱和度过⾼
+    expr: sum(node_load1) by (instance,job) / (count(node_cpu_seconds_total&amp;#123;mode=&amp;quot;idle&amp;quot;&amp;#125;) by (instance,job) * 2) * 100 &amp;gt; 80
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;CPU饱和度过高，实例：&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的1分钟平均CPU负载超过了核心数的两倍，已经持续2分钟，当前CPU饱和度：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。需要立即检查系统负载情况。&amp;quot;
+
+- name: 内存告警规则
+  rules:
+  - alert: 主机内存不⾜
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 &amp;gt; 80
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;主机内存使用率较高, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的内存使用率持续2分钟高于80%，当前利用率：&amp;#123;&amp;#123; $value&amp;#125;&amp;#125;%&amp;quot;
+  - alert: 内存饱和度⾼
+    expr: ( 1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes) * 100 &amp;gt; 10
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;主机内存内存饱和度高, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;SWAP内存使用率已连续2分钟超过10%，表明内存饱和度过⾼，当前SWAP使用率为：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。&amp;quot;
+      
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/node_rules.yml
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;133-磁盘监控案例实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#133-磁盘监控案例实践&#34;&gt;#&lt;/a&gt; 1.3.3 磁盘监控案例实践&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/rules/node_rules.yml 
+groups:
+- name: CPU告警规则
+  rules:
+  - alert: 节点CPU使率超过80%
+    expr: ( 1 - avg(irate(node_cpu_seconds_total&amp;#123;mode=&amp;quot;idle&amp;quot;&amp;#125;[1m])) by (instance,job) ) * 100 &amp;gt; 80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;主机CPU利率过高，实例：&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的CPU利用率低于20%，当前利用率：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。可能存在CPU资源浪费情况。&amp;quot;
+
+  - alert: CPU饱和度过⾼
+    expr: sum(node_load1) by (instance,job) / (count(node_cpu_seconds_total&amp;#123;mode=&amp;quot;idle&amp;quot;&amp;#125;) by (instance,job) * 2) * 100 &amp;gt; 80
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;CPU饱和度过高，实例：&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的1分钟平均CPU负载超过了核心数的两倍，已经持续2分钟，当前CPU饱和度：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。需要立即检查系统负载情况。&amp;quot;
+
+  - alert: 主机内存不⾜
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 &amp;gt; 80
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;主机内存使用率较高, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的内存使用率持续2分钟高于80%，当前利用率：&amp;#123;&amp;#123; $value&amp;#125;&amp;#125;%&amp;quot;
+
+  - alert: 内存饱和度⾼
+    expr: ( 1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes) * 100 &amp;gt; 10
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;主机内存内存饱和度高, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;SWAP内存使用率已连续2分钟超过10%，表明内存饱和度过⾼，当前SWAP使用率为：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。&amp;quot;
+
+- name: 磁盘告警规则
+  rules:
+  - alert: 磁盘空间告急
+    expr: ( node_filesystem_size_bytes&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; - node_filesystem_avail_bytes&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; ) / node_filesystem_size_bytes&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; * 100 &amp;gt; 70
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘 &amp;#123;&amp;#123; $labels.mountpoint &amp;#125;&amp;#125;分区空间不足&amp;quot;
+      description: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘 &amp;#123;&amp;#123; $labels.mountpoint&amp;#125;&amp;#125; 分区空间使用率已超过 70%，当前使用率为 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%，请及时处理。&amp;quot;
+          
+  - alert: 磁盘Inode空间告急
+    expr: (node_filesystem_files&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; - node_filesystem_files_free&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; ) / node_filesystem_files&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; * 100 &amp;gt; 70
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘 &amp;#123;&amp;#123; $labels.mountpoint &amp;#125;&amp;#125;分区Inode空间不足&amp;quot;
+      description: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘 &amp;#123;&amp;#123; $labels.mountpoint&amp;#125;&amp;#125; 分区的Inode空间使用率已超过 70%，，当前使用率为 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%，请及时处理。&amp;quot;
+          
+  - alert: 磁盘IOPS写入较高
+    #expr: sum(rate(node_disk_writes_completed_total[1m])) by (instance,job) / 120 * 100 &amp;gt;60
+    #round函数可以对值进行四舍五入，磁盘最大IOPS为120次/s
+    expr: round(max(irate(node_disk_writes_completed_total[1m])) by (instance,job) / 120 * 100) &amp;gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; IOPS每秒写入次数超过120次/s&amp;quot;
+      description: 
+        当前磁盘IOPS写入饱和度是 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%
+        当前磁盘IOPS每秒写入最大 &amp;#123;&amp;#123; printf `max(rate(node_disk_writes_completed_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;&amp;#125;[1m]))` $labels.instance $labels.job | query | first | value | printf &#34;%.2f&#34; &amp;#125;&amp;#125; 次/s
+                
+  - alert: 磁盘IOPS读取较高
+    expr: round(max(irate(node_disk_reads_completed_total[1m])) by (instance,job) / 120 * 100) &amp;gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; IOPS每秒读取次数超过120次/s&amp;quot;
+      description:
+        当前磁盘IOPS读取饱和度是 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%
+        当前磁盘IOPS每秒读取最⼤ &amp;#123;&amp;#123; printf `max(rate(node_disk_reads_completed_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;&amp;#125;[1m]))` $labels.instance $labels.job | query | first | value | printf &#34;%.2f&#34; &amp;#125;&amp;#125; 次/s
+  
+  - alert: 磁盘IO写入吞吐较高
+    expr: round(max(rate(node_disk_written_bytes_total[1m])) by (instance,job) / 1024 /1024 / 30 * 100) &amp;gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘IO写入每秒超过最高30MB/s&amp;quot;
+      description:
+        当前磁盘IO写入吞吐量的饱和度是 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。
+        当前磁盘IO写入吞吐量每秒最大是 &amp;#123;&amp;#123; printf `max(rate(node_disk_written_bytes_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;&amp;#125;[1m])) /1024/1024` $labels.instance $labels.job | query | first | value | printf &#34;%.2f&#34; &amp;#125;&amp;#125;MB/s
+
+  - alert: 磁盘IO读取吞吐较高
+    expr: round(max(rate(node_disk_read_bytes_total[1m])) by (instance,job) / 1024 /1024 /30 * 100 ) &amp;gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘IO读取每秒超过最大30MB/s&amp;quot;
+      description:
+        当前磁盘IO读取吞吐量的饱和度是 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。
+        当前磁盘IO读取吞吐量每秒最大是 &amp;#123;&amp;#123; printf `max(rate(node_disk_read_bytes_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;&amp;#125;[1m])) /1024/1024` $labels.instance $labels.job | query | first | value | printf &#34;%.2f&#34; &amp;#125;&amp;#125;MB/s
+[root@prom-node01 ~]# vim /etc/prometheus/rules/node_rules.yml 
+[root@prom-node01 ~]# cat /etc/prometheus/rules/node_rules.yml 
+groups:
+- name: CPU告警规则
+  rules:
+  - alert: 节点CPU使率超过80%
+    expr: ( 1 - avg(irate(node_cpu_seconds_total&amp;#123;mode=&amp;quot;idle&amp;quot;&amp;#125;[1m])) by (instance,job) ) * 100 &amp;gt; 80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;主机CPU利率过高，实例：&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的CPU利用率低于20%，当前利用率：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。可能存在CPU资源浪费情况。&amp;quot;
+
+  - alert: CPU饱和度过高
+    expr: sum(node_load1) by (instance,job) / (count(node_cpu_seconds_total&amp;#123;mode=&amp;quot;idle&amp;quot;&amp;#125;) by (instance,job) * 2) * 100 &amp;gt; 80
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;CPU饱和度过高，实例：&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的1分钟平均CPU负载超过了核心数的两倍，已经持续2分钟，当前CPU饱和度：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。需要立即检查系统负载情况。&amp;quot;
+
+  - alert: 主机内存不足
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 &amp;gt; 80
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;主机内存使用率较高, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的内存使用率持续2分钟高于80%，当前利用率：&amp;#123;&amp;#123; $value&amp;#125;&amp;#125;%&amp;quot;
+
+  - alert: 内存饱和度高
+    expr: ( 1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes) * 100 &amp;gt; 10
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;主机内存内存饱和度高, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;SWAP内存使用率已连续2分钟超过10%，表明内存饱和度过高，当前SWAP使用率为：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。&amp;quot;
+
+- name: 磁盘告警规则
+  rules:
+  - alert: 磁盘空间告急
+    expr: ( node_filesystem_size_bytes&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; - node_filesystem_avail_bytes&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; ) / node_filesystem_size_bytes&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; * 100 &amp;gt; 70
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘 &amp;#123;&amp;#123; $labels.mountpoint &amp;#125;&amp;#125;分区空间不足&amp;quot;
+      description: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘 &amp;#123;&amp;#123; $labels.mountpoint&amp;#125;&amp;#125; 分区空间使用率已超过 70%，当前使用率为 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%，请及时处理。&amp;quot;
+          
+  - alert: 磁盘Inode空间告急
+    expr: (node_filesystem_files&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; - node_filesystem_files_free&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; ) / node_filesystem_files&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; * 100 &amp;gt; 70
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘 &amp;#123;&amp;#123; $labels.mountpoint &amp;#125;&amp;#125;分区Inode空间不足&amp;quot;
+      description: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘 &amp;#123;&amp;#123; $labels.mountpoint&amp;#125;&amp;#125; 分区的Inode空间使用率已超过 70%，，当前使用率为 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%，请及时处理。&amp;quot;
+          
+  - alert: 磁盘IOPS写入较高
+    #expr: sum(rate(node_disk_writes_completed_total[1m])) by (instance,job) / 120 * 100 &amp;gt;60
+    #round函数可以对值进行四舍五入，磁盘最大IOPS为120次/s
+    expr: round(max(irate(node_disk_writes_completed_total[1m])) by (instance,job) / 120 * 100) &amp;gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; IOPS每秒写入次数超过120次/s&amp;quot;
+      description: 
+        当前磁盘IOPS写入饱和度是 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%
+        当前磁盘IOPS每秒写入最大 &amp;#123;&amp;#123; printf `max(rate(node_disk_writes_completed_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;&amp;#125;[1m]))` $labels.instance $labels.job | query | first | value | printf &#34;%.2f&#34; &amp;#125;&amp;#125; 次/s
+                
+  - alert: 磁盘IOPS读取较高
+    expr: round(max(irate(node_disk_reads_completed_total[1m])) by (instance,job) / 120 * 100) &amp;gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; IOPS每秒读取次数超过120次/s&amp;quot;
+      description:
+        当前磁盘IOPS读取饱和度是 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%
+        当前磁盘IOPS每秒读取最⼤ &amp;#123;&amp;#123; printf `max(rate(node_disk_reads_completed_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;&amp;#125;[1m]))` $labels.instance $labels.job | query | first | value | printf &#34;%.2f&#34; &amp;#125;&amp;#125; 次/s
+  
+  - alert: 磁盘IO写入吞吐较高
+    expr: round(max(rate(node_disk_written_bytes_total[1m])) by (instance,job) / 1024 /1024 / 30 * 100) &amp;gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘IO写入每秒超过最高30MB/s&amp;quot;
+      description:
+        当前磁盘IO写入吞吐量的饱和度是 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。
+        当前磁盘IO写入吞吐量每秒最大是 &amp;#123;&amp;#123; printf `max(rate(node_disk_written_bytes_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;&amp;#125;[1m])) /1024/1024` $labels.instance $labels.job | query | first | value | printf &#34;%.2f&#34; &amp;#125;&amp;#125;MB/s
+
+  - alert: 磁盘IO读取吞吐较高
+    expr: round(max(rate(node_disk_read_bytes_total[1m])) by (instance,job) / 1024 /1024 /30 * 100 ) &amp;gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘IO读取每秒超过最大30MB/s&amp;quot;
+      description:
+        当前磁盘IO读取吞吐量的饱和度是 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。
+        当前磁盘IO读取吞吐量每秒最大是 &amp;#123;&amp;#123; printf `max(rate(node_disk_read_bytes_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;&amp;#125;[1m])) /1024/1024` $labels.instance $labels.job | query | first | value | printf &#34;%.2f&#34; &amp;#125;&amp;#125;MB/s
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/node_rules.yml
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+
+#根据过去24小时磁盘使用情况，计算未来30天磁盘使用空间
+predict_linear(node_filesystem_avail_bytes&amp;#123;device!~&amp;quot;tmpfs|rootfs&amp;quot;&amp;#125;[24h],60*60*24*30) /1024/1024/1024
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h6 id=&#34;134-网络监控案例实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#134-网络监控案例实践&#34;&gt;#&lt;/a&gt; 1.3.4 ⽹络监控案例实践&lt;/h6&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/rules/node_rules.yml 
+groups:
+- name: 节点告警规则
+  rules:
+  - alert: 节点CPU使率超过80%
+    expr: ( 1 - avg(irate(node_cpu_seconds_total&amp;#123;mode=&amp;quot;idle&amp;quot;&amp;#125;[1m])) by (instance,job) ) * 100 &amp;gt; 80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;主机CPU利率过高，实例：&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的CPU利用率低于20%，当前利用率：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。可能存在CPU资源浪费情况。&amp;quot;
+
+  - alert: CPU饱和度过高
+    expr: sum(node_load1) by (instance,job) / (count(node_cpu_seconds_total&amp;#123;mode=&amp;quot;idle&amp;quot;&amp;#125;) by (instance,job) * 2) * 100 &amp;gt; 80
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;CPU饱和度过高，实例：&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的1分钟平均CPU负载超过了核心数的两倍，已经持续2分钟，当前CPU饱和度：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。需要立即检查系统负载情况。&amp;quot;
+
+  - alert: 主机内存不足
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 &amp;gt; 80
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;主机内存使用率较高, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例的内存使用率持续2分钟高于80%，当前利用率：&amp;#123;&amp;#123; $value&amp;#125;&amp;#125;%&amp;quot;
+
+  - alert: 内存饱和度高
+    expr: ( 1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes) * 100 &amp;gt; 10
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;主机内存内存饱和度高, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, 任务:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;SWAP内存使用率已连续2分钟超过10%，表明内存饱和度过高，当前SWAP使用率为：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。&amp;quot;
+
+  - alert: 磁盘空间告急
+    expr: ( node_filesystem_size_bytes&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; - node_filesystem_avail_bytes&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; ) / node_filesystem_size_bytes&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; * 100 &amp;gt; 70
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘 &amp;#123;&amp;#123; $labels.mountpoint &amp;#125;&amp;#125;分区空间不足&amp;quot;
+      description: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘 &amp;#123;&amp;#123; $labels.mountpoint&amp;#125;&amp;#125; 分区空间使用率已超过 70%，当前使用率为 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%，请及时处理。&amp;quot;
+          
+  - alert: 磁盘Inode空间告急
+    expr: (node_filesystem_files&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; - node_filesystem_files_free&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; ) / node_filesystem_files&amp;#123;device!=&amp;quot;tmpfs&amp;quot;&amp;#125; * 100 &amp;gt; 70
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘 &amp;#123;&amp;#123; $labels.mountpoint &amp;#125;&amp;#125;分区Inode空间不足&amp;quot;
+      description: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘 &amp;#123;&amp;#123; $labels.mountpoint&amp;#125;&amp;#125; 分区的Inode空间使用率已超过 70%，，当前使用率为 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%，请及时处理。&amp;quot;
+          
+  - alert: 磁盘IOPS写入较高
+    #expr: sum(rate(node_disk_writes_completed_total[1m])) by (instance,job) / 120 * 100 &amp;gt;60
+    #round函数可以对值进行四舍五入，磁盘最大IOPS为120次/s
+    expr: round(max(irate(node_disk_writes_completed_total[1m])) by (instance,job) / 120 * 100) &amp;gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; IOPS每秒写入次数超过120次/s&amp;quot;
+      description: 
+        当前磁盘IOPS写入饱和度是 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%
+        当前磁盘IOPS每秒写入最大 &amp;#123;&amp;#123; printf `max(rate(node_disk_writes_completed_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;&amp;#125;[1m]))` $labels.instance $labels.job | query | first | value | printf &#34;%.2f&#34; &amp;#125;&amp;#125; 次/s
+                
+  - alert: 磁盘IOPS读取较高
+    expr: round(max(irate(node_disk_reads_completed_total[1m])) by (instance,job) / 120 * 100) &amp;gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; IOPS每秒读取次数超过120次/s&amp;quot;
+      description:
+        当前磁盘IOPS读取饱和度是 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%
+        当前磁盘IOPS每秒读取最⼤ &amp;#123;&amp;#123; printf `max(rate(node_disk_reads_completed_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;&amp;#125;[1m]))` $labels.instance $labels.job | query | first | value | printf &#34;%.2f&#34; &amp;#125;&amp;#125; 次/s
+  
+  - alert: 磁盘IO写入吞吐较高
+    expr: round(max(rate(node_disk_written_bytes_total[1m])) by (instance,job) / 1024 /1024 / 30 * 100) &amp;gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘IO写入每秒超过最高30MB/s&amp;quot;
+      description:
+        当前磁盘IO写入吞吐量的饱和度是 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。
+        当前磁盘IO写入吞吐量每秒最大是 &amp;#123;&amp;#123; printf `max(rate(node_disk_written_bytes_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;&amp;#125;[1m])) /1024/1024` $labels.instance $labels.job | query | first | value | printf &#34;%.2f&#34; &amp;#125;&amp;#125;MB/s
+
+  - alert: 磁盘IO读取吞吐较高
+    expr: round(max(rate(node_disk_read_bytes_total[1m])) by (instance,job) / 1024 /1024 /30 * 100 ) &amp;gt; 60
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 磁盘IO读取每秒超过最大30MB/s&amp;quot;
+      description:
+        当前磁盘IO读取吞吐量的饱和度是 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。
+        当前磁盘IO读取吞吐量每秒最大是 &amp;#123;&amp;#123; printf `max(rate(node_disk_read_bytes_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;&amp;#125;[1m])) /1024/1024` $labels.instance $labels.job | query | first | value | printf &#34;%.2f&#34; &amp;#125;&amp;#125;MB/s
+
+  - alert: 网络下载带宽异常
+    expr: max(irate(node_network_receive_bytes_total[1m]) * 8 / 1024 / 1024) by (instance,job,device) / 50 * 100 &amp;gt;= 80
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 的 &amp;#123;&amp;#123; $labels.device &amp;#125;&amp;#125; 接口下载流量已经超过公司实际50Mbps&amp;quot;
+      description:
+        当前下载带宽已经达到 &amp;#123;&amp;#123; printf `(irate(node_network_receive_bytes_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;,device=&#34;%s&#34;&amp;#125;[1m]) * 8 / 1024 / 1024)` $labels.instance $labels.job $labels.device | query | first | value | printf &#34;%.2f&#34;&amp;#125;&amp;#125; Mbps/s
+        当前下载带宽使用率在 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%
+  
+  - alert: 网络上传带宽异常
+    expr: max(irate(node_network_transmit_bytes_total[1m]) * 8 / 1024 / 1024) by (instance,job,device) / 50 * 100 &amp;gt;= 80
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 的 &amp;#123;&amp;#123; $labels.device &amp;#125;&amp;#125; 接口上传流量已经超过公司实际50Mbps&amp;quot;
+      description:
+        当前上传带宽已经达到 &amp;#123;&amp;#123; printf `(irate(node_network_transmit_bytes_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;,device=&#34;%s&#34;&amp;#125;[1m]) * 8 / 1024 / 1024)` $labels.instance $labels.job $labels.device | query | first | value | printf &#34;%.2f&#34;&amp;#125;&amp;#125; Mbps/s
+        当前上传带宽使用率在 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/node_rules.yml
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;二-prometheus监控rabbitmq&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#二-prometheus监控rabbitmq&#34;&gt;#&lt;/a&gt; 二. Prometheus 监控 RabbitmQ&lt;/h4&gt;
+&lt;h5 id=&#34;21-配置prometheus&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-配置prometheus&#34;&gt;#&lt;/a&gt; 2.1 配置 Prometheus&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &amp;quot;/etc/prometheus/rules/*.yml&amp;quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &amp;quot;prometheus&amp;quot; # 定义一个抓取任务，名为 &#39;prometheus&#39;。
+    metrics_path: &amp;quot;/metrics&amp;quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 &#39;/metrics&#39;。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&amp;quot;prom-node01.oldxu.net:9090&amp;quot;]
+
+  - job_name: &amp;quot;grafana&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:3000&amp;quot;]
+
+  - job_name: &amp;quot;node_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:9100&amp;quot;,&amp;quot;prom-node02.oldxu.net:9100&amp;quot;,&amp;quot;prom-node03.oldxu.net:9100&amp;quot;]
+
+  - job_name: &amp;quot;weather_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7001&amp;quot;]
+
+  - job_name: &amp;quot;webserver&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7002&amp;quot;]
+
+  - job_name: &amp;quot;rabbitmq&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:15692&amp;quot;]
+
+#2.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;22-rabbitmq告警规则文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-rabbitmq告警规则文件&#34;&gt;#&lt;/a&gt; 2.2 RabbitMQ 告警规则文件&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1.配置rabbitmq告警规则
+[root@prom-node01 ~]# cat /etc/prometheus/rules/rabbitmq_rules.yml
+groups:
+- name: rabbitmq告警规则
+  rules:
+  - alert: RabbitMQDown
+    expr: up&amp;#123;instance=&amp;quot;prom-node02.oldxu.net:15692&amp;quot;, job=&amp;quot;rabbitmq&amp;quot;&amp;#125; != 1
+    labels:
+      severity: High
+    annotations:
+      summary: &amp;quot;Rabbitmq Down,实例:&amp;#123;&amp;#123;$labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;Rabbitmq_exporter连不上RabbitMQ!&amp;quot;
+  
+  - alert: RabbitMQ队列已就绪的消息过多
+    expr: avg_over_time(rabbitmq_queue_messages_ready[5m]) &amp;gt; 500
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &#39;&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; RabbitMQ实例的队列消息准备过多&#39;
+      description: &#39;&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;实例中平均准备好待消费的消息数量超过500，当前平均值为&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;。&#39;
+          
+  - alert: RabbitMQ队列中已消费但未确认的消息过多
+    expr: avg_over_time(rabbitmq_queue_messages_unacked[5m]) &amp;gt; 500
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &#39;&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; RabbitMQ实例的队列消息确认存在延迟&#39;
+      description: &#39;&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 实例中平均已被消费但未被确认的消息数量超过500，当前平均值为&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;。&#39;
+          
+  - alert: RabbitMQ磁盘空间预测不足
+    expr: predict_linear(rabbitmq_disk_space_available_bytes[24h], 60*60*24*10) &amp;lt; rabbitmq_disk_space_available_limit_bytes
+    for: 1h
+    labels:
+      severity: critical
+    annotations:
+      summary: &#39;&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; RabbitMQ实例的磁盘空间预测不足。&#39;
+      description: &#39;基于过去24小时磁盘可用空间数据预测，未来10天内磁盘的可用空间可能低于默认配置的50MB。&#39;
+ 
+  - alert: RabbitMQ文件描述符使用率过高
+    expr: max_over_time(rabbitmq_process_open_fds[5m]) / rabbitmq_process_max_fds * 100 &amp;gt; 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &#39;&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; RabbitMQ实例的文件描述符使用率过高&#39;
+      description: &#39;&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 实例打开的文件描述符数量最大值，占文件描述限制的比率超过80%，当前比率为&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。&#39;
+          
+  - alert: RabbitMQ TCP套接字使用率过高
+    expr: max_over_time(rabbitmq_process_open_tcp_sockets[5m]) / rabbitmq_process_max_tcp_sockets * 100 &amp;gt; 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &#39;&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; RabbitMQ实例的TCP套接字使用率过高&#39;
+      description: &#39;&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 实例打开的TCP套接字数量最大值，占操作系统允许的TCP连接数限制的比率超过80%，当前比率为&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。&#39;
+      
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/rabbitmq_rules.yml 
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;三-prometheus监控nginx&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#三-prometheus监控nginx&#34;&gt;#&lt;/a&gt; 三. Prometheus 监控 Nginx&lt;/h4&gt;
+&lt;h5 id=&#34;31-安装并配置nginx&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#31-安装并配置nginx&#34;&gt;#&lt;/a&gt; 3.1 安装并配置 Nginx&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1.安装Nginx
+[root@prom-node03 ~]# yum install nginx -y
+[root@prom-node03 ~]# cat /etc/nginx/conf.d/mointor.oldxu.net.conf
+server &amp;#123;
+	 listen 8888;
+	 server_name monitor.oldxu.net;
+	 location /nginx_status &amp;#123;
+		 stub_status on;
+ 	 &amp;#125;
+&amp;#125;
+[root@prom-node03 ~]# nginx -t
+[root@prom-node03 ~]# systemctl enable nginx &amp;amp;&amp;amp; systemctl start nginx
+
+#2.检查Nginx的状态⻚⾯
+[root@prom-node03 ~]#  curl http://localhost:8888/nginx_status
+Active connections: 1 
+server accepts handled requests
+ 1 1 1 
+Reading: 0 Writing: 1 Waiting: 0 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;32-安装并配置nginx-exporter&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#32-安装并配置nginx-exporter&#34;&gt;#&lt;/a&gt; 3.2 安装并配置 Nginx-exporter&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1.下载Nginx-exporter
+[root@prom-node03 ~]# wget https://github.com/nginxinc/nginx-prometheus-exporter/releases/download/v1.1.0/nginx-prometheus-exporter_1.1.0_linux_amd64.tar.gz
+#加速地址
+[root@prom-node03 ~]# wget https://mirror.ghproxy.com/https://github.com/nginxinc/nginx-prometheus-exporter/releases/download/v1.1.0/nginx-prometheus-exporter_1.1.0_linux_amd64.tar.gz
+
+#2.将Nginx_exporter安装到指定的路径
+[root@prom-node03 ~]# mkdir /etc/nginx_exporter_1.1.0
+[root@prom-node03 ~]# tar xf nginx-prometheus-exporter_1.1.0_linux_amd64.tar.gz -C /etc/nginx_exporter_1.1.0/
+[root@prom-node03 ~]# ln -s /etc/nginx_exporter_1.1.0/ /etc/nginx_exporter
+[root@prom-node03 nginx_exporter]# ./nginx-prometheus-exporter --web.listen-address=:9113 --nginx.scrape-uri=http://127.0.0.1:8888/nginx_status
+
+#3.为nginx_exporter准备system启停⽂件
+[root@prom-node03 ~]# cat /usr/lib/systemd/system/nginx_exporter.service
+[Unit]
+Description=nginx-exporter
+Documentation=https://prometheus.io/
+After=network.target
+
+[Service]
+ExecStart=/etc/nginx_exporter/nginx-prometheus-exporter \
+  --web.listen-address=:9113 \
+  --web.telemetry-path=&amp;quot;/metrics&amp;quot; \
+  --nginx.scrape-uri=http://127.0.0.1:8888/nginx_status
+Restart=on-failure
+RestartSec=20
+[Install]
+WantedBy=multi-user.target
+
+#4.启动nginx_exporter服务，它默认监听在 9113 端⼝上
+[root@prom-node03 ~]#  systemctl daemon-reload &amp;amp;&amp;amp; systemctl enable nginx_exporter &amp;amp;&amp;amp; systemctl start nginx_exporter
+[root@prom-node03 ~]# netstat -lntp|grep 9113
+tcp6       0      0 :::9113                 :::*                    LISTEN      1829/nginx-promethe 
+
+#5.访问nginx_exporter暴露的metrics，检查是否能获取到对应的指标数据
+[root@prom-node03 nginx_exporter]#  curl http://127.0.0.1:9113/metrics
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds&amp;#123;quantile=&amp;quot;0&amp;quot;&amp;#125; 0
+go_gc_duration_seconds&amp;#123;quantile=&amp;quot;0.25&amp;quot;&amp;#125; 0
+go_gc_duration_seconds&amp;#123;quantile=&amp;quot;0.5&amp;quot;&amp;#125; 0
+go_gc_duration_seconds&amp;#123;quantile=&amp;quot;0.75&amp;quot;&amp;#125; 0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;33-配置prometheus&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#33-配置prometheus&#34;&gt;#&lt;/a&gt; 3.3 配置 Prometheus&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &amp;quot;/etc/prometheus/rules/*.yml&amp;quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &amp;quot;prometheus&amp;quot; # 定义一个抓取任务，名为 &#39;prometheus&#39;。
+    metrics_path: &amp;quot;/metrics&amp;quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 &#39;/metrics&#39;。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&amp;quot;prom-node01.oldxu.net:9090&amp;quot;]
+
+  - job_name: &amp;quot;grafana&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:3000&amp;quot;]
+
+  - job_name: &amp;quot;node_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:9100&amp;quot;,&amp;quot;prom-node02.oldxu.net:9100&amp;quot;,&amp;quot;prom-node03.oldxu.net:9100&amp;quot;]
+
+  - job_name: &amp;quot;weather_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7001&amp;quot;]
+
+  - job_name: &amp;quot;webserver&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7002&amp;quot;]
+
+  - job_name: &amp;quot;rabbitmq&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:15692&amp;quot;]
+
+  - job_name: &amp;quot;nginx&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9113&amp;quot;]
+
+#2.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;34-nginx告警规则文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#34-nginx告警规则文件&#34;&gt;#&lt;/a&gt; 3.4 Nginx 告警规则⽂件&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1.具体的告警规则示例⽂件（需要根据公司实际情况进⾏调整）
+[root@prom-node01 ~]# cat /etc/prometheus/rules/nginx_rules.yml
+groups:
+- name: nginx告警规则
+  rules:
+  - alert: Nginx Server Down
+    expr: nginx_up == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;Nginx 服务不存活, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;nginx_exporter连不上Nginx了，当前状态为: &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;&amp;quot;
+          
+  - alert: Nginx活跃连接数过高
+    expr: avg_over_time(nginx_connections_active[5m]) &amp;gt; 500
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;Nginx 活跃连接数过高, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot; Nginx 的平均活跃连接数超过了设定的500阈值，当前值为 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;。&amp;quot;
+          
+  - alert: Nginx等待连接数高
+    expr: max_over_time(nginx_connections_waiting[5m]) &amp;gt; 100
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;Nginx 等待连接数过高, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;Nginx 的等待连接数超过了设定的100阈值，当前最大值为 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;。可能后端服务存在瓶颈。&amp;quot;
+          
+  - alert: Nginx读写入率异常
+    expr: (nginx_connections_reading - nginx_connections_writing) / nginx_connections_reading * 100 &amp;gt; 10
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;Nginx 读写入率异常, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;Nginx 读取请求的数量高于写请求的数量，当前读请求高于写请求比率是: &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;&amp;quot;
+  - alert: Nginx⼤量TCP连接处理失败
+    expr: nginx_connections_accepted - nginx_connections_handled &amp;gt; 50
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;Nginx 大量TCP连接处理失败, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;Nginx 接受的连接数与处理成功的连接数之差超过了50，当前差值为&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;&amp;quot;
+      
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/node_rules.yml
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;四-prometheus监控tomcat&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#四-prometheus监控tomcat&#34;&gt;#&lt;/a&gt; 四. Prometheus 监控 Tomcat&lt;/h4&gt;
+&lt;h5 id=&#34;41-安装并配置tomcat&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#41-安装并配置tomcat&#34;&gt;#&lt;/a&gt; 4.1 安装并配置 tomcat&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1.安装tomcat
+[root@prom-node03 nginx_exporter]# yum install tomcat tomcat-webapps -y
+
+#2.下载所依赖的 jar包
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=io/prometheus/simpleclient/0.12.0/simpleclient-0.12.0.jar
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=io/prometheus/simpleclient_common/0.12.0/simpleclient_common-0.12.0.jar
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=io/prometheus/simpleclient_hotspot/0.12.0/simpleclient_hotspot-0.12.0.jar
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=io/prometheus/simpleclient_servlet/0.12.0/simpleclient_servlet-0.12.0.jar
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=io/prometheus/simpleclient_servlet_common/0.12.0/simpleclient_servlet_common-0.12.0.jar
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=nl/nlighten/tomcat_exporter_client/0.0.15/tomcat_exporter_client-0.0.15.jar
+[root@prom-node03 ~]# wget https://search.maven.org/remotecontent?filepath=nl/nlighten/tomcat_exporter_servlet/0.0.15/tomcat_exporter_servlet-0.0.15.war
+# 整合包的下载地址
+[root@prom-node03 ~]# wget https://mirror.ghproxy.com/https://github.com/Im-oldxu/tomcat-exporter/releases/download/tomcat_exporter-0.0.17/tomcat_exporter.tar.gz
+
+#3.将jar包和war包分别拷⻉⾄对应的⽬录下
+[root@prom-node03 ~]# cp tomcat_exporter/*.jar /usr/share/tomcat/lib/
+[root@prom-node03 ~]# cp tomcat_exporter/*.war /usr/share/tomcat/webapps/
+
+#4.启动Tomcat
+[root@prom-node03 ~]# systemctl start tomcat &amp;amp;&amp;amp; systemctl enable tomcat
+
+#5.访问tomcat的metrics
+[root@prom-node03 ~]# curl http://localhost:8080/metrics/
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 7.37
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.70921425481E9
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 65.0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;42-配置prometheus&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#42-配置prometheus&#34;&gt;#&lt;/a&gt; 4.2 配置 Prometheus&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &amp;quot;/etc/prometheus/rules/*.yml&amp;quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &amp;quot;prometheus&amp;quot; # 定义一个抓取任务，名为 &#39;prometheus&#39;。
+    metrics_path: &amp;quot;/metrics&amp;quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 &#39;/metrics&#39;。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&amp;quot;prom-node01.oldxu.net:9090&amp;quot;]
+
+  - job_name: &amp;quot;grafana&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:3000&amp;quot;]
+
+  - job_name: &amp;quot;node_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:9100&amp;quot;,&amp;quot;prom-node02.oldxu.net:9100&amp;quot;,&amp;quot;prom-node03.oldxu.net:9100&amp;quot;]
+
+  - job_name: &amp;quot;weather_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7001&amp;quot;]
+
+  - job_name: &amp;quot;webserver&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7002&amp;quot;]
+
+  - job_name: &amp;quot;rabbitmq&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:15692&amp;quot;]
+
+  - job_name: &amp;quot;nginx&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9113&amp;quot;]
+
+  - job_name: &amp;quot;tomcat&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:8080&amp;quot;]
+
+#.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;43-tomcat告警规则文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#43-tomcat告警规则文件&#34;&gt;#&lt;/a&gt; 4.3 Tomcat 告警规则⽂件&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1.具体的告警规则示例⽂件
+[root@prom-node01 ~]# cat /etc/prometheus/rules/tomcat_rules.yml
+groups:
+- name: tomcat告警规则
+  rules:
+  - alert: Tomcat活跃连接数过⾼
+    expr: tomcat_connections_active_total / tomcat_connections_active_max* 100 &amp;gt;=80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;Tomcat服务器活跃连接数过高, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description:
+        Tomcat最大连接数是 &amp;#123;&amp;#123; printf `tomcat_connections_active_max&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;,name=&#34;%s&#34;&amp;#125;` $labels.instance $labels.job $labels.name | query | first | value &amp;#125;&amp;#125;
+        Tomcat目前连接数是 &amp;#123;&amp;#123; printf `tomcat_connections_active_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;,name=&#34;%s&#34;&amp;#125;` $labels.instance $labels.job $labels.name | query | first | value &amp;#125;&amp;#125;
+        Tomcat活跃连接数已超过最大活跃连接数的80%, 当前值为 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%
+                
+  - alert: Tomcat处理请求超过5秒
+    expr: rate(tomcat_requestprocessor_time_seconds[5m]) &amp;gt; 5
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;Tomcat处理请求时间过长, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;Tomcat在过去5分钟的平均处理请求时间超过5秒，当前值 &amp;#123;&amp;#123; $value&amp;#125;&amp;#125;。&amp;quot;
+          
+  - alert: &amp;quot;Tomcat会话拒绝率超过20%&amp;quot;
+    expr: (tomcat_session_rejected_total / (tomcat_session_created_total +tomcat_session_rejected_total)) * 100 &amp;gt; 20
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;Tomcat会话拒绝率过高, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;Tomcat在Host:&amp;#123;&amp;#123; $labels.host &amp;#125;&amp;#125; 的 &amp;#123;&amp;#123; $labels.context&amp;#125;&amp;#125; 的上下文中的会话拒绝率超过20%，当前值 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;。&amp;quot;
+          
+  - alert: &amp;quot;Tomcat线程使用率过高&amp;quot;
+    expr: (tomcat_threads_active_total / tomcat_threads_max) * 100 &amp;gt; 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;Tomcat线程使⽤率过⾼, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description:
+        Tmcat最大线程数是 &amp;#123;&amp;#123; printf `tomcat_threads_max&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;,name=&#34;%s&#34;&amp;#125;` $labels.instance $labels.job $labels.name | query | first| value &amp;#125;&amp;#125;
+        Tomcat目前线程数是 &amp;#123;&amp;#123; printf `tomcat_threads_active_total&amp;#123;instance=&#34;%s&#34;,job=&#34;%s&#34;,name=&#34;%s&#34;&amp;#125;` $labels.instance $labels.job $labels.name | query | first | value &amp;#125;&amp;#125;
+        Tomcat线程数已超过最大活跃连接数的80%, 当前值为 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/node_rules.yml
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;五-prometheus监控springboot&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#五-prometheus监控springboot&#34;&gt;#&lt;/a&gt; 五. Prometheus 监控 SpringBoot&lt;/h4&gt;
+&lt;h5 id=&#34;51-下载jmx-exporter&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#51-下载jmx-exporter&#34;&gt;#&lt;/a&gt; 5.1 下载 jmx-exporter&lt;/h5&gt;
+&lt;p&gt;1、访问 github， &lt;a href=&#34;https://github.com/prometheus/jmx_exporter/releases&#34;&gt;https://github.com/prometheus/jmx_exporter/releases&lt;/a&gt; ，下载 java-expoter&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node03 ~]# mkdir /etc/jmx_exporter
+[root@prom-node03 ~]# cd /etc/jmx_exporter
+[root@prom-node03 springboot]# wget https://repo.maven.apache.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.20.0/jmx_prometheus_javaagent-0.20.0.jar
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;2、准备 config.yml 配置⽂件（规则⽂件可以定义要暴露哪些指标给 Prometheus）&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node03 ~]# cat /etc/jmx_exporter/config.yaml
+rules:
+- pattern: &amp;quot;.*&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;52-运行springboot应用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#52-运行springboot应用&#34;&gt;#&lt;/a&gt; 5.2 运⾏ SpringBoot 应⽤&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1、安装java基础环境
+[root@prom-node03 ~]#  yum install java-11-openjdk maven -y
+[root@prom-node03 ~]# wget -O /etc/maven/settings.xml https://linux.oldxu.net/settings.xml
+
+#2、下载java应⽤然后进⾏编译
+[root@prom-node03 ~]# wget http://file.oldxu.net/jenkins/springboot-devops-myapp-java11-jar.tar.gz
+[root@prom-node03 ~]# tar xf springboot-devops-myapp-java11-jar.tar.gz
+[root@prom-node03 ~]# cd springboot-devops-myapp-jar/
+[root@prom-node03 springboot-devops-myapp-jar]# mvn package
+
+#3、运⾏java应⽤，并加载jmx监控，监听12345端⼝， &amp;lt;path_to_jmx_exporter.jar&amp;gt;=&amp;lt;exporter_port&amp;gt;:&amp;lt;path_to_config.yaml&amp;gt;
+[root@prom-node03 springboot-devops-myapp-jar]# java \
+ -javaagent:/etc/jmx_exporter/jmx_prometheus_javaagent-0.20.0.jar=12345:/etc/jmx_exporter/config.yaml \
+ -jar -Xms50m -Xmx50m target/devops-myapp-1.0.jar \
+ --server.port=8081 &amp;amp;&amp;gt;/var/log/springboot.log &amp;amp;
+ 
+ #4、检查对应的端⼝是否正常
+ [root@prom-node03 springboot-devops-myapp-jar]# curl http://localhost:12345/metrics
+# HELP jmx_scrape_error Non-zero if this scrape failed.
+# TYPE jmx_scrape_error gauge
+jmx_scrape_error 0.0
+# HELP jmx_scrape_cached_beans Number of beans with their matching rule cached
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;53-配置prometheus&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#53-配置prometheus&#34;&gt;#&lt;/a&gt; 5.3  配置 Prometheus&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &amp;quot;/etc/prometheus/rules/*.yml&amp;quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &amp;quot;prometheus&amp;quot; # 定义一个抓取任务，名为 &#39;prometheus&#39;。
+    metrics_path: &amp;quot;/metrics&amp;quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 &#39;/metrics&#39;。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&amp;quot;prom-node01.oldxu.net:9090&amp;quot;]
+
+  - job_name: &amp;quot;grafana&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:3000&amp;quot;]
+
+  - job_name: &amp;quot;node_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:9100&amp;quot;,&amp;quot;prom-node02.oldxu.net:9100&amp;quot;,&amp;quot;prom-node03.oldxu.net:9100&amp;quot;]
+
+  - job_name: &amp;quot;weather_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7001&amp;quot;]
+
+  - job_name: &amp;quot;webserver&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7002&amp;quot;]
+
+  - job_name: &amp;quot;rabbitmq&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:15692&amp;quot;]
+
+  - job_name: &amp;quot;nginx&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9113&amp;quot;]
+
+  - job_name: &amp;quot;tomcat&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:8080&amp;quot;]
+
+  - job_name: &amp;quot;jmx_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:12345&amp;quot;]
+
+#2.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;54-jmx告警规则文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#54-jmx告警规则文件&#34;&gt;#&lt;/a&gt; 5.4 JMX 告警规则⽂件&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/rules/jvm_rules.yml
+groups:
+- name: &amp;quot;JVM告警规则&amp;quot;
+  rules:
+  - alert: JVM堆内存使用率过高
+    expr: jvm_memory_bytes_used&amp;#123;area=&amp;quot;heap&amp;quot;,&amp;#125; / jvm_memory_bytes_max&amp;#123;area=&amp;quot;heap&amp;quot;,&amp;#125; * 100 &amp;gt; 80
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;JVM 堆内存使用率过高, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, job:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125; &amp;quot;
+      description: &amp;quot;JVM堆内存使用率超过80%, 当前值 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%&amp;quot;
+          
+  - alert: JVMGC时间过长
+    expr: sum (rate(jvm_gc_collection_seconds_sum[5m]) / rate(jvm_gc_collection_seconds_count[5m])) by (gc, instance, job) &amp;gt; 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;JVM GC时间过长, 实例:&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;, job:&amp;#123;&amp;#123; $labels.job &amp;#125;&amp;#125; &amp;quot;
+      description: &amp;quot;JVM &amp;#123;&amp;#123; $labels.gc &amp;#125;&amp;#125; 的回收时间超过1s，当前值 &amp;#123;&amp;#123; $value&amp;#125;&amp;#125;s&amp;quot;
+          
+  - alert: JVM死锁线程过多
+    expr: min_over_time(jvm_threads_deadlocked[5m]) &amp;gt; 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;JVM检测到死锁线程&amp;quot;
+      description: &amp;quot;在过去5分钟内JVM检测到存在死锁线程, 当前值 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;。&amp;quot;
+      
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/jvm_rules.yml 
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;六-安装并配置mysql_master&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#六-安装并配置mysql_master&#34;&gt;#&lt;/a&gt; 六。安装并配置 mysql_master&lt;/h4&gt;
+&lt;h5 id=&#34;61-安装并配置mysql_master&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#61-安装并配置mysql_master&#34;&gt;#&lt;/a&gt; 6.1 安装并配置 mysql_master&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1、安装Mysql5.7
+[root@prom-node03 ~]# yum install -y mysql-community-server
+[root@prom-node03 ~]# systemctl start mysqld &amp;amp;&amp;amp; systemctl enable mysqld
+[root@prom-node03 ~]# mysql -uroot -p$(awk &#39;/temporary password/&amp;#123;print $NF&amp;#125;&#39; /var/log/mysqld.log)
+mysql&amp;gt;  ALTER USER &#39;root&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;Superman*2023&#39;;
+
+#2、创建⼀个 mysql_exporter 专属的监控账户
+mysql&amp;gt; create user &#39;exporter&#39;@&#39;localhost&#39; identified by &#39;Superman*2023&#39; WITH MAX_USER_CONNECTIONS 3;
+mysql&amp;gt; grant process,replication client,select on *.* to &#39;exporter&#39;@&#39;localhost&#39;;
+
+#3、创建MySQL从库复制的账户
+mysql&amp;gt; grant replication slave on *.* to &#39;repl&#39;@&#39;%&#39; identified by &#39;Superman*2023&#39;;
+mysql&amp;gt; flush privileges;
+
+#4.配置主库
+[root@prom-node03 ~]# vim /etc/my.cnf
+server-id=1
+log-bin=mysql-bin
+read-only=0
+[root@prom-node03 ~]# systemctl restart mysqld
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;62-安装并配置mysql_slave&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#62-安装并配置mysql_slave&#34;&gt;#&lt;/a&gt; 6.2 安装并配置 mysql_slave&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1、从库配置
+[root@prom-node04 ~]# yum install -y mysql-community-server
+[root@db02 ~]# vim /etc/my.cnf
+server-id=2
+read-only=1
+
+#2、创建⼀个 mysql_exporter 专属的监控账户
+grant all on *.* to &#39;exporter&#39;@&#39;localhost&#39; identified by &#39;Superman*2023&#39;;
+
+#3、获取主库的信息，⽽后配置从库的change master
+mysql&amp;gt; show master status;
++------------------+----------+--------------+------------------+-------------------+
+| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
++------------------+----------+--------------+------------------+-------------------+
+| mysql-bin.000007 |      154 |              |                  |                   |
++------------------+----------+--------------+------------------+-------------------+
+1 row in set (0.01 sec)
+
+#4、配置从服务器，连接主服务器
+mysql&amp;gt; change master to master_host=&#39;192.168.40.223&#39;,master_user=&#39;repl&#39;,master_password=&#39;Superman*2023&#39;,master_log_file=&#39;mysql-bin.000007&#39;,master_log_pos=154;
+
+#5.开启从库
+mysql&amp;gt; start slave;
+
+#6.检查主从复制状态
+mysql&amp;gt; show slave status\G
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;63-安装并配置mysqld_exporter&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#63-安装并配置mysqld_exporter&#34;&gt;#&lt;/a&gt; 6.3 安装并配置 mysqld_exporter&lt;/h5&gt;
+&lt;p&gt;1、访问 mysqld_exporter 的 github 地址， &lt;a href=&#34;https://github.com/prometheus/mysqld_exporter/releases&#34;&gt;https://github.com/prometheus/mysqld_exporter/releases&lt;/a&gt; 下载 mysqld-exporter&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#1、下载mysqld_expor
+[root@prom-node03 ~]# wget https://github.com/prometheus/mysqld_exporter/releases/download/v0.15.0/mysqld_exporter-0.15.0.linux-amd64.tar.gz
+# 加速地址
+[root@prom-node03 ~]# wget https://mirror.ghproxy.com/https://github.com/prometheus/mysqld_exporter/releases/download/v0.15.0/mysqld_exporter-0.15.0.linux-amd64.tar.gz
+
+#2、解压mysqld_expor
+[root@prom-node03 ~]# tar xf mysqld_exporter-0.15.0.linux-amd64.tar.gz -C /etc/
+[root@prom-node03 ~]# ln -s /etc/mysqld_exporter-0.15.0.linux-amd64/ /etc/mysqld_exporter
+
+#3、启动mysqld_expor
+[root@prom-node03 ~]# export MYSQLD_EXPORTER_PASSWORD=Superman*2023
+[root@prom-node03 ~]# /etc/mysqld_exporter/mysqld_exporter --mysqld.address=localhost:3306 --mysqld.username=exporter
+
+#4、编写mysqld_exporter启动⽂件
+[root@prom-node03 ~]# cat /usr/lib/systemd/system/mysqld_exporter.service
+[Unit]
+Description=mysqld_exporter
+Documentation=https://prometheus.io/
+After=network.target
+
+[Service]
+Environment=&#39;MYSQLD_EXPORTER_PASSWORD=Superman*2023&#39;
+ExecStart=/etc/mysqld_exporter/mysqld_exporter \
+        --mysqld.address=localhost:3306 \
+        --mysqld.username=exporter \
+        --web.listen-address=:9104 \
+        --web.telemetry-path=&amp;quot;/metrics&amp;quot; \
+        --collect.info_schema.processlist \
+        --collect.info_schema.innodb_tablespaces \
+        --collect.info_schema.innodb_metrics \
+        --collect.info_schema.query_response_time \
+        --collect.info_schema.userstats \
+        --collect.info_schema.tables \
+        --collect.global_status \
+        --collect.global_variables \
+        --collect.slave_status \
+        --collect.binlog_size \
+        --collect.engine_innodb_status
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+#4、启动mysqld_exporter，并检查服务
+[root@prom-node03 ~]# systemctl daemon-reload
+[root@prom-node03 ~]# systemctl start mysqld_exporter
+
+#5、测试mysqld_exporter能否获取到对应的指标
+[root@prom-node03 ~]# netstat -lntp |grep 9104
+tcp6       0      0 :::9104                 :::*                    LISTEN      2863/mysqld_exporte 
+[root@prom-node03 ~]#  curl http://localhost:9104/metrics
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;64-配置prometheus&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#64-配置prometheus&#34;&gt;#&lt;/a&gt; 6.4 配置 Prometheus&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &amp;quot;/etc/prometheus/rules/*.yml&amp;quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &amp;quot;prometheus&amp;quot; # 定义一个抓取任务，名为 &#39;prometheus&#39;。
+    metrics_path: &amp;quot;/metrics&amp;quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 &#39;/metrics&#39;。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&amp;quot;prom-node01.oldxu.net:9090&amp;quot;]
+
+  - job_name: &amp;quot;grafana&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:3000&amp;quot;]
+
+  - job_name: &amp;quot;node_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:9100&amp;quot;,&amp;quot;prom-node02.oldxu.net:9100&amp;quot;,&amp;quot;prom-node03.oldxu.net:9100&amp;quot;]
+
+  - job_name: &amp;quot;weather_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7001&amp;quot;]
+
+  - job_name: &amp;quot;webserver&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7002&amp;quot;]
+
+  - job_name: &amp;quot;rabbitmq&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:15692&amp;quot;]
+
+  - job_name: &amp;quot;nginx&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9113&amp;quot;]
+
+  - job_name: &amp;quot;tomcat&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:8080&amp;quot;]
+
+  - job_name: &amp;quot;jmx_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:12345&amp;quot;]
+
+  - job_name: &amp;quot;mysqld_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9104&amp;quot;]
+      labels:
+        service: database
+        role: master
+    - targets: [&amp;quot;prom-node04.oldxu.net:9104&amp;quot;]
+      labels:
+        service: database
+        role: slave
+
+#2.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;65-mysql告警规则文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#65-mysql告警规则文件&#34;&gt;#&lt;/a&gt; 6.5 MySQL 告警规则⽂件&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1、编写MySQL告警规则⽂件
+[root@prom-node01 ~]# cat /etc/prometheus/rules/mysql_rules.yml
+groups:
+- name: mysql告警规则
+  rules:
+  - alert: MySQL主库实例宕机
+    expr: mysql_up&amp;#123;role=&amp;quot;master&amp;quot;&amp;#125; == 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;MySQL实例宕机, 实例: &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;服务:&amp;#123;&amp;#123; $labels.service &amp;#125;&amp;#125; ⻆⾊: &amp;#123;&amp;#123; $labels.role &amp;#125;&amp;#125; 已经宕机。&amp;quot;
+          
+  - alert: MySQL从库实例宕机
+    expr: mysql_up&amp;#123;role=&amp;quot;slave&amp;quot;&amp;#125; == 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;MySQL实例宕机, 实例: &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;服务:&amp;#123;&amp;#123; $labels.service &amp;#125;&amp;#125; ⻆⾊: &amp;#123;&amp;#123; $labels.role &amp;#125;&amp;#125; 已经宕机。&amp;quot;
+          
+  - alert: MySQL实例重启
+    expr: sum(mysql_global_status_uptime) by (instance,job,service,role)&amp;lt; 60
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;MySQL实例重启, 实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;服务:&amp;#123;&amp;#123; $labels.service &amp;#125;&amp;#125; ⻆⾊: &amp;#123;&amp;#123; $labels.role &amp;#125;&amp;#125; 运行时间小于60s。当前值 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;&amp;quot;
+
+  - alert: MySQL连接数使用率超过80%
+    expr: max_over_time(mysql_global_status_threads_connected[5m]) / mysql_global_variables_max_connections * 100 &amp;gt; 80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;MySQL连接数过高, 实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;,服务:&amp;#123;&amp;#123; $labels.service &amp;#125;&amp;#125; ⻆⾊: &amp;#123;&amp;#123; $labels.role &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例MySQL的连接数在过去5分钟内超过了最大连接数的80%, 当前值 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。&amp;quot;
+          
+  - alert: MySQL活跃线程数高
+    expr: avg_over_time(mysql_global_status_threads_running[5m]) / mysql_global_variables_max_connections * 100 &amp;gt; 60
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;MySQL活跃线程数过高, 实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;,服务:&amp;#123;&amp;#123; $labels.service &amp;#125;&amp;#125; 角色: &amp;#123;&amp;#123; $labels.role &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例MySQL的活跃线程数在过去5分钟内持续超过了最大连接数的60%, 当前值 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。&amp;quot;
+          
+  - alert: MySQL查询率(QPS)过高
+    expr: irate(mysql_global_status_queries[5m]) &amp;gt; 1000
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;MySQL查询率(QPS)超标, 实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;,服务:&amp;#123;&amp;#123; $labels.service &amp;#125;&amp;#125; 角色: &amp;#123;&amp;#123; $labels.role &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例MySQL的查询率(QPS)在过去5分钟内超过1000, 当前值 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;。&amp;quot;
+          
+  - alert: MySQL事务率(TPS)过高
+    expr: sum(rate(mysql_global_status_commands_total&amp;#123;command=~&amp;quot;(commit|rollback)&amp;quot;&amp;#125;[5m])) without (command) &amp;gt; 100
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;MySQL事务率(TPS)超标, 实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;,服务:&amp;#123;&amp;#123; $labels.service &amp;#125;&amp;#125; 角色: &amp;#123;&amp;#123; $labels.role &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例MySQL的事务率(TPS)在过去5分钟内超过100, 当前值 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;。&amp;quot;
+          
+  - alert: MySQL文件描述符使用率过高
+    expr: mysql_global_status_open_files / mysql_global_variables_open_files_limit * 100 &amp;gt; 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;MySQL活跃线程数过高, 实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;,服务:&amp;#123;&amp;#123; $labels.service &amp;#125;&amp;#125; 角色: &amp;#123;&amp;#123; $labels.role &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例MySQL的文件描述符使用率超过80%，当前值 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%可能需要增加文件描述符限制。&amp;quot;
+          
+  - alert: Mysql从库IO线程未运行
+    expr: mysql_slave_status_slave_io_running == 0
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;MySQL从库IO线程已停止, 实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该MySQL实例IO线程已停止，当前值 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;&amp;quot;
+          
+  - alert: Mysql从库SQL线程未运行
+    expr: mysql_slave_status_slave_sql_running == 0
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;MySQL从库SQL线程已停止, 实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该MySQL实例SQL线程已停止，当前值 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;&amp;quot;
+          
+  - alert: Mysql从库复制延迟过高
+    expr: mysql_slave_status_seconds_behind_master - mysql_slave_status_sql_delay &amp;gt; 5
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;MySQL从库复制延迟过高, 实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&amp;quot;
+      description: &amp;quot;该实例MySQL的复制延迟超过5s，当前值 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;s&amp;quot;
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/mysql_rules.yml 
+Checking /etc/prometheus/rules/mysql_rules.yml
+  SUCCESS: 11 rules found
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;七-prometheus监控redis&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#七-prometheus监控redis&#34;&gt;#&lt;/a&gt; 七. Prometheus 监控 Redis&lt;/h4&gt;
+&lt;h5 id=&#34;71-安装并配置redis&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#71-安装并配置redis&#34;&gt;#&lt;/a&gt; 7.1 安装并配置 Redis&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node03 ~]# yum install redis -y
+[root@prom-node03 ~]# vim /etc/redis.conf 
+maxmemory 200mb
+[root@prom-node03 ~]# systemctl start redis &amp;amp;&amp;amp; systemctl enable redis
+[root@prom-node03 ~]# netstat -lntp|grep redis
+tcp        0      0 127.0.0.1:6379          0.0.0.0:*               LISTEN      2532/redis-server 1 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;72-安装并配置redis_exporter&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#72-安装并配置redis_exporter&#34;&gt;#&lt;/a&gt; 7.2 安装并配置 redis_exporter&lt;/h5&gt;
+&lt;p&gt;1、访问 redis_exporter 的 github 地址， &lt;a href=&#34;https://github.com/oliver006/redis_exporter/releases&#34;&gt;https://github.com/oliver006/redis_exporter/releases&lt;/a&gt; ，下载 redis_exporter&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#1、下载redis_exporter
+[root@prom-node03 ~]# wget https://github.com/oliver006/redis_exporter/releases/download/v1.57.0/redis_exporter-v1.57.0.linux-amd64.tar.gz
+#加速地址
+[root@prom-node03 ~]# wget https://mirror.ghproxy.com/https://github.com/oliver006/redis_exporter/releases/download/v1.57.0/redis_exporter-v1.57.0.linux-amd64.tar.gz
+
+#2、解压redis_exporter
+[root@prom-node03 ~]# tar xf redis_exporter-v1.57.0.linux-amd64.tar.gz -C /etc
+[root@prom-node03 ~]# ln -s /etc/redis_exporter-v1.57.0.linux-amd64/ /etc/redis_exporter
+
+#3、配置redis_exporter启动⽂件
+[root@prom-node03 ~]# cat /usr/lib/systemd/system/redis_exporter.service
+[Unit]
+Description=redis_exporter
+Documentation=https://prometheus.io/
+After=network.target
+
+[Service]
+ExecStart=/etc/redis_exporter/redis_exporter \
+  -redis.addr=&amp;quot;redis://localhost:6379&amp;quot;
+  -redis.password=&amp;quot;&amp;quot;
+  -web.listen-address=&amp;quot;:9121&amp;quot; \
+  -web.telemetry-path=&amp;quot;/metrics&amp;quot; \
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+#4、启动redis_exporter
+[root@prom-node03 ~]# systemctl daemon-reload
+[root@prom-node03 ~]# systemctl start redis_exporter
+[root@prom-node03 ~]# systemctl enable redis_exporter
+[root@prom-node03 ~]# netstat -lntp|grep 9121
+tcp6       0      0 :::9121                 :::*                    LISTEN      2600/redis_exporter 
+
+#5、访问redis的metrics
+[root@prom-node03 ~]# curl http://localhost:9121/metrics
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds&amp;#123;quantile=&amp;quot;0&amp;quot;&amp;#125; 4.7772e-05
+go_gc_duration_seconds&amp;#123;quantile=&amp;quot;0.25&amp;quot;&amp;#125; 4.7772e-05
+go_gc_duration_seconds&amp;#123;quantile=&amp;quot;0.5&amp;quot;&amp;#125; 9.3206e-05
+go_gc_duration_seconds&amp;#123;quantile=&amp;quot;0.75&amp;quot;&amp;#125; 9.3206e-05
+go_gc_duration_seconds&amp;#123;quantile=&amp;quot;1&amp;quot;&amp;#125; 9.3206e-05
+go_gc_duration_seconds_sum 0.000140978
+go_gc_duration_seconds_count 2
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 8
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;73-配置prometheus&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#73-配置prometheus&#34;&gt;#&lt;/a&gt; 7.3 配置 Prometheus&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1、修改Prometheus配置
+[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &amp;quot;/etc/prometheus/rules/*.yml&amp;quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &amp;quot;prometheus&amp;quot; # 定义一个抓取任务，名为 &#39;prometheus&#39;。
+    metrics_path: &amp;quot;/metrics&amp;quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 &#39;/metrics&#39;。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&amp;quot;prom-node01.oldxu.net:9090&amp;quot;]
+
+  - job_name: &amp;quot;grafana&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:3000&amp;quot;]
+
+  - job_name: &amp;quot;node_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:9100&amp;quot;,&amp;quot;prom-node02.oldxu.net:9100&amp;quot;,&amp;quot;prom-node03.oldxu.net:9100&amp;quot;]
+
+  - job_name: &amp;quot;weather_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7001&amp;quot;]
+
+  - job_name: &amp;quot;webserver&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7002&amp;quot;]
+
+  - job_name: &amp;quot;rabbitmq&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:15692&amp;quot;]
+
+  - job_name: &amp;quot;nginx&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9113&amp;quot;]
+
+  - job_name: &amp;quot;tomcat&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:8080&amp;quot;]
+
+  - job_name: &amp;quot;jmx_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:12345&amp;quot;]
+
+  - job_name: &amp;quot;mysqld_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9104&amp;quot;]
+      labels:
+        service: database
+        role: master
+    - targets: [&amp;quot;prom-node04.oldxu.net:9104&amp;quot;]
+      labels:
+        service: database
+        role: slave
+
+  - job_name: &amp;quot;redis_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9121&amp;quot;]
+
+#2.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;74-redis告警规则文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#74-redis告警规则文件&#34;&gt;#&lt;/a&gt; 7.4 Redis 告警规则⽂件&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1、编写Redis告警规则⽂件
+[root@prom-node01 ~]# cat /etc/prometheus/rules/redis_rules.yml
+groups:
+- name: redis告警规则
+  rules:
+  - alert: Redis实例宕机
+    expr: sum(redis_up) by (instance, job) == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;Redis实例宕机, &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; &amp;quot;
+      description: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 在过去1分钟内无法连接。&amp;quot;
+          
+  - alert: Redis实例重启
+    expr: sum(redis_uptime_in_seconds) by (instance, job) &amp;lt; 60
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 重启&amp;quot;
+      description: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 出现重启。当前运行时间:&amp;#123;&amp;#123; $value &amp;#125;&amp;#125; 秒。&amp;quot;
+          
+  - alert: Redis连接数过高
+    expr: redis_connected_clients / redis_config_maxclients * 100 &amp;gt; 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 连接数超过80%&amp;quot;
+      description: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 当前连接数占最大连接数的比率超过80%。当前比率: &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。&amp;quot;
+          
+  - alert: Redis连接被拒绝
+    expr: increase(redis_rejected_connections_total[1h]) &amp;gt; 0
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 有连接被拒绝&amp;quot;
+      description: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 在过去1小时内有连接被拒绝。当前被拒绝的连接数: &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;。&amp;quot;
+          
+  - alert: Redis内存使用率过高
+    expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 &amp;gt; 80 
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 内存使用率超过80%&amp;quot;
+      description: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 当前内存使用率超过配置的最大内存值的80%。当前内存使用率: &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。&amp;quot;
+          
+  - alert: Redis缓存命中率低
+    expr: |
+      irate(redis_keyspace_hits_total[5m]) /
+      (irate(redis_keyspace_hits_total[5m]) + irate(redis_keyspace_misses_total[5m])) * 100 &amp;lt; 90
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 缓存命中率低于90%&amp;quot;
+      description: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 最近5分钟内的缓存命中率低于90%。当前命中率: &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。&amp;quot;
+          
+  - alert: Redis即将过期的Key数量过多
+    expr: |
+      sum(redis_db_keys_expiring) by (instance, job, db) /
+      sum(redis_db_keys) by (instance, job, db) * 100 &amp;gt; 50
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 中的数据库 &amp;#123;&amp;#123; $labels.db&amp;#125;&amp;#125; 有过多即将过期的Key&amp;quot;
+      description: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 中的数据库 &amp;#123;&amp;#123; $labels.db &amp;#125;&amp;#125; 有超过50%的Key即将过期。当前比率: &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。&amp;quot;
+          
+  - alert: RedisRDB备份失败
+    expr: redis_rdb_last_bgsave_status == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; RDB备份失败&amp;quot;
+      description: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 最近的RDB备份尝试失败。&amp;quot;
+          
+  - alert: RedisRDB备份时间过长
+    expr: redis_rdb_last_bgsave_duration_sec &amp;gt; 3 and redis_rdb_last_bgsave_status == 1
+    for: 1m
+    labels:
+       severity: warning
+    annotations:
+      summary: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; RDB备份成功但耗时超过3秒&amp;quot;
+      description: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; RDB备份成功，但备份耗时超过了3秒。持续时间: &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;秒。&amp;quot;
+   
+  - alert: RedisRDB备份过期
+    expr: (time() - redis_rdb_last_save_timestamp_seconds) &amp;gt; 36000
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 超过10小时未进行RDB备份&amp;quot;
+      description: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 已超过10小时没有生成新的RDB备份文件。&amp;quot;
+          
+  - alert: Redis命令拒绝率过高
+    expr: |
+      sum(irate(redis_commands_rejected_calls_total[5m])) by (instance, job) /
+      sum(irate(redis_commands_total[5m])) by (instance, job) * 100 &amp;gt; 25
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 命令拒绝率超过25%&amp;quot;
+      description: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 的命令拒绝率超过了25%。当前拒绝率: &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;%。&amp;quot;
+          
+  - alert: Redis命令平均响应时间过长
+    expr: |
+      sum(rate(redis_commands_duration_seconds_total[5m])) by (instance,job) /
+      sum(rate(redis_commands_processed_total[5m])) by (instance, job) &amp;gt;0.250
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 命令平均响应时间超过250ms&amp;quot;
+      description: &amp;quot;Redis实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 的执⾏命令平均响应时间超过了250毫秒。当前平均响应时间: &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;秒。&amp;quot;
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/redis_rules.yml 
+Checking /etc/prometheus/rules/redis_rules.yml
+  SUCCESS: 12 rules found
+
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;八-prometheus监控docker&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#八-prometheus监控docker&#34;&gt;#&lt;/a&gt; 八. Prometheus 监控 Docker&lt;/h4&gt;
+&lt;h4 id=&#34;九-blackbox_exporter黑盒监控&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#九-blackbox_exporter黑盒监控&#34;&gt;#&lt;/a&gt; 九. Blackbox_exporter ⿊盒监控&lt;/h4&gt;
+&lt;h5 id=&#34;91-安装blackbox_exporter&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#91-安装blackbox_exporter&#34;&gt;#&lt;/a&gt; 9.1 安装 Blackbox_exporter&lt;/h5&gt;
+&lt;p&gt;1、访问 blackbox_exporter 的 github 地址， &lt;a href=&#34;https://github.com/prometheus/blackbox_exporter/releases&#34;&gt;https://github.com/prometheus/blackbox_exporter/releases&lt;/a&gt; ，下载 blackbox_exporter&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#1.下载blackbox_exporter
+[root@prom-node04 ~]# wget https://github.com/prometheus/blackbox_exporter/releases/download/v0.24.0/blackbox_exporter-0.24.0.linux-amd64.tar.gz
+#加速地址
+[root@prom-node04 ~]# wget https://mirror.ghproxy.com/https://github.com/prometheus/blackbox_exporter/releases/download/v0.24.0/blackbox_exporter-0.24.0.linux-amd64.tar.gz
+
+#2、解压blackbox_exporter
+[root@prom-node04 ~]# tar xf blackbox_exporter-0.24.0.linux-amd64.tar.gz -C /etc
+[root@prom-node04 ~]# ln -s /etc/blackbox_exporter-0.24.0.linux-amd64/ /etc/blackbox_exporter
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;2、编辑 /etc/blackbox_exporter/blackbox.yml 默认配置⽂件，可以⾃⾏定义对应的模块，blackbox_exporter/example.yml&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node04 ~]# cat /etc/blackbox_exporter/blackbox.yml
+modules:
+  # http检查模块
+  http_2xx:
+    prober: http
+    http:
+      preferred_ip_protocol: &amp;quot;ip4&amp;quot;
+      valid_http_versions: [ &amp;quot;HTTP/1.1&amp;quot;, &amp;quot;HTTP/2.0&amp;quot; ]
+          
+  # Http Post检查模块
+  http_post_2xx:
+    prober: http
+    http:
+      method: POST
+      preferred_ip_protocol: &amp;quot;ip4&amp;quot;
+      valid_http_versions: [ &amp;quot;HTTP/1.1&amp;quot;, &amp;quot;HTTP/2.0&amp;quot; ]
+          
+  # TCP检查模块
+  tcp_connect:
+    prober: tcp
+    timeout: 5s
+        
+  # ICMP检查模块
+  icmp:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: &amp;quot;ip4&amp;quot;
+          
+  # DNS检查模块
+  dns_tcp: 
+    prober: dns
+    dns:
+      transport_protocol: &amp;quot;tcp&amp;quot;
+      preferred_ip_protocol: &amp;quot;ip4&amp;quot;
+      query_name: &amp;quot;www.oldxu.net&amp;quot;
+          
+  # SSH检查模块
+  ssh_banner:
+    prober: tcp
+    tcp:
+      query_response:
+      - expect: &amp;quot;^SSH-2.0-&amp;quot;
+      - send: &amp;quot;SSH-2.0-blackbox-ssh-check&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;3、配置 blackbox_exporter 启动⽂件&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node04 ~]# cat /usr/lib/systemd/system/blackbox_exporter.service
+[Unit]
+Description=blackbox_exporter
+Documentation=https://prometheus.io/
+After=network.target
+
+[Service]
+ExecStart=/etc/blackbox_exporter/blackbox_exporter \
+  --config.file=/etc/blackbox_exporter/blackbox.yml \
+  --web.listen-address=:9115
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;4、启动 blackbox_exporter&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node04 ~]# systemctl daemon-reload
+[root@prom-node04 ~]# systemctl start blackbox_exporter
+[root@prom-node04 ~]# systemctl enable blackbox_exporter
+[root@prom-node04 ~]# netstat -lntp|grep 9115
+tcp6       0      0 :::9115                 :::*                    LISTEN      1879/blackbox_expor
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;5、访问 Blackbox_exporter&lt;/p&gt;
+&lt;p&gt;1、访问 Blackbox_exporter，通过 &lt;a href=&#34;http://IP:9115&#34;&gt;http://IP:9115&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;2、使⽤ blackbox_exporter 监控站点，需要传递⽬标 target ，以及检测⽅法 module&lt;/p&gt;
+&lt;p&gt;具体的 Url 地址： &lt;a href=&#34;http://local-blackbox.oldxu.net:9115/probe?target=https://www.xuliangwei.com&amp;amp;module=http_2xx&amp;amp;debug=true&#34;&gt;http://local-blackbox.oldxu.net:9115/probe?target=https://www.xuliangwei.com&amp;amp;module=http_2xx&amp;amp;debug=true&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;3、针对 blackbox_exporter 的探测过程进⾏解读&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Logs for the probe:
+ts=2024-03-03T13:42:59.577027389Z caller=main.go:181 module=http_2xx target=https://www.xuliangwei.com level=info msg=&amp;quot;Beginning probe&amp;quot; probe=http timeout_seconds=119.5
+ts=2024-03-03T13:42:59.577520722Z caller=http.go:328 module=http_2xx target=https://www.xuliangwei.com level=info msg=&amp;quot;Resolving target address&amp;quot; target=www.xuliangwei.com ip_protocol=ip4
+ts=2024-03-03T13:42:59.842714479Z caller=http.go:328 module=http_2xx target=https://www.xuliangwei.com level=info msg=&amp;quot;Resolved target address&amp;quot; target=www.xuliangwei.com ip=27.152.185.120
+ts=2024-03-03T13:42:59.842996999Z caller=client.go:252 module=http_2xx target=https://www.xuliangwei.com level=info msg=&amp;quot;Making HTTP request&amp;quot; url=https://27.152.185.120 host=www.xuliangwei.com
+ts=2024-03-03T13:43:00.382291128Z caller=handler.go:120 module=http_2xx target=https://www.xuliangwei.com level=info msg=&amp;quot;Received HTTP response&amp;quot; status_code=200
+ts=2024-03-03T13:43:00.612921591Z caller=handler.go:120 module=http_2xx target=https://www.xuliangwei.com level=info msg=&amp;quot;Response timings for roundtrip&amp;quot; roundtrip=0 start=2024-03-03T21:42:59.843230972+08:00 dnsDone=2024-03-03T21:42:59.843230972+08:00 connectDone=2024-03-03T21:42:59.861071294+08:00 gotConn=2024-03-03T21:42:59.966743791+08:00 responseStart=2024-03-03T21:43:00.382134238+08:00 tlsStart=2024-03-03T21:42:59.861142714+08:00 tlsDone=2024-03-03T21:42:59.966579816+08:00 end=2024-03-03T21:43:00.612905768+08:00
+ts=2024-03-03T13:43:00.613022806Z caller=main.go:181 module=http_2xx target=https://www.xuliangwei.com level=info msg=&amp;quot;Probe succeeded&amp;quot; duration_seconds=1.035611838
+
+# 1、开始探测（msg=&amp;quot;Beginning probe&amp;quot;） 使⽤的是 http_2xx 模块，超时设置为119.5秒。
+# 2、解析⽬标地址（msg=&amp;quot;Resolving target address&amp;quot;） 正在尝试解析⽬标 www.xuliangwei.com 的IP地址，使⽤的是IPv4协议。
+# 3、已解析⽬标地址（msg=&amp;quot;Resolved target address&amp;quot;） 成功解析为61.241.151.57。
+# 4、发出 HTTP 请求（msg=&amp;quot;Making HTTP request&amp;quot;） 向 http://61.241.151.57 发出HTTP请求，请求中的 host 头设置为 www.xuliangwei.com。
+# 5、收到 HTTP 响应（msg=&amp;quot;Received HTTP response&amp;quot;） 已收到状态码为200的HTTP响应，这意味着⽹⻚正常，服务器成功处理了请求。
+# 6、响应时间（msg=&amp;quot;Response timings for roundtrip&amp;quot;） 提供了对于整个请求-响应周期中每个步骤的具体时间点，包括DNS解析完成、TLS握⼿开始和完成、连接建⽴、获得连接、响应开始等时间点。
+# 7、探测成功（msg=&amp;quot;Probe succeeded&amp;quot;） 探测操作成功完成，总耗时为0.355298304秒。
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;92-配置prometheus&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#92-配置prometheus&#34;&gt;#&lt;/a&gt; 9.2 配置 Prometheus&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &amp;quot;/etc/prometheus/rules/*.yml&amp;quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &amp;quot;prometheus&amp;quot; # 定义一个抓取任务，名为 &#39;prometheus&#39;。
+    metrics_path: &amp;quot;/metrics&amp;quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 &#39;/metrics&#39;。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&amp;quot;prom-node01.oldxu.net:9090&amp;quot;]
+
+  - job_name: &amp;quot;grafana&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:3000&amp;quot;]
+
+  - job_name: &amp;quot;node_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:9100&amp;quot;,&amp;quot;prom-node02.oldxu.net:9100&amp;quot;,&amp;quot;prom-node03.oldxu.net:9100&amp;quot;]
+
+  - job_name: &amp;quot;weather_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7001&amp;quot;]
+
+  - job_name: &amp;quot;webserver&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7002&amp;quot;]
+
+  - job_name: &amp;quot;rabbitmq&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:15692&amp;quot;]
+
+  - job_name: &amp;quot;nginx&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9113&amp;quot;]
+
+  - job_name: &amp;quot;tomcat&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:8080&amp;quot;]
+
+  - job_name: &amp;quot;jmx_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:12345&amp;quot;]
+
+  - job_name: &amp;quot;mysqld_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9104&amp;quot;]
+      labels:
+        service: database
+        role: master
+    - targets: [&amp;quot;prom-node04.oldxu.net:9104&amp;quot;]
+      labels:
+        service: database
+        role: slave
+
+  - job_name: &amp;quot;redis_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9121&amp;quot;]
+
+  - job_name: &#39;blackbox_http&#39;
+    metrics_path: /probe # metrics的path这次不是/metrics，⽽是/probe
+    params: # 传递参数
+      module: [http_2xx] # 调⽤哪个模块进⾏探测
+    static_configs:
+    - targets: [&amp;quot;https://www.xuliangwei.com&amp;quot;,&amp;quot;http://www.oldxu.net&amp;quot;,&amp;quot;https://www.baidu.com&amp;quot;,&amp;quot;http://httpbin.org/status/400&amp;quot;,&amp;quot;https://httpstat.us/500&amp;quot;,&amp;quot;https://httpstat.us/502&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+      
+# relabel_configs是标签重写的配置，这⾥进⾏了三次操作：
+# 1、将⽬标地址（__address__）赋予给__param_target，这是Blackbox Exporter需要的⽬标target参数。
+# 2、将__param_target的内容复制到instance标签，这样Prometheus UI中显示的instance实例名称会是⽬标站点地址，⽽不是Blackbox的地址。
+# 3、最后，将实际发送探测请求的地址（__address__）设置为运⾏Blackbox Exporter的节点地址和端⼝（prom-node04.oldxu.net:9115），这样Prometheus就会向这个地址发送探测请求。
+      
+#.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;93-配置tcp-ssh-icmp监控&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#93-配置tcp-ssh-icmp监控&#34;&gt;#&lt;/a&gt; 9.3 配置 tcp、ssh、icmp 监控&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;#1、修改Prometheus配置
+[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &amp;quot;/etc/prometheus/rules/*.yml&amp;quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &amp;quot;prometheus&amp;quot; # 定义一个抓取任务，名为 &#39;prometheus&#39;。
+    metrics_path: &amp;quot;/metrics&amp;quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 &#39;/metrics&#39;。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&amp;quot;prom-node01.oldxu.net:9090&amp;quot;]
+
+  - job_name: &amp;quot;grafana&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:3000&amp;quot;]
+
+  - job_name: &amp;quot;node_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:9100&amp;quot;,&amp;quot;prom-node02.oldxu.net:9100&amp;quot;,&amp;quot;prom-node03.oldxu.net:9100&amp;quot;]
+
+  - job_name: &amp;quot;weather_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7001&amp;quot;]
+
+  - job_name: &amp;quot;webserver&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7002&amp;quot;]
+
+  - job_name: &amp;quot;rabbitmq&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:15692&amp;quot;]
+
+  - job_name: &amp;quot;nginx&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9113&amp;quot;]
+
+  - job_name: &amp;quot;tomcat&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:8080&amp;quot;]
+
+  - job_name: &amp;quot;jmx_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:12345&amp;quot;]
+
+  - job_name: &amp;quot;mysqld_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9104&amp;quot;]
+      labels:
+        service: database
+        role: master
+    - targets: [&amp;quot;prom-node04.oldxu.net:9104&amp;quot;]
+      labels:
+        service: database
+        role: slave
+
+  - job_name: &amp;quot;redis_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9121&amp;quot;]
+
+  - job_name: &#39;blackbox_http&#39;
+    metrics_path: /probe # metrics的path这次不是/metrics，是/probe
+    params: # 传递参数
+      module: [http_2xx] # 调哪个模块进探测
+    static_configs:
+    - targets: [&amp;quot;https://www.xuliangwei.com&amp;quot;,&amp;quot;http://www.oldxu.net&amp;quot;,&amp;quot;https://www.baidu.com&amp;quot;,&amp;quot;http://httpbin.org/status/400&amp;quot;,&amp;quot;https://httpstat.us/500&amp;quot;,&amp;quot;https://httpstat.us/502&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: &#39;blackbox_tcp&#39;
+    metrics_path: /probe
+    params:
+      module: [tcp_connect] # 使tcp_connect模块
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:3306&amp;quot;,&amp;quot;prom-node03.oldxu.net:6379&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: &#39;blackbox_icmp&#39;
+    metrics_path: /probe
+    params:
+      module: [icmp] # 使icmp模块
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net&amp;quot;,&amp;quot;prom-node02.oldxu.net&amp;quot;,&amp;quot;prom-node03.oldxu.net&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: &#39;blackbox_ssh&#39;
+    metrics_path: /probe
+    params:
+      module: [ssh_banner] # 使⽤ssh_banner模块
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:22&amp;quot;,&amp;quot;prom-node02.oldxu.net:22&amp;quot;,&amp;quot;prom-node03.oldxu.net:22&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+#2.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;94-blackbox告警规则文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#94-blackbox告警规则文件&#34;&gt;#&lt;/a&gt; 9.4 Blackbox 告警规则⽂件&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/rules/blackbox_rules.yml
+groups:
+- name: Blackbox告警规则文件
+  rules:
+  - alert: 探测失败
+    expr: sum(probe_success == 0) by (instance, job)
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 探测失败&amp;quot;
+      description: &amp;quot;探测目标 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 在 job &amp;#123;&amp;#123; $labels.job&amp;#125;&amp;#125; 中失败。&amp;quot;
+          
+  - alert: 站点整体平均请求时间过长
+    expr: sum(avg_over_time(probe_http_duration_seconds[1m])) by (instance,job) &amp;gt; 3
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 请求时间过长&amp;quot;
+      description: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 最近1分钟的平均请求时间超过3秒。当前平均请求时间：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;秒。&amp;quot;
+          
+  - alert: 重定向次数过多
+    expr: probe_http_redirects &amp;gt; 5
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 重定向次数过多&amp;quot;
+      description: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 在最近的探测中重定向次数超过5次。当前次数：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;次。&amp;quot;
+          
+  - alert: 站点阶段耗时过⻓
+    expr: |
+      (
+        probe_http_duration_seconds&amp;#123;phase=&amp;quot;connect&amp;quot;&amp;#125; &amp;gt; 0.5 or
+        probe_http_duration_seconds&amp;#123;phase=&amp;quot;processing&amp;quot;&amp;#125; &amp;gt; 0.5 or
+        probe_http_duration_seconds&amp;#123;phase=&amp;quot;resolve&amp;quot;&amp;#125; &amp;gt; 0.5 or
+        probe_http_duration_seconds&amp;#123;phase=&amp;quot;tls&amp;quot;&amp;#125; &amp;gt; 0.5 or
+        probe_http_duration_seconds&amp;#123;phase=&amp;quot;transfer&amp;quot;&amp;#125; &amp;gt; 0.5
+          )
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 阶段 &#39;&amp;#123;&amp;#123; $labels.phase &amp;#125;&amp;#125;&#39; 耗时过长&amp;quot;
+      description: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 在阶段 &#39;&amp;#123;&amp;#123; $labels.phase&amp;#125;&amp;#125;&#39; 的耗时超过0.5秒。当前耗时：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;秒。&amp;quot;
+          
+  - alert: 站点响应状态码异常
+    expr: probe_http_status_code &amp;lt;= 199 or probe_http_status_code &amp;gt;= 400
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 返回异常状态码&amp;quot;
+      description: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 返回的状态码为 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;，表明请求可能存在问题。&amp;quot;
+          
+  - alert: 证书即将过期&amp;lt;30
+    expr: (probe_ssl_earliest_cert_expiry - time()) /86400 &amp;lt; 30
+    for: 24h
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 的 SSL 证书即将过期&amp;quot;
+      description: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 的 SSL 证书将在 &amp;#123;&amp;#123; $value&amp;#125;&amp;#125; 天内过期。&amp;quot;
+          
+  - alert: 证书即将过期&amp;lt;7
+    expr: (probe_ssl_earliest_cert_expiry - time()) /86400 &amp;lt; 7
+    for: 24h
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 的 SSL 证书即将过期&amp;quot;
+      description: &amp;quot;实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 的 SSL 证书将在 &amp;#123;&amp;#123; $value&amp;#125;&amp;#125; 天内过期.&amp;quot;
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/blackbox_rules.yml 
+Checking /etc/prometheus/rules/blackbox_rules.yml
+  SUCCESS: 7 rules found
+  
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;十-domain_exporter域名监控&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#十-domain_exporter域名监控&#34;&gt;#&lt;/a&gt; 十. domain_exporter 域名监控&lt;/h4&gt;
+&lt;p&gt;domain_exporter 主要⽤来监控⽹站域名的过期时间。这对于企业和个⼈都是⽐较重要的，因为域名过期可能会导致⽹站⽆法访问，进⽽影响业务的正常运⾏。因此监控 “域名的过期时间” 就显得⽐较重要了。&lt;/p&gt;
+&lt;h5 id=&#34;101-安装domain_exporter&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#101-安装domain_exporter&#34;&gt;#&lt;/a&gt; 10.1 安装 domain_exporter&lt;/h5&gt;
+&lt;p&gt;1、访问 domain_exporter 的 github 地址， &lt;a href=&#34;https://github.com/caarlos0/domain_exporter/releases&#34;&gt;https://github.com/caarlos0/domain_exporter/releases&lt;/a&gt; ，下载 domain_exporter&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#1.下载domain_exporte
+[root@prom-node04 ~]# wget https://github.com/caarlos0/domain_exporter/releases/download/v1.23.0/domain_exporter_1.23.0_linux_amd64.tar.gz
+#2.加速地址
+[root@prom-node04 ~]# wget https://mirror.ghproxy.com/https://github.com/caarlos0/domain_exporter/releases/download/v1.23.0/domain_exporter_1.23.0_linux_amd64.tar.gz
+
+#3.解压domain_exporter
+[root@prom-node04 ~]# mkdir /etc/domain_exporter_1.23.0
+[root@prom-node04 ~]# tar xf domain_exporter_1.23.0_linux_amd64.tar.gz -C /etc/domain_exporter_1.23.0
+[root@prom-node04 ~]# ln -s /etc/domain_exporter_1.23.0/ /etc/domain_exporter
+
+#4.配置domain_exporter启动⽂件
+[root@prom-node04 ~]# cat /usr/lib/systemd/system/domain_exporter.service
+[Unit]
+Description=domain_exporter
+Documentation=https://prometheus.io/
+After=network.target
+
+[Service]
+ExecStart=/etc/domain_exporter/domain_exporter --bind=&amp;quot;:9222&amp;quot;
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+#5.动domain_exporter
+[root@prom-node04 ~]#  systemctl daemon-reload
+[root@prom-node04 ~]# systemctl start domain_exporter.service
+[root@prom-node04 ~]# systemctl enable domain_exporter.service
+Created symlink from /etc/systemd/system/multi-user.target.wants/domain_exporter.service to /usr/lib/systemd/system/domain_exporter.service.
+[root@prom-node04 ~]# netstat -lntp|grep 9222
+tcp6       0      0 :::9222                 :::*                    LISTEN      1880/domain_exporte 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;2、通过 domain_exporter 获取域名过期时间，访问 URL &lt;a href=&#34;http://localhost:9222/probe?target=oldxu.net&#34;&gt;http://localhost:9222/probe?target=oldxu.net&lt;/a&gt; 来获取特定域名（如 &lt;a href=&#34;http://oldxu.net&#34;&gt;oldxu.net&lt;/a&gt;）的过期时间。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node04 ~]#  curl http://localhost:9222/probe?target=hmallleasing.com
+# HELP domain_expiry_days time in days until the domain expires
+# TYPE domain_expiry_days gauge
+domain_expiry_days&amp;#123;domain=&amp;quot;hmallleasing.com&amp;quot;&amp;#125; 741
+# HELP domain_probe_duration_seconds returns how long the probe took to complete in seconds
+# TYPE domain_probe_duration_seconds gauge
+domain_probe_duration_seconds&amp;#123;domain=&amp;quot;hmallleasing.com&amp;quot;&amp;#125; 1.036303946
+# HELP domain_probe_success whether the probe was successful or not
+# TYPE domain_probe_success gauge
+domain_probe_success&amp;#123;domain=&amp;quot;hmallleasing.com&amp;quot;&amp;#125; 1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;102-配置prometheus&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#102-配置prometheus&#34;&gt;#&lt;/a&gt; 10.2 配置 Prometheus&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &amp;quot;/etc/prometheus/rules/*.yml&amp;quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &amp;quot;prometheus&amp;quot; # 定义一个抓取任务，名为 &#39;prometheus&#39;。
+    metrics_path: &amp;quot;/metrics&amp;quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 &#39;/metrics&#39;。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&amp;quot;prom-node01.oldxu.net:9090&amp;quot;]
+
+  - job_name: &amp;quot;grafana&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:3000&amp;quot;]
+
+  - job_name: &amp;quot;node_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:9100&amp;quot;,&amp;quot;prom-node02.oldxu.net:9100&amp;quot;,&amp;quot;prom-node03.oldxu.net:9100&amp;quot;]
+
+  - job_name: &amp;quot;weather_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7001&amp;quot;]
+
+  - job_name: &amp;quot;webserver&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7002&amp;quot;]
+
+  - job_name: &amp;quot;rabbitmq&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:15692&amp;quot;]
+
+  - job_name: &amp;quot;nginx&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9113&amp;quot;]
+
+  - job_name: &amp;quot;tomcat&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:8080&amp;quot;]
+
+  - job_name: &amp;quot;jmx_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:12345&amp;quot;]
+
+  - job_name: &amp;quot;mysqld_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9104&amp;quot;]
+      labels:
+        service: database
+        role: master
+    - targets: [&amp;quot;prom-node04.oldxu.net:9104&amp;quot;]
+      labels:
+        service: database
+        role: slave
+
+  - job_name: &amp;quot;redis_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9121&amp;quot;]
+
+  - job_name: &#39;blackbox_http&#39;
+    metrics_path: /probe # metrics的path这次不是/metrics，是/probe
+    params: # 传递参数
+      module: [http_2xx] # 调哪个模块进探测
+    static_configs:
+    - targets: [&amp;quot;https://www.xuliangwei.com&amp;quot;,&amp;quot;http://www.oldxu.net&amp;quot;,&amp;quot;https://www.baidu.com&amp;quot;,&amp;quot;http://httpbin.org/status/400&amp;quot;,&amp;quot;https://httpstat.us/500&amp;quot;,&amp;quot;https://httpstat.us/502&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: &#39;blackbox_tcp&#39;
+    metrics_path: /probe
+    params:
+      module: [tcp_connect] # 使tcp_connect模块
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:3306&amp;quot;,&amp;quot;prom-node03.oldxu.net:6379&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: &#39;blackbox_icmp&#39;
+    metrics_path: /probe
+    params:
+      module: [icmp] # 使icmp模块
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net&amp;quot;,&amp;quot;prom-node02.oldxu.net&amp;quot;,&amp;quot;prom-node03.oldxu.net&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: &#39;blackbox_ssh&#39;
+    metrics_path: /probe
+    params:
+      module: [ssh_banner] # 使⽤ssh_banner模块
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:22&amp;quot;,&amp;quot;prom-node02.oldxu.net:22&amp;quot;,&amp;quot;prom-node03.oldxu.net:22&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: &#39;domain_exporter&#39;
+    metrics_path: /probe # metrics的path不是/metrics，⽽是/probe
+    static_configs:
+    - targets: [&amp;quot;nf-leasing.com&amp;quot;,&amp;quot;hmallleasing.com&amp;quot;,&amp;quot;jd.com&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9222
+
+#.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;103-domain告警规则文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#103-domain告警规则文件&#34;&gt;#&lt;/a&gt; 10.3 domain 告警规则⽂件&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/rules/domain_rules.yml
+groups:
+- name: domain告警规则文件
+  rules:
+  - alert: 域名即将过期 &amp;lt;100
+    expr: domain_expiry_days &amp;lt; 100
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;域名即将过期 (实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;)&amp;quot;
+      description: &amp;quot;域名 &amp;#123;&amp;#123; $labels.domain &amp;#125;&amp;#125; 还有少于100天即将过期。当前剩余天数：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;。&amp;quot;
+          
+  - alert: 域名即将过期&amp;lt;30
+    expr: domain_expiry_days &amp;lt; 30
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;域名即将过期 (实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;)&amp;quot;
+      description: &amp;quot;域名 &amp;#123;&amp;#123; $labels.domain &amp;#125;&amp;#125; 还有少于30天即将过期。当前剩余天数：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;。&amp;quot;
+ 
+  - alert: 域名检测失败
+    expr: sum(domain_probe_success) by (domain, instance, job) == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;域名检测失败 (实例 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;)&amp;quot;
+      description: &amp;quot;域名 &amp;#123;&amp;#123; $labels.domain &amp;#125;&amp;#125; 在 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125; 上的检测失败。当前值：&amp;#123;&amp;#123; $value &amp;#125;&amp;#125;。&amp;quot;
+      
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/domain_rules.yml 
+Checking /etc/prometheus/rules/domain_rules.yml
+  SUCCESS: 3 rules found
+  
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;十一-pushgateway推送网关服务&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#十一-pushgateway推送网关服务&#34;&gt;#&lt;/a&gt; 十一. PushGateway 推送⽹关服务&lt;/h4&gt;
+&lt;p&gt;Pushgateway 允许脚本通过 Push 的⽅式来推送指标数据，但它不会像 Prometheus 那样主动去抓取指标数据。&lt;/p&gt;
+&lt;p&gt;Pushgateway 作为中间存储，仅负责接收数据，等待 Prometheus Server 进⾏数据抓取，它⾃身并不具备抓取功能。默认情况下，数据保存在内存中，但可以通过 --persistence.file 参数持久化数据⾄⽂件中，同时通过 --persistence.interval=5m 设置数据持久化间隔。&lt;/p&gt;
+&lt;h5 id=&#34;111-安装pushgateway&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#111-安装pushgateway&#34;&gt;#&lt;/a&gt; 11.1 安装 pushGateway&lt;/h5&gt;
+&lt;p&gt;1、访问 PushGateway 官⽹ &lt;a href=&#34;https://github.com/prometheus/pushgateway&#34;&gt;https://github.com/prometheus/pushgateway&lt;/a&gt; ，下载 PushGateway&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#1.下载Pushgateway 
+[root@prom-node04 ~]# wget https://github.com/prometheus/pushgateway/releases/download/v1.7.0/pushgateway-1.7.0.linux-amd64.tar.gz
+# 加速地址
+[root@prom-node04 ~]# wget https://mirror.ghproxy.com/https://github.com/prometheus/pushgateway/releases/download/v1.7.0/pushgateway-1.7.0.linux-amd64.tar.gz
+
+#2.解压PushGateway
+[root@prom-node04 ~]# tar xf pushgateway-1.7.0.linux-amd64.tar.gz -C /etc/
+[root@prom-node04 ~]# ln -s /etc/pushgateway-1.7.0.linux-amd64/ /etc/pushgateway
+
+#3.编写pushgateway启动⽂件
+[root@prom-node04 ~]# cat /usr/lib/systemd/system/pushgateway.service 
+[Unit]
+Description=pushgateway
+Documentation=https://prometheus.io/
+After=network.target
+
+[Service]
+ExecStart=/etc/pushgateway/pushgateway \
+ --web.listen-address=:9091 \
+ --web.telemetry-path=/metrics \
+ --web.enable-lifecycle
+ExecReload=/bin/kill -HUP
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+#4.启动PushGateway
+[root@prom-node04 ~]# systemctl daemon-reload
+[root@prom-node04 ~]# systemctl start pushgateway
+[root@prom-node04 ~]# systemctl enable pushgateway
+[root@prom-node04 ~]# netstat -lntp|grep 9091
+tcp6       0      0 :::9091                 :::*                    LISTEN      2421/pushgateway   
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;2、是⽤ Curl 给 pushgateway 推送⼀个 some_metric 的指标，值为 3.14&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node04 ~]# echo &amp;quot;some_metric 3.14&amp;quot; | curl --data-binary @- http://localhost:9091/metrics/job/some_job
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;3、访问 pushgateway 的 web ⻚⾯，通过 &lt;a href=&#34;http://IP:9091&#34;&gt;http://IP:9091&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20240304220806380.png&#34; alt=&#34;image-20240304220806380&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;112-配置promethues&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#112-配置promethues&#34;&gt;#&lt;/a&gt; 11.2 配置 Promethues&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
+# 全局段定义
+global:
+  scrape_interval: 15s # 设置 Prometheus 抓取指标数据的间隔，默认为15秒。
+
+rule_files:
+  - &amp;quot;/etc/prometheus/rules/*.yml&amp;quot; 
+
+# 抓取指定的目标
+scrape_configs:
+  - job_name: &amp;quot;prometheus&amp;quot; # 定义一个抓取任务，名为 &#39;prometheus&#39;。
+    metrics_path: &amp;quot;/metrics&amp;quot; # 指定 Prometheus 从监控目标暴露的 HTTP 端点路径抓取指标，默认为 &#39;/metrics&#39;。
+    static_configs: # 配置静态目标地址，Prometheus 将定期从如下这些地址抓取指标。
+    - targets: [&amp;quot;prom-node01.oldxu.net:9090&amp;quot;]
+
+  - job_name: &amp;quot;grafana&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:3000&amp;quot;]
+
+  - job_name: &amp;quot;node_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:9100&amp;quot;,&amp;quot;prom-node02.oldxu.net:9100&amp;quot;,&amp;quot;prom-node03.oldxu.net:9100&amp;quot;]
+
+  - job_name: &amp;quot;weather_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7001&amp;quot;]
+
+  - job_name: &amp;quot;webserver&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:7002&amp;quot;]
+
+  - job_name: &amp;quot;rabbitmq&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node02.oldxu.net:15692&amp;quot;]
+
+  - job_name: &amp;quot;nginx&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9113&amp;quot;]
+
+  - job_name: &amp;quot;tomcat&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:8080&amp;quot;]
+
+  - job_name: &amp;quot;jmx_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:12345&amp;quot;]
+
+  - job_name: &amp;quot;mysqld_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9104&amp;quot;]
+      labels:
+        service: database
+        role: master
+    - targets: [&amp;quot;prom-node04.oldxu.net:9104&amp;quot;]
+      labels:
+        service: database
+        role: slave
+
+  - job_name: &amp;quot;redis_exporter&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:9121&amp;quot;]
+
+  - job_name: &#39;blackbox_http&#39;
+    metrics_path: /probe # metrics的path这次不是/metrics，是/probe
+    params: # 传递参数
+      module: [http_2xx] # 调哪个模块进探测
+    static_configs:
+    - targets: [&amp;quot;https://www.xuliangwei.com&amp;quot;,&amp;quot;http://www.oldxu.net&amp;quot;,&amp;quot;https://www.baidu.com&amp;quot;,&amp;quot;http://httpbin.org/status/400&amp;quot;,&amp;quot;https://httpstat.us/500&amp;quot;,&amp;quot;https://httpstat.us/502&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: &#39;blackbox_tcp&#39;
+    metrics_path: /probe
+    params:
+      module: [tcp_connect] # 使tcp_connect模块
+    static_configs:
+    - targets: [&amp;quot;prom-node03.oldxu.net:3306&amp;quot;,&amp;quot;prom-node03.oldxu.net:6379&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: &#39;blackbox_icmp&#39;
+    metrics_path: /probe
+    params:
+      module: [icmp] # 使icmp模块
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net&amp;quot;,&amp;quot;prom-node02.oldxu.net&amp;quot;,&amp;quot;prom-node03.oldxu.net&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: &#39;blackbox_ssh&#39;
+    metrics_path: /probe
+    params:
+      module: [ssh_banner] # 使⽤ssh_banner模块
+    static_configs:
+    - targets: [&amp;quot;prom-node01.oldxu.net:22&amp;quot;,&amp;quot;prom-node02.oldxu.net:22&amp;quot;,&amp;quot;prom-node03.oldxu.net:22&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9115
+
+  - job_name: &#39;domain_exporter&#39;
+    metrics_path: /probe # metrics的path不是/metrics，⽽是/probe
+    static_configs:
+    - targets: [&amp;quot;nf-leasing.com&amp;quot;,&amp;quot;hmallleasing.com&amp;quot;,&amp;quot;jd.com&amp;quot;]
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: prom-node04.oldxu.net:9222
+
+  - job_name: &amp;quot;pushgateway&amp;quot;
+    metrics_path: &amp;quot;/metrics&amp;quot;
+    static_configs:
+    - targets: [&amp;quot;prom-node04.oldxu.net:9091&amp;quot;]
+
+#.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5 id=&#34;113-编写脚本并推送指标&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#113-编写脚本并推送指标&#34;&gt;#&lt;/a&gt; 11.3 编写脚本并推送指标&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node04 ~]# cat pushgateway_backup.sh
+#!/bin/bash
+[[ $# -ne 1 ]] &amp;amp;&amp;amp; echo &amp;quot;给定一个备份的应用名称&amp;quot; &amp;amp;&amp;amp; exit
+
+# PushGateway地址
+PUSH_ADDR=&amp;quot;prom-node04.oldxu.net&amp;quot;
+
+# 应用名称
+APP_NAME=&amp;quot;$1&amp;quot;
+
+# 备份脚本示例
+START_TIME=$(date +%s)
+
+# 模拟备份任务，随机睡眠时间1-10秒
+SLEEP_TIME=$((1 + RANDOM % 10))
+sleep $SLEEP_TIME
+
+# 随机决定备份操作是否成功
+if [ $((RANDOM % 10)) -lt 5 ]; then
+    STATUS=1 # 成功
+else
+    STATUS=0 # 失败
+fi
+
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+
+# 推送指标⾄ PushGateway
+cat &amp;lt;&amp;lt;EOF | curl --data-binary @- http://$PUSH_ADDR:9091/metrics/job/backup/instance/$APP_NAME
+# HELP backup_duration_seconds The duration of the last backup in seconds.
+# TYPE backup_duration_seconds gauge
+backup_duration_seconds&amp;#123;application=&amp;quot;$APP_NAME&amp;quot;&amp;#125; $DURATION
+# HELP backup_success Last backup was success(1) or ERROR(0).
+# TYPE backup_success gauge
+backup_success&amp;#123;application=&amp;quot;$APP_NAME&amp;quot;&amp;#125; $STATUS
+EOF
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;1、执⾏脚本，需要传递⼀个应⽤的名称&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node04 ~]# sh pushgateway_backup.sh shop
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;2、在 Prometheus UI 中检查 backup_duration_seconds 和 backup_success 指标&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20240304221939121.png&#34; alt=&#34;image-20240304221939121&#34; /&gt;&lt;/p&gt;
+&lt;h5 id=&#34;114-配置告警规则文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#114-配置告警规则文件&#34;&gt;#&lt;/a&gt; 11.4 配置告警规则⽂件&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/rules/backup_rules.yml
+groups:
+- name: backup_alerts
+  rules:
+  # 警告：在备份成功情况在，如果备份任务耗时超过了9秒则触发告警
+  - alert: 备份告警超时
+    expr: backup_duration_seconds &amp;gt; 6 and backup_success == 1
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: &amp;quot;备份任务耗时过长&amp;quot;
+      description: &amp;quot;&amp;#123;&amp;#123; $labels.exported_instance &amp;#125;&amp;#125; 应⽤备份任务成功完成，但耗时超过了6秒。实际耗时: &amp;#123;&amp;#123; $value &amp;#125;&amp;#125; 秒。&amp;quot;
+ 
+  # 严重警告：备份任务失败，并且不考虑耗时
+  - alert: 备份任务失败
+    expr: backup_success == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: &amp;quot;备份失败&amp;quot;
+      description: &amp;quot;&amp;#123;&amp;#123; $labels.exported_job &amp;#125;&amp;#125; 任务中 &amp;#123;&amp;#123; $labels.exported_instance &amp;#125;&amp;#125; 应用备份失败。&amp;quot;
+
+#2.检查告警规则语法
+[root@prom-node01 ~]# /etc/prometheus/promtool check rules /etc/prometheus/rules/backup_rules.yml 
+Checking /etc/prometheus/rules/backup_rules.yml
+  SUCCESS: 2 rules found
+  
+#3.重载Prometheus
+[root@prom-node01 ~]# curl -v -X POST http://localhost:9090/-/reload
+&lt;/code&gt;&lt;/pre&gt;
 </content>
         <category term="Prometheus" />
         <updated>2025-06-28T14:17:01.000Z</updated>
@@ -45,7 +2549,7 @@
         <title>PromQL快速入门（二）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/3386060324.html"/>
         <content type="html">&lt;h3 id=&#34;promql快速入门二&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#promql快速入门二&#34;&gt;#&lt;/a&gt; PromQL 快速入门（二）&lt;/h3&gt;
-&lt;h4 id=&#34;一-promql基础概念&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-promql基础概念&#34;&gt;#&lt;/a&gt; 一、PromQL 基础概念&lt;/h4&gt;
+&lt;h4 id=&#34;一-promql基础概念&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-promql基础概念&#34;&gt;#&lt;/a&gt; 一. PromQL 基础概念&lt;/h4&gt;
 &lt;h5 id=&#34;11-什么是promeql&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-什么是promeql&#34;&gt;#&lt;/a&gt; 1.1 什么是 PromeQL&lt;/h5&gt;
 &lt;p&gt;Prometheus 内置了⼀种强⼤的查询语⾔：PromQL，即 PrometheusQuery Language。PromQL 允许⽤户实时查询监控数据，并对这些数据执⾏复杂的聚合和计算操作。&lt;/p&gt;
 &lt;p&gt;在 PromQL 中，查询的结果被称为 “向量（vector）”，分为两种类型：&lt;/p&gt;
@@ -64,7 +2568,7 @@
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/oqN9oVU.jpeg&#34; alt=&#34;2.jpg&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;3、监控告警：Prometheus 可以直接使⽤ PromQL 对指标的查询结果来设置告警。⼀旦查询结果满⾜指定的条件，就会触发告警，⼀个完整的报警规则如下所示：&lt;/p&gt;
 &lt;p&gt;⼀个告警规则包括了告警的名称、条件、持续时间等信息。&lt;/p&gt;
-&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;groups:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;- name: 告警组&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  rules:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  - alert: 节点宕机   &lt;span class=&#34;token comment&#34;&gt;# 告警名称&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    expr: up &lt;span class=&#34;token operator&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;   &lt;span class=&#34;token comment&#34;&gt;# 告警条件&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    for: 1m         &lt;span class=&#34;token comment&#34;&gt;# 持续时间&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    labels:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      severity: critical&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    annotations: &lt;span class=&#34;token comment&#34;&gt;# 定义邮件中收到的告警详细内容&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      summary: &lt;span class=&#34;token string&#34;&gt;&#34;节点宕机警告 - 实例：&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      description: &lt;span class=&#34;token string&#34;&gt;&#34;作业  的节点⽆法访问，已经持续超过1分钟。&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;二-promql基础使用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#二-promql基础使用&#34;&gt;#&lt;/a&gt; 二、PromQL 基础使⽤&lt;/h4&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;groups:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;- name: 告警组&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  rules:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  - alert: 节点宕机   &lt;span class=&#34;token comment&#34;&gt;# 告警名称&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    expr: up &lt;span class=&#34;token operator&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;   &lt;span class=&#34;token comment&#34;&gt;# 告警条件&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    for: 1m         &lt;span class=&#34;token comment&#34;&gt;# 持续时间&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    labels:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      severity: critical&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    annotations: &lt;span class=&#34;token comment&#34;&gt;# 定义邮件中收到的告警详细内容&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      summary: &lt;span class=&#34;token string&#34;&gt;&#34;节点宕机警告 - 实例：&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      description: &lt;span class=&#34;token string&#34;&gt;&#34;作业  的节点⽆法访问，已经持续超过1分钟。&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;二-promql基础使用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#二-promql基础使用&#34;&gt;#&lt;/a&gt; 二. PromQL 基础使⽤&lt;/h4&gt;
 &lt;h5 id=&#34;21-指标查询&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-指标查询&#34;&gt;#&lt;/a&gt; 2.1 指标查询&lt;/h5&gt;
 &lt;p&gt;1、查询指标的最直接⽅式是输⼊ “指标的名称”。⽐如，你想知道系统的⼀分钟负载（node_load1）情况：&lt;/p&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 查询表达式&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;node_load1&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 查询结果（结果展示了所有被监控节点的⼀分钟负载。）&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;node_load1&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;node_load1&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node02.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;0.02&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;node_load1&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node03.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;0.13&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;2、但是，在实际监控时，我们通常只需要关注 “特定节点” 的指标数据。例如，如果我只想查看 &lt;a href=&#34;http://prom-node01.oldxu.net&#34;&gt;prom-node01.oldxu.net&lt;/a&gt; 这个节点的⼀分钟负载情况，那么就可需要是⽤ “标签匹配器” 来筛选出所需的指标。&lt;/p&gt;
@@ -90,7 +2594,7 @@
 &lt;li&gt;例如，如果当前总接收流量是 6000MB，⽽ 1 ⼩时前接收的总流量是 5000MB，&lt;/li&gt;
 &lt;li&gt;那么计算公式为： （6000 - 5000） / 5000 * 100 = 20% （意味着相⽐ 1 ⼩时前，当前流量增⻓了 20%）&lt;/li&gt;
 &lt;/ul&gt;
-&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 表达式&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;node_network_receive_bytes_total&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;device&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;eth0&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; - node_network_receive_bytes_total&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;device&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;eth0&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; offset 1h&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; / node_network_receive_bytes_total&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;device&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;eth0&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; offset 1h * &lt;span class=&#34;token number&#34;&gt;100&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 结果&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;device&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;eth0&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-87.68874820331817&lt;/span&gt; &lt;span class=&#34;token comment&#34;&gt;# 负增⻓ 80%&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;device&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;eth0&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node02.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;4231.893284128109&lt;/span&gt;  &lt;span class=&#34;token comment&#34;&gt;# 增⻓ 4231%&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;device&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;eth0&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node03.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;24.658781604740295&lt;/span&gt; &lt;span class=&#34;token comment&#34;&gt;# 增⻓ 24%&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;三-promql常用函数&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#三-promql常用函数&#34;&gt;#&lt;/a&gt; 三、PromQL 常⽤函数&lt;/h4&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 表达式&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;node_network_receive_bytes_total&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;device&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;eth0&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; - node_network_receive_bytes_total&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;device&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;eth0&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; offset 1h&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; / node_network_receive_bytes_total&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;device&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;eth0&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; offset 1h * &lt;span class=&#34;token number&#34;&gt;100&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 结果&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;device&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;eth0&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-87.68874820331817&lt;/span&gt; &lt;span class=&#34;token comment&#34;&gt;# 负增⻓ 80%&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;device&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;eth0&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node02.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;4231.893284128109&lt;/span&gt;  &lt;span class=&#34;token comment&#34;&gt;# 增⻓ 4231%&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;device&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;eth0&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node03.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;24.658781604740295&lt;/span&gt; &lt;span class=&#34;token comment&#34;&gt;# 增⻓ 24%&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;三-promql常用函数&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#三-promql常用函数&#34;&gt;#&lt;/a&gt; 三. PromQL 常⽤函数&lt;/h4&gt;
 &lt;h5 id=&#34;31-count类型常用函数&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#31-count类型常用函数&#34;&gt;#&lt;/a&gt; 3.1 Count 类型常⽤函数&lt;/h5&gt;
 &lt;p&gt;前⾯我们讲过，Counter 类型的监控指标只增不减，因此其样本值应该是不断增⼤的。因此单纯的 Counter 总数并没有直接作⽤，⽽是需要借助于 rate、irate、increase 和等函数来计算样本数据的变化状况（增⻓率）；&lt;/p&gt;
 &lt;p&gt;1、rate ⽤于计算平均增⻓速率：计算公式：通过指定时间范围内的样本，使⽤最后⼀个样本的值减去第⼀个样本的值，⽽后除以这两个样本之间的间隔时⻓。&lt;/p&gt;
@@ -112,7 +2616,7 @@
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;delta&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;cpu_temp_celsius&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;host&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom01.oldxu.net&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;2h&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;例如： delta (node_filesystem_avail_bytes [10m]) /1024 /1024 ，返回服务器上磁盘可⽤空间与 10 分钟之前的差异；&lt;/p&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;delta&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;node_filesystem_avail_bytes&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;10m&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; /1024 /1024&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;#创建大文件&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node01 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# dd if=/dev/zero of=/bigdata count=1 bs=200M&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;3、changes () ：计算监控时间范围内某个时间序列的数据变化的次数。它只关⼼变化的次数，⽽不关⼼具体变化的值是什么。&lt;/p&gt;
 &lt;p&gt;例如： changes (nginx_up [10m]) 监控 Nginx 服务在给定时间内变化的次数，如果停⽌了变化次数 + 1，启动了变化次数 + 1。&lt;/p&gt;
-&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;changes&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;up&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;10m&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;#模式测试&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node02 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# systemctl stop node_exporter&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node02 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# systemctl start node_exporter&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:3000&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;grafana&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;         &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9090&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prometheus&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;      &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;   &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node02.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;   &lt;span class=&#34;token number&#34;&gt;2&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node03.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;   &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;四-promql二元运算符&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#四-promql二元运算符&#34;&gt;#&lt;/a&gt; 四、PromQL ⼆元运算符&lt;/h4&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;changes&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;up&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;10m&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;#模式测试&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node02 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# systemctl stop node_exporter&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node02 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# systemctl start node_exporter&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:3000&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;grafana&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;         &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9090&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prometheus&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;      &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;   &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node02.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;   &lt;span class=&#34;token number&#34;&gt;2&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node03.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;   &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;四-promql二元运算符&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#四-promql二元运算符&#34;&gt;#&lt;/a&gt; 四. PromQL ⼆元运算符&lt;/h4&gt;
 &lt;p&gt;PromQL 提供了⼀系列⼆元运算符，包括算术运算 (+ - * /)、⽐较运算 ( == &amp;lt;= &amp;gt;=)、以及集合运算 ( and or unless)。在 PromQL 中，⽤户可以执⾏以下类型的运算：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -184,7 +2688,7 @@
 &lt;p&gt;实例 1：查询实例的⽹络接收流量 “并且” ⽹络发送流量，每秒传输超过 200Mb/s&lt;/p&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;#模拟接收和发送流量⽐较⾼：&#34;需要在同⼀节点&#34; 模拟服务端和客户端，执⾏如下命令&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 1、模拟服务端：iperf -s -p 9999&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 2、模拟客户端：iperf -c prom-node01.oldxu.net -p 9999 -b 300M -t 60&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 表达式&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;rate&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;node_network_receive_bytes_total&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;1m&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; *8 /1024 /1024 &lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;&lt;span class=&#34;token number&#34;&gt;200&lt;/span&gt; and&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;rate&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;node_network_transmit_bytes_total&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;1m&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; *8 /1024 /1024 &lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;&lt;span class=&#34;token number&#34;&gt;200&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 结果&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;device&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;lo&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9100&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;node_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;300.4421537611219&lt;/span&gt; &lt;span class=&#34;token comment&#34;&gt;# 这个实例发送和接收同时达到了 300Mb/s&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;实例 2：查询当前磁盘，可⽤空间不⾜ 20GB “或者” 当前磁盘可⽤空间不⾜ 30%&lt;/p&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 表达式，计算公式： 可⽤空间 / 1024/1024/1024 &amp;lt;= 20 OR （可⽤空间 / 总磁盘空间） *100 &amp;lt; 30 &lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;node_filesystem_avail_bytes /1024 /1024 /1024 &lt;span class=&#34;token operator&#34;&gt;&amp;lt;=&lt;/span&gt;&lt;span class=&#34;token number&#34;&gt;20&lt;/span&gt; or &lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt; node_filesystem_avail_bytes / node_filesystem_size_bytes&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; * &lt;span class=&#34;token number&#34;&gt;100&lt;/span&gt; &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;30&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 结果&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;实例 3：通过 probe_http_status_code 指标获取当前监控的⽹站返回的状态码，并从中筛选出⼩于 200 的状态码 “或者” ⼤于 400 的状态码&lt;/p&gt;
-&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 表达式&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code &lt;span class=&#34;token operator&#34;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;199&lt;/span&gt; or&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code &lt;span class=&#34;token operator&#34;&gt;&gt;=&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;400&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 结果&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;https://httpstat.us/102&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;blackbox_http&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;http://httpbin.org/status/400&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;blackbox_http&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;400&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;https://httpstat.us/421&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;blackbox_http&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;421&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;https://httpstat.us/500&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;blackbox_http&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;500&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;https://httpstat.us/502&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;blackbox_http&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;502&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;五-promql聚合操作&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#五-promql聚合操作&#34;&gt;#&lt;/a&gt; 五、PromQL 聚合操作&lt;/h4&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 表达式&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code &lt;span class=&#34;token operator&#34;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;199&lt;/span&gt; or&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code &lt;span class=&#34;token operator&#34;&gt;&gt;=&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;400&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 结果&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;https://httpstat.us/102&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;blackbox_http&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;http://httpbin.org/status/400&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;blackbox_http&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;400&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;https://httpstat.us/421&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;blackbox_http&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;421&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;https://httpstat.us/500&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;blackbox_http&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;500&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;probe_http_status_code&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;https://httpstat.us/502&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;blackbox_http&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;502&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;五-promql聚合操作&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#五-promql聚合操作&#34;&gt;#&lt;/a&gt; 五. PromQL 聚合操作&lt;/h4&gt;
 &lt;h5 id=&#34;51-promql聚合介绍&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#51-promql聚合介绍&#34;&gt;#&lt;/a&gt; 5.1 PromQL 聚合介绍&lt;/h5&gt;
 &lt;p&gt;聚合运算，是数据处理中的⽐较常⻅操作，例如统计公司所有⼈员的年龄，求公司整体的平均年龄，最⼤年龄，或最⼩年龄等。因此聚合操作它是从⼀组数据值中，计算出⼀个单⼀的值。&lt;/p&gt;
 &lt;p&gt;Prometheus 的聚合操作与此前刚才所描述的常规聚合在本质上是相似的，只不过它⽀持多种聚合运算函数，包括:&lt;/p&gt;
@@ -241,7 +2745,7 @@
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 模拟数据写⼊，复制 2G 的数据，控制每秒 20M 左右的速度写&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# yum install pv -y&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# dd if=/dev/zero bs=1M count=2000 | pv -L 20M &gt; /tmp/bigdata&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 表达式： 获取每分钟的磁盘速率，然后提取最⼤的值，最后 / 1024/1024 得到 MB/s&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;max&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;rate&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;node_disk_written_bytes_total&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;1m&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;))&lt;/span&gt; by &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;instance&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; /1024 /1024&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 结果&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9100&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;0.007052951388888888&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node02.oldxu.net:9100&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;19.724283854166664&lt;/span&gt; &lt;span class=&#34;token comment&#34;&gt;#每秒写⼊速度在 19MB/s&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node03.oldxu.net:9100&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;0.011946614583333333&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;实例 4：查询所有节点，最近 1 分钟磁盘的读取写⼊速率，以 MB/s 为单位，指标名称： node_disk_read_bytes_total&lt;/p&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 模拟数据读取，读取 /tmp/bigdata ⽂件，然后以每秒 15MB 的速度读取&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# yum install pv -y&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# pv -L 15M /tmp/bigdata &gt; /dev/null&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 表达式&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;max&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;rate&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;node_disk_read_bytes_total&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;1m&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;))&lt;/span&gt; by &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;instance&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; /1024 /1024&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 结果&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9100&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node02.oldxu.net:9100&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;15.006076388888888&lt;/span&gt; &lt;span class=&#34;token comment&#34;&gt;#每秒读取速度在 15MB/s&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node03.oldxu.net:9100&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;实例 5：计算 Prometheus 服务器的 HTTP 请求成功率，指标名称： prometheus_http_requests_total&lt;/p&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 计算公式： 请求成功的 (2xx|3xx) / 总的请求 * 100 = 请求成功率&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 表达式&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;sum&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;prometheus_http_requests_total&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;code&lt;span class=&#34;token operator&#34;&gt;=~&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;2.*|3.*&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; / sum&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;prometheus_http_requests_total&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; * &lt;span class=&#34;token number&#34;&gt;100&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 结果&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;99.59027974003956&lt;/span&gt; &lt;span class=&#34;token comment&#34;&gt;# ⽹站整体请求成功率在 99.5%&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;实例 6：查询请求排名前三的 URL，指标名称： prometheus_http_requests_total&lt;/p&gt;
-&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 表达式&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;sum&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;topk&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;token number&#34;&gt;3&lt;/span&gt;,prometheus_http_requests_total&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; by &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;instance,handler&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 结果&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;handler&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;/metrics&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9090&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;5483&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;handler&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;/api/v1/query&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9090&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;1576&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;handler&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;/api/v1/metadata&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9090&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;113&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;六-promql时间聚合操作&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#六-promql时间聚合操作&#34;&gt;#&lt;/a&gt; 六、PromQL 时间聚合操作&lt;/h4&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 表达式&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;sum&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;topk&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;token number&#34;&gt;3&lt;/span&gt;,prometheus_http_requests_total&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; by &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;instance,handler&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 结果&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;handler&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;/metrics&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9090&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;5483&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;handler&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;/api/v1/query&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9090&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;1576&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;handler&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;/api/v1/metadata&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9090&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;113&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;六-promql时间聚合操作&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#六-promql时间聚合操作&#34;&gt;#&lt;/a&gt; 六. PromQL 时间聚合操作&lt;/h4&gt;
 &lt;h5 id=&#34;61-promql时间聚合介绍&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#61-promql时间聚合介绍&#34;&gt;#&lt;/a&gt; 6.1 PromQL 时间聚合介绍&lt;/h5&gt;
 &lt;p&gt;在 Prometheus 中，除了可以 “纵向的聚合” 以外，还可以基于时间聚合也就是 “横向聚合”。&lt;/p&gt;
 &lt;p&gt;时间聚合不是在不同的序列上进⾏聚合操作，⽽是在 “单个序列” 的不同时间点之间进⾏聚合，这意味着，对于单个序列，我们可以计算过去⼀段时间内的最⼤值，最⼩值，以及平均值等。&lt;/p&gt;
@@ -269,7 +2773,7 @@
 &lt;li&gt;mysql_global_status_threads_connected （表示当前打开的连接数）&lt;/li&gt;
 &lt;li&gt;mysql_global_variables_max_connections （表示配置允许的最⼤连接数）&lt;/li&gt;
 &lt;/ul&gt;
-&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 模拟 MySQL 连接数&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token keyword&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;token for-or-select variable&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;token keyword&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;&lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;..&lt;/span&gt;&lt;span class=&#34;token number&#34;&gt;120&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;token keyword&#34;&gt;do&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    mysql &lt;span class=&#34;token parameter variable&#34;&gt;-e&lt;/span&gt; &lt;span class=&#34;token string&#34;&gt;&#34;SELECT SLEEP(60);&#34;&lt;/span&gt; &lt;span class=&#34;token operator&#34;&gt;&amp;amp;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token keyword&#34;&gt;done&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 表达式&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;max_over_time&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;mysql_global_status_threads_connected&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;1m&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; / mysql_global_variables_max_connections * &lt;span class=&#34;token number&#34;&gt;100&lt;/span&gt; &lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;80&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 结果&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node03.oldxu.net:9104&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;mysqld_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;80.79470198675497&lt;/span&gt; &lt;span class=&#34;token comment&#34;&gt;# 当前最⼤连接数已经超过了 80%&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;七-promql向量匹配&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#七-promql向量匹配&#34;&gt;#&lt;/a&gt; 七、PromQL 向量匹配&lt;/h4&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 模拟 MySQL 连接数&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token keyword&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;token for-or-select variable&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;token keyword&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;&lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;..&lt;/span&gt;&lt;span class=&#34;token number&#34;&gt;120&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;token keyword&#34;&gt;do&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    mysql &lt;span class=&#34;token parameter variable&#34;&gt;-e&lt;/span&gt; &lt;span class=&#34;token string&#34;&gt;&#34;SELECT SLEEP(60);&#34;&lt;/span&gt; &lt;span class=&#34;token operator&#34;&gt;&amp;amp;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token keyword&#34;&gt;done&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 表达式&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;max_over_time&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;mysql_global_status_threads_connected&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;1m&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt; / mysql_global_variables_max_connections * &lt;span class=&#34;token number&#34;&gt;100&lt;/span&gt; &lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;80&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 结果&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node03.oldxu.net:9104&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;job&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;mysqld_exporter&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;80.79470198675497&lt;/span&gt; &lt;span class=&#34;token comment&#34;&gt;# 当前最⼤连接数已经超过了 80%&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;七-promql向量匹配&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#七-promql向量匹配&#34;&gt;#&lt;/a&gt; 七. PromQL 向量匹配&lt;/h4&gt;
 &lt;h5 id=&#34;71-promql向量匹配介绍&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#71-promql向量匹配介绍&#34;&gt;#&lt;/a&gt; 7.1 PromQL 向量匹配介绍&lt;/h5&gt;
 &lt;p&gt;在 Prometheus 中，执⾏ “向量与向量之间的运算” 时，需要遵循向量匹配的规则。这意味着两个向量必须具有 “相同的标签”，且对应的 “标签值也必须完全相同”，这才能进⾏运算。如果有任何⼀个标签或标签值不匹配，那么此次的运算将不会执⾏。这种匹配规则也被称为 “向量的⼀对⼀匹配”。例如，下⾯两个时间序列可以成功进⾏⼀对⼀匹配，⽽后可以正常执⾏各种运算：&lt;/p&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;http_requests_total&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;job&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;webserver&#34;&lt;/span&gt;, &lt;span class=&#34;token assign-left variable&#34;&gt;instance&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;promnode01.oldxu.net:9100&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;http_requests_duration_seconds&lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;job&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;webserver&#34;&lt;/span&gt;,instance&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;prom-node01.oldxu.net:9100&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;因为它们的标签以及标签值完全⼀致，所以它们可以直接进⾏运算操作。&lt;/p&gt;
