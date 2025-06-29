@@ -5,23 +5,23 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-06-30T02:33:49.000Z</updated>
     <category term="Aliyun" />
-    <category term="Docker" />
     <category term="DevOps" />
-    <category term="Harbor" />
+    <category term="Docker" />
     <category term="ELKStack" />
+    <category term="Harbor" />
+    <category term="Kubernetes" />
     <category term="LVS" />
+    <category term="MySQL" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Samba" />
     <category term="Vsftp" />
     <category term="Openvpn" />
-    <category term="MySQL" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
     <category term="Redis" />
-    <category term="Tomcat" />
     <category term="Windows" />
-    <category term="Kubernetes" />
+    <category term="Tomcat" />
     <entry>
         <id>http://ixuyong.cn/posts/2041568856.html</id>
         <title>Prometheus监控Kubernetes</title>
@@ -8708,7 +8708,7 @@ data:
     </entry>
     <entry>
         <id>http://ixuyong.cn/posts/4081185382.html</id>
-        <title>Prometheus监控实战（三）</title>
+        <title>Prometheus监控实战（四）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/4081185382.html"/>
         <content type="html">&lt;h3 id=&#34;prometheus告警服务&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#prometheus告警服务&#34;&gt;#&lt;/a&gt; &lt;strong&gt;Prometheus 告警服务&lt;/strong&gt;&lt;/h3&gt;
 &lt;h4 id=&#34;1-aleartmanager部署&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-aleartmanager部署&#34;&gt;#&lt;/a&gt; 1. AleartManager 部署&lt;/h4&gt;
