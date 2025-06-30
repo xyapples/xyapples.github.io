@@ -8,16 +8,16 @@
     <category term="DevOps" />
     <category term="Docker" />
     <category term="ELKStack" />
-    <category term="Kubernetes" />
     <category term="Harbor" />
+    <category term="Kubernetes" />
     <category term="LVS" />
     <category term="Linux" />
-    <category term="Samba" />
     <category term="rsync" />
+    <category term="Samba" />
     <category term="Vsftp" />
+    <category term="Prometheus" />
     <category term="Openvpn" />
     <category term="MySQL" />
-    <category term="Prometheus" />
     <category term="Rabbitmq" />
     <category term="Redis" />
     <category term="Tomcat" />
@@ -8711,7 +8711,7 @@ data:
         <title>Prometheus监控实战（四）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/4081185382.html"/>
         <content type="html">&lt;h3 id=&#34;prometheus告警服务&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#prometheus告警服务&#34;&gt;#&lt;/a&gt; &lt;strong&gt;Prometheus 告警服务&lt;/strong&gt;&lt;/h3&gt;
-&lt;h4 id=&#34;1-aleartmanager部署&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-aleartmanager部署&#34;&gt;#&lt;/a&gt; 1. AleartManager 部署&lt;/h4&gt;
+&lt;h4 id=&#34;一-aleartmanager部署&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-aleartmanager部署&#34;&gt;#&lt;/a&gt; 一. AleartManager 部署&lt;/h4&gt;
 &lt;h5 id=&#34;11-aleartmanager安装&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-aleartmanager安装&#34;&gt;#&lt;/a&gt; 1.1 AleartManager 安装&lt;/h5&gt;
 &lt;p&gt;1、访问 AlertManager 的 github，获取 AlertManager 的下载地址， &lt;a href=&#34;https://github.com/prometheus/alertmanager/releases&#34;&gt;https://github.com/prometheus/alertmanager/releases&lt;/a&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;#1.下载AlertManager
@@ -8813,7 +8813,7 @@ tcp6       0      0 :::9093                 :::*                    LISTEN      
 ./alert_test_oldxu --alertURL=&amp;quot;http://prom-node01.oldxu.net:9093/api/v1/alerts&amp;quot; --label=&amp;quot;alertname=cpu故障,instance=prom-node01.oldxu.net,severity=critical,job=node_exporter&amp;quot;
 ./alert_test_oldxu --alertURL=&amp;quot;http://prom-node01.oldxu.net:9093/api/v1/alerts&amp;quot; --label=&amp;quot;alertname=cpu故障,instance=prom-node02.oldxu.net,severity=critical,job=node_exporter&amp;quot;
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;2prometheus对接aleartmanager&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2prometheus对接aleartmanager&#34;&gt;#&lt;/a&gt; 2.Prometheus 对接 AleartManager&lt;/h4&gt;
+&lt;h4 id=&#34;二-prometheus对接aleartmanager&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#二-prometheus对接aleartmanager&#34;&gt;#&lt;/a&gt; 二. Prometheus 对接 AleartManager&lt;/h4&gt;
 &lt;h5 id=&#34;21-配置prom对接aleartmanager&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-配置prom对接aleartmanager&#34;&gt;#&lt;/a&gt; 2.1 配置 Prom 对接 AleartManager&lt;/h5&gt;
 &lt;p&gt;1、编辑 prometheus.yml ⽂件，然后将告警接⼊⾄ AlertManager 组件；&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# cat /etc/prometheus/prometheus.yml
@@ -9389,7 +9389,7 @@ Found:
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;5、触发告警，验证告警模板是否正常渲染&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20240306200956695.png&#34; alt=&#34;image-20240306200956695&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;3-alertmanager告警通知方式&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-alertmanager告警通知方式&#34;&gt;#&lt;/a&gt; 3. AlertManager 告警通知⽅式&lt;/h4&gt;
+&lt;h4 id=&#34;三-alertmanager告警通知方式&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#三-alertmanager告警通知方式&#34;&gt;#&lt;/a&gt; 三. AlertManager 告警通知⽅式&lt;/h4&gt;
 &lt;h5 id=&#34;31-配置alert对接微信告警&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#31-配置alert对接微信告警&#34;&gt;#&lt;/a&gt; 3.1 配置 Alert 对接微信告警&lt;/h5&gt;
 &lt;p&gt;企业微信告警，需要将发送告警的服务器域名添加到⽩名单，同时该服务器必须运⾏在公⽹，因此常规的企业微信告警没办法很好在本地实现。但是我们可以采⽤ webhook ⽅式来实现： Prometheus--&amp;gt;AlertManager--&amp;gt; ⾃定义 Webhook 程序 --&amp;gt; 企业微信机器⼈ --&amp;gt; 通知给对应的⽤户&lt;/p&gt;
 &lt;ul&gt;
@@ -9644,7 +9644,7 @@ Found:
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;8、触发告警，验证是否能通过企业微信收到消息&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20240306214829806.png&#34; alt=&#34;image-20240306214829806&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;4-alertmanager告警路由&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#4-alertmanager告警路由&#34;&gt;#&lt;/a&gt; 4. AlertManager 告警路由&lt;/h4&gt;
+&lt;h4 id=&#34;四-alertmanager告警路由&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#四-alertmanager告警路由&#34;&gt;#&lt;/a&gt; 四. AlertManager 告警路由&lt;/h4&gt;
 &lt;h5 id=&#34;41-告警路由介绍&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#41-告警路由介绍&#34;&gt;#&lt;/a&gt; 4.1 告警路由介绍&lt;/h5&gt;
 &lt;p&gt;所谓的告警路由，就是将不同的告警消息转发给不同的接收⼈，以便故障能快速的被处理和解决。&lt;/p&gt;
 &lt;p&gt;Alertmanager 的告警路由配置，使⽤的是树状结构来定义，以确保每条告警消息都能够按照定义好的路径进⾏处理。当⼀条告警消息进来后，会先进⼊根路由，然后逐级的去匹配每个⼦路由的规则，然后将消息通过媒介发送给对应的接收⼈。&lt;/p&gt;
@@ -9707,30 +9707,11 @@ receivers:
     html: &#39;&amp;#123;&amp;#123; template &#34;email.html&#34; . &amp;#125;&amp;#125;&#39; # 发送邮件内容，调用该模板进行渲染
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;2、检查语法，并重新加载 AlertManager&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@prom-node01 data]# /etc/alertmanager/amtool check-config /etc/alertmanager/alertmanager.yml
-Checking &#39;/etc/alertmanager/alertmanager.yml&#39;  SUCCESS
-Found:
- - global config
- - route
- - 0 inhibit rules
- - 3 receivers
- - 1 templates
-  SUCCESS
-  
-[root@prom-node01 data]#  curl -X POST http://localhost:9093/-/reload
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;43-告警路由验证&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#43-告警路由验证&#34;&gt;#&lt;/a&gt; 4.3 告警路由验证&lt;/h5&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node01 data&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# /etc/alertmanager/amtool check-config /etc/alertmanager/alertmanager.yml&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;Checking &lt;span class=&#34;token string&#34;&gt;&#39;/etc/alertmanager/alertmanager.yml&#39;&lt;/span&gt;  SUCCESS&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;Found:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt; - global config&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt; - route&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt; - &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt; inhibit rules&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt; - &lt;span class=&#34;token number&#34;&gt;3&lt;/span&gt; receivers&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt; - &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt; templates&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  SUCCESS&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  &lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node01 data&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;#  curl -X POST http://localhost:9093/-/reload&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h5 id=&#34;43-告警路由验证&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#43-告警路由验证&#34;&gt;#&lt;/a&gt; 4.3 告警路由验证&lt;/h5&gt;
 &lt;p&gt;1、触发 mysql 和 redis 的告警，验证钉钉 - DBA 团队是否能收到告警消息&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@prom-node03 ~]# systemctl stop mysqld_exporter.service redis_exporter.service
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;2、触发 node 相关的告警，验证钉钉 - OPS 团队是否能收到告警消息&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@prom-node02 ~]# systemctl stop node_exporter.service
-[root@prom-node03 ~]# systemctl stop node_exporter.service
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;3、触发 nginx 相关的告警，验证微信运维团队是否能收到告警消息&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@prom-node03 ~]# systemctl stop nginx_exporter.service
-&lt;/code&gt;&lt;/pre&gt;
-</content>
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node03 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# systemctl stop mysqld_exporter.service redis_exporter.service&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;2、触发 node 相关的告警，验证钉钉 - OPS 团队是否能收到告警消息&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node02 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# systemctl stop node_exporter.service&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node03 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# systemctl stop node_exporter.service&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;3、触发 nginx 相关的告警，验证微信运维团队是否能收到告警消息&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node03 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# systemctl stop nginx_exporter.service&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;</content>
         <category term="Prometheus" />
         <updated>2025-06-29T14:03:48.000Z</updated>
     </entry>
