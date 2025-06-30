@@ -19,9 +19,9 @@
         <category>Samba</category>
         <category>Vsftp</category>
         <category>MySQL</category>
+        <category>Rabbitmq</category>
         <category>Openvpn</category>
         <category>Prometheus</category>
-        <category>Rabbitmq</category>
         <category>Redis</category>
         <category>Tomcat</category>
         <category>Windows</category>
