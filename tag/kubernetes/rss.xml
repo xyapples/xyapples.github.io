@@ -23,8 +23,8 @@
         <category>Prometheus</category>
         <category>Rabbitmq</category>
         <category>Redis</category>
-        <category>Tomcat</category>
         <category>Windows</category>
+        <category>Tomcat</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/626047790.html</guid>
             <title>消费租赁系统微服务应用交付实践</title>

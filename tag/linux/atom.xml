@@ -20,8 +20,8 @@
     <category term="Prometheus" />
     <category term="Rabbitmq" />
     <category term="Redis" />
-    <category term="Tomcat" />
     <category term="Windows" />
+    <category term="Tomcat" />
     <entry>
         <id>http://ixuyong.cn/posts/581151773.html</id>
         <title>100个运维相关技术官网汇总</title>
