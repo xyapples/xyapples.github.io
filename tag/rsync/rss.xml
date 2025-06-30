@@ -7,24 +7,24 @@
         <language>zh-CN</language>
         <pubDate>Sun, 30 Mar 2025 20:45:48 +0800</pubDate>
         <lastBuildDate>Sun, 30 Mar 2025 20:45:48 +0800</lastBuildDate>
-        <category>Aliyun</category>
         <category>DevOps</category>
+        <category>Aliyun</category>
         <category>Docker</category>
         <category>ELKStack</category>
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>LVS</category>
         <category>Linux</category>
+        <category>MySQL</category>
         <category>rsync</category>
         <category>Samba</category>
         <category>Vsftp</category>
-        <category>MySQL</category>
         <category>Openvpn</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
         <category>Redis</category>
-        <category>Windows</category>
         <category>Tomcat</category>
+        <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1922841233.html</guid>
             <title>Rsync服务实践</title>
