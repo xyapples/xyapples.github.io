@@ -5,20 +5,20 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-06-05T13:50:22.000Z</updated>
     <category term="Aliyun" />
-    <category term="DevOps" />
-    <category term="Docker" />
     <category term="ELKStack" />
-    <category term="Harbor" />
+    <category term="Docker" />
+    <category term="DevOps" />
     <category term="Kubernetes" />
+    <category term="Harbor" />
     <category term="LVS" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Samba" />
     <category term="Vsftp" />
     <category term="MySQL" />
-    <category term="Openvpn" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
+    <category term="Openvpn" />
     <category term="Redis" />
     <category term="Tomcat" />
     <category term="Windows" />
