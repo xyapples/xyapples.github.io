@@ -8,19 +8,19 @@
     <category term="Docker" />
     <category term="DevOps" />
     <category term="ELKStack" />
-    <category term="Harbor" />
     <category term="Kubernetes" />
+    <category term="Harbor" />
+    <category term="MySQL" />
     <category term="LVS" />
     <category term="Linux" />
+    <category term="Samba" />
     <category term="rsync" />
     <category term="Vsftp" />
-    <category term="Samba" />
-    <category term="MySQL" />
     <category term="Openvpn" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
-    <category term="Tomcat" />
     <category term="Redis" />
+    <category term="Tomcat" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/2126514413.html</id>
