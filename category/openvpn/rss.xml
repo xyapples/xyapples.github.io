@@ -16,14 +16,14 @@
         <category>LVS</category>
         <category>Linux</category>
         <category>rsync</category>
-        <category>Samba</category>
         <category>Vsftp</category>
+        <category>Samba</category>
         <category>MySQL</category>
         <category>Openvpn</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
-        <category>Redis</category>
         <category>Tomcat</category>
+        <category>Redis</category>
         <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2126514413.html</guid>
