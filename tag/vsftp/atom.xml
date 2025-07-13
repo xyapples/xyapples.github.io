@@ -5,12 +5,12 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-06-20T14:12:00.000Z</updated>
     <category term="Aliyun" />
-    <category term="Docker" />
     <category term="DevOps" />
+    <category term="Docker" />
     <category term="ELKStack" />
     <category term="Harbor" />
-    <category term="LVS" />
     <category term="Kubernetes" />
+    <category term="LVS" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Samba" />
