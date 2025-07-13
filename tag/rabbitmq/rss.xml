@@ -11,8 +11,8 @@
         <category>Docker</category>
         <category>DevOps</category>
         <category>ELKStack</category>
-        <category>LVS</category>
         <category>Harbor</category>
+        <category>LVS</category>
         <category>Kubernetes</category>
         <category>Linux</category>
         <category>rsync</category>
