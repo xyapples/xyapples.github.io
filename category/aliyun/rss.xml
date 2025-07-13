@@ -13,11 +13,11 @@
         <category>ELKStack</category>
         <category>Harbor</category>
         <category>Kubernetes</category>
-        <category>LVS</category>
         <category>Linux</category>
         <category>rsync</category>
         <category>Samba</category>
         <category>Vsftp</category>
+        <category>LVS</category>
         <category>MySQL</category>
         <category>Openvpn</category>
         <category>Prometheus</category>

@@ -10,11 +10,11 @@
     <category term="ELKStack" />
     <category term="Harbor" />
     <category term="Kubernetes" />
-    <category term="LVS" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Samba" />
     <category term="Vsftp" />
+    <category term="LVS" />
     <category term="MySQL" />
     <category term="Openvpn" />
     <category term="Prometheus" />
@@ -86,7 +86,6 @@
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;curl&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-X&lt;/span&gt; POST http://localhost:9090/-/reload&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h5 id=&#34;34-触发规则并验证告警通知&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#34-触发规则并验证告警通知&#34;&gt;#&lt;/a&gt; 3.4 触发规则并验证告警通知&lt;/h5&gt;
 &lt;p&gt;1、停⽌ node2 和 node03 的 node_exporter 服务，那么就会触发告警&lt;/p&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node02 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# systemctl stop node_exporter.service&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node03 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# systemctl stop node_exporter.service&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;2、检查 Prometheus 的 Alert ⻚⾯的状态是否处于 Firing&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/GiZA5Fd.png&#34; alt=&#34;11.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;3、检查 AlertManager 是否收到了告警&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/i9iZoxh.png&#34; alt=&#34;12.png&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;4、检查邮件是否能看到告警的信息，因为两条告警的 alertname 是一致的，因此它们会合并为一条消息发送出来。&lt;/p&gt;
