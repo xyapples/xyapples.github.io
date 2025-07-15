@@ -5,23 +5,23 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-06-05T11:06:21.000Z</updated>
     <category term="DevOps" />
-    <category term="Aliyun" />
+    <category term="Docker" />
     <category term="ELKStack" />
     <category term="Kubernetes" />
-    <category term="Docker" />
     <category term="Harbor" />
+    <category term="Aliyun" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Samba" />
-    <category term="LVS" />
     <category term="Vsftp" />
-    <category term="Prometheus" />
+    <category term="LVS" />
     <category term="MySQL" />
+    <category term="Prometheus" />
     <category term="Rabbitmq" />
-    <category term="Redis" />
     <category term="Openvpn" />
     <category term="Windows" />
     <category term="Tomcat" />
+    <category term="Redis" />
     <entry>
         <id>http://ixuyong.cn/posts/570469260.html</id>
         <title>ELK收集Kubernetes组件日志分析与实践</title>
