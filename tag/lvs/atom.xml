@@ -6,8 +6,8 @@
     <updated>2025-06-20T14:28:55.000Z</updated>
     <category term="Aliyun" />
     <category term="DevOps" />
-    <category term="ELKStack" />
     <category term="Docker" />
+    <category term="ELKStack" />
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="LVS" />
@@ -16,11 +16,11 @@
     <category term="Samba" />
     <category term="Vsftp" />
     <category term="MySQL" />
-    <category term="Openvpn" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
-    <category term="Tomcat" />
+    <category term="Openvpn" />
     <category term="Redis" />
+    <category term="Tomcat" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/1598774589.html</id>

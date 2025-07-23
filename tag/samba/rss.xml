@@ -9,8 +9,8 @@
         <lastBuildDate>Fri, 20 Jun 2025 22:12:07 +0800</lastBuildDate>
         <category>Aliyun</category>
         <category>DevOps</category>
-        <category>ELKStack</category>
         <category>Docker</category>
+        <category>ELKStack</category>
         <category>Harbor</category>
         <category>Kubernetes</category>
         <category>LVS</category>
@@ -19,11 +19,11 @@
         <category>Samba</category>
         <category>Vsftp</category>
         <category>MySQL</category>
-        <category>Openvpn</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
-        <category>Tomcat</category>
+        <category>Openvpn</category>
         <category>Redis</category>
+        <category>Tomcat</category>
         <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/269104229.html</guid>
