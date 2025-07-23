@@ -10,20 +10,20 @@
         <category>Aliyun</category>
         <category>DevOps</category>
         <category>ELKStack</category>
-        <category>Kubernetes</category>
+        <category>Docker</category>
         <category>Harbor</category>
+        <category>Kubernetes</category>
+        <category>LVS</category>
         <category>Linux</category>
         <category>rsync</category>
         <category>Samba</category>
         <category>Vsftp</category>
-        <category>LVS</category>
         <category>MySQL</category>
+        <category>Openvpn</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
-        <category>Openvpn</category>
-        <category>Redis</category>
         <category>Tomcat</category>
-        <category>Docker</category>
+        <category>Redis</category>
         <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2041568856.html</guid>
@@ -32,8 +32,8 @@
             <category>Prometheus</category>
             <pubDate>Tue, 15 Jul 2025 10:33:49 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;prometheus监控kubernetes&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#prometheus监控kubernetes&#34;&gt;#&lt;/a&gt; Prometheus 监控 Kubernetes&lt;/h3&gt;
-&lt;h4 id=&#34;1-监控kubernetes环境准备&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-监控kubernetes环境准备&#34;&gt;#&lt;/a&gt; 1、监控 Kubernetes 环境准备&lt;/h4&gt;
-&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl get nodes&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;NAME           STATUS   ROLES    AGE   VERSION&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;k8s-master01   Ready    &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;   46d   v1.27.10&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;k8s-master02   Ready    &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;   46d   v1.27.10&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;k8s-master03   Ready    &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;   46d   v1.27.10&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;k8s-node01     Ready    &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;   46d   v1.27.10&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;k8s-node02     Ready    &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;   46d   v1.27.10&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;2-部署alertmanager至kubernetes&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2-部署alertmanager至kubernetes&#34;&gt;#&lt;/a&gt; 2、部署 AlertManager ⾄ Kubernetes&lt;/h4&gt;
+&lt;h4 id=&#34;一-监控kubernetes环境准备&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-监控kubernetes环境准备&#34;&gt;#&lt;/a&gt; 一、监控 Kubernetes 环境准备&lt;/h4&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl get nodes&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;NAME           STATUS   ROLES    AGE   VERSION&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;k8s-master01   Ready    &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;   46d   v1.27.10&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;k8s-master02   Ready    &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;   46d   v1.27.10&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;k8s-master03   Ready    &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;   46d   v1.27.10&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;k8s-node01     Ready    &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;   46d   v1.27.10&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;k8s-node02     Ready    &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;   46d   v1.27.10&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;二-部署alertmanager至kubernetes&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#二-部署alertmanager至kubernetes&#34;&gt;#&lt;/a&gt; 二、部署 AlertManager ⾄ Kubernetes&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;①先交付 webhook_wechat、webhook_dingding；&lt;/li&gt;
 &lt;li&gt;②创建 ConfigMap，准备邮件的告警 template 模板；&lt;/li&gt;
@@ -44,177 +44,13 @@
 &lt;/ul&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;#创建 namespace&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl create ns monitoring&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 01-alert-webhook-wechat&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# sed -i &#34;s#kube-prom#monitoring#g&#34; *.yaml&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h5 id=&#34;21-部署webhook_wechat&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-部署webhook_wechat&#34;&gt;#&lt;/a&gt; 2.1 部署 webhook_wechat&lt;/h5&gt;
 &lt;p&gt;1、编写 deployment，运⾏ webhook-wechat&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@k8s-master01 01-alert-webhook-wechat]# cat 01-webhook-wechat-deploy.yaml 
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: webhook-wechat
-  namespace: monitoring
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: wechat
-  template:
-    metadata:
-      labels:
-        app: wechat
-    spec:
-      containers:
-      - name: webchat
-        image: oldxu3957/webhook_wechat_oldxu:v1.0
-        args: [&amp;quot;--port&amp;quot;,&amp;quot;5001&amp;quot;]		# 默认就是5001端口
-        ports:
-        - containerPort: 5001
-
-[root@k8s-master01 01-alert-webhook-wechat]# kubectl apply -f 01-webhook-wechat-deploy.yaml
-[root@k8s-master01 01-alert-webhook-wechat]# kubectl get pods -n monitoring
-NAME                              READY   STATUS    RESTARTS   AGE
-webhook-wechat-54b5bbf677-rmr26   1/1     Running   0          16s
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;2、编写 Service&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@k8s-master01 01-alert-webhook-wechat]# cat 02-webhook-wechat-service.yaml 
-apiVersion: v1
-kind: Service
-metadata:
-  name: webhook-wechat-svc
-  namespace: monitoring
-spec:
-  selector:
-    app: wechat
-  ports:
-   - port: 5001
-     targetPort: 5001
-     
-[root@k8s-master01 01-alert-webhook-wechat]# kubectl apply -f 02-webhook-wechat-service.yaml 
-[root@k8s-master01 01-alert-webhook-wechat]# kubectl get svc -n monitoring
-NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
-webhook-wechat-svc   ClusterIP   10.96.82.7   &amp;lt;none&amp;gt;        5001/TCP   13s
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;3、测试 webhook-wechat 是否能正常发送消息 (8e24a24d-3f48-4ea8-bbde-36ca84d857e4)&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@prom-node01 ~]# curl -X POST http://10.96.82.7:5001/alert?token=8e24a24d-3f48-4ea8-bbde-36ca84d857e4 \
--H &amp;quot;Content-Type: application/json&amp;quot; \
--d &#39;&amp;#123;
-  &amp;quot;alerts&amp;quot;: [
-    &amp;#123;
-      &amp;quot;status&amp;quot;: &amp;quot;firing&amp;quot;,
-      &amp;quot;labels&amp;quot;: &amp;#123;
-        &amp;quot;severity&amp;quot;: &amp;quot;critical&amp;quot;,
-        &amp;quot;alertname&amp;quot;: &amp;quot;InstanceDown&amp;quot;,
-        &amp;quot;instance&amp;quot;: &amp;quot;example1&amp;quot;
-      &amp;#125;,
-      &amp;quot;annotations&amp;quot;: &amp;#123;
-        &amp;quot;summary&amp;quot;: &amp;quot;Instance example1 down&amp;quot;,
-        &amp;quot;description&amp;quot;: &amp;quot;The instance example1 is down.&amp;quot;
-      &amp;#125;,
-      &amp;quot;startsAt&amp;quot;: &amp;quot;2024-12-20T15:04:05Z&amp;quot;,
-      &amp;quot;endsAt&amp;quot;: &amp;quot;0001-01-01T00:00:00Z&amp;quot;
-    &amp;#125;,
-   &amp;#123;
-      &amp;quot;status&amp;quot;: &amp;quot;resolved&amp;quot;,
-      &amp;quot;labels&amp;quot;: &amp;#123;
-        &amp;quot;severity&amp;quot;: &amp;quot;critical&amp;quot;,
-        &amp;quot;alertname&amp;quot;: &amp;quot;InstanceDown&amp;quot;,
-        &amp;quot;instance&amp;quot;: &amp;quot;example1&amp;quot;
-      &amp;#125;,
-      &amp;quot;annotations&amp;quot;: &amp;#123;
-        &amp;quot;summary&amp;quot;: &amp;quot;Instance example1 is back up&amp;quot;,
-        &amp;quot;description&amp;quot;: &amp;quot;The instance example1 has recovered.&amp;quot;
-      &amp;#125;,
-      &amp;quot;startsAt&amp;quot;: &amp;quot;2024-12-20T15:04:05Z&amp;quot;,
-      &amp;quot;endsAt&amp;quot;: &amp;quot;2024-12-20T16:04:05Z&amp;quot;
-    &amp;#125;
-  ]
-&amp;#125;&#39;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;22-部署webhook_dingding&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-部署webhook_dingding&#34;&gt;#&lt;/a&gt; 2.2 部署 webhook_dingding&lt;/h5&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 01-alert-webhook-wechat&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# cat 01-webhook-wechat-deploy.yaml &lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;apiVersion: apps/v1&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;kind: Deployment&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;metadata:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  name: webhook-wechat&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  namespace: monitoring&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;spec:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  replicas: &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  selector:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    matchLabels:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      app: wechat&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;12&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  template:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;13&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    metadata:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;14&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      labels:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;15&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        app: wechat&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;16&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    spec:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;17&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      containers:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;18&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      - name: webchat&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;19&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        image: oldxu3957/webhook_wechat_oldxu:v1.0&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;20&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        args: &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;--port&#34;&lt;/span&gt;,&lt;span class=&#34;token string&#34;&gt;&#34;5001&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;		&lt;span class=&#34;token comment&#34;&gt;# 默认就是 5001 端口&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;21&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        ports:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;22&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - containerPort: &lt;span class=&#34;token number&#34;&gt;5001&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;23&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;24&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 01-alert-webhook-wechat&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl apply -f 01-webhook-wechat-deploy.yaml&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;25&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 01-alert-webhook-wechat&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl get pods -n monitoring&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;26&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;NAME                              READY   STATUS    RESTARTS   AGE&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;27&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;webhook-wechat-54b5bbf677-rmr26   &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;/1     Running   &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;          16s&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;2、编写 Service&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 01-alert-webhook-wechat&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# cat 02-webhook-wechat-service.yaml &lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;apiVersion: v1&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;kind: Service&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;metadata:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  name: webhook-wechat-svc&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  namespace: monitoring&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;spec:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  selector:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    app: wechat&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  ports:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;   - port: &lt;span class=&#34;token number&#34;&gt;5001&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;12&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;     targetPort: &lt;span class=&#34;token number&#34;&gt;5001&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;13&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;     &lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;14&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 01-alert-webhook-wechat&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl apply -f 02-webhook-wechat-service.yaml &lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;15&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 01-alert-webhook-wechat&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl get svc -n monitoring&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;16&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;S&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt;    AGE&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;17&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;webhook-wechat-svc   ClusterIP   &lt;span class=&#34;token number&#34;&gt;10.96&lt;/span&gt;.82.7   &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;        &lt;span class=&#34;token number&#34;&gt;5001&lt;/span&gt;/TCP   13s&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;3、测试 webhook-wechat 是否能正常发送消息 (8e24a24d-3f48-4ea8-bbde-36ca84d857e4)&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@prom-node01 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# curl -X POST http://10.96.82.7:5001/alert?token=8e24a24d-3f48-4ea8-bbde-36ca84d857e4 \&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token parameter variable&#34;&gt;-H&lt;/span&gt; &lt;span class=&#34;token string&#34;&gt;&#34;Content-Type: application/json&#34;&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token parameter variable&#34;&gt;-d&lt;/span&gt; &lt;span class=&#34;token string&#34;&gt;&#39;&amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  &#34;alerts&#34;: [&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    &amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;status&#34;: &#34;firing&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;labels&#34;: &amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;severity&#34;: &#34;critical&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;alertname&#34;: &#34;InstanceDown&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;instance&#34;: &#34;example1&#34;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &amp;#125;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;12&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;annotations&#34;: &amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;13&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;summary&#34;: &#34;Instance example1 down&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;14&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;description&#34;: &#34;The instance example1 is down.&#34;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;15&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &amp;#125;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;16&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;startsAt&#34;: &#34;2024-12-20T15:04:05Z&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;17&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;endsAt&#34;: &#34;0001-01-01T00:00:00Z&#34;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;18&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    &amp;#125;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;19&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;   &amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;20&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;status&#34;: &#34;resolved&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;21&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;labels&#34;: &amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;22&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;severity&#34;: &#34;critical&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;23&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;alertname&#34;: &#34;InstanceDown&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;24&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;instance&#34;: &#34;example1&#34;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;25&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &amp;#125;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;26&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;annotations&#34;: &amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;27&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;summary&#34;: &#34;Instance example1 is back up&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;28&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;description&#34;: &#34;The instance example1 has recovered.&#34;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;29&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &amp;#125;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;30&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;startsAt&#34;: &#34;2024-12-20T15:04:05Z&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;31&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;endsAt&#34;: &#34;2024-12-20T16:04:05Z&#34;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;32&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    &amp;#125;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;33&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  ]&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;34&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&amp;#125;&#39;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h5 id=&#34;22-部署webhook_dingding&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#22-部署webhook_dingding&#34;&gt;#&lt;/a&gt; 2.2 部署 webhook_dingding&lt;/h5&gt;
 &lt;p&gt;1、编写 deployment，运⾏ webhook-dingding&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@k8s-master01 02-alert-webhook-dingding]# cat 01-webhook-dingding-deploy.yaml 
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: webhook-dingding
-  namespace: monitoring
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: dingding
-  template:
-    metadata:
-      labels:
-        app: dingding
-    spec:
-      containers:
-      - name: dingding
-        image: oldxu3957/webhook_dingding_oldxu:v1.0
-        args: [&amp;quot;--port&amp;quot;,&amp;quot;5002&amp;quot;]
-        ports:
-        - containerPort: 5002
-
-[root@k8s-master01 02-alert-webhook-dingding]# kubectl apply -f 01-webhook-dingding-deploy.yaml
-[root@k8s-master01 02-alert-webhook-dingding]# kubectl get pods -n monitoring
-NAME                                READY   STATUS    RESTARTS   AGE
-webhook-dingding-6d68854649-r6smd   1/1     Running   0          14s
-webhook-wechat-54b5bbf677-rmr26     1/1     Running   0          13m
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;2、编写 Service&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@k8s-master01 02-alert-webhook-dingding]# cat 02-webhook-dingding-service.yaml 
-apiVersion: v1
-kind: Service
-metadata:
-  name: webhook-dingding-svc
-  namespace: monitoring
-spec:
-  selector:
-    app: dingding
-  ports:
-  - port: 5002
-    targetPort: 5002
-
-[root@k8s-master01 02-alert-webhook-dingding]# kubectl apply -f 02-webhook-dingding-service.yaml 
-[root@k8s-master01 02-alert-webhook-dingding]# kubectl get svc -n monitoring
-NAME                   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
-webhook-dingding-svc   ClusterIP   10.96.241.84   &amp;lt;none&amp;gt;        5002/TCP   0s
-webhook-wechat-svc     ClusterIP   10.96.82.7     &amp;lt;none&amp;gt;        5001/TCP   12m
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;3、测试 webhook-wechat 是否能正常发送消息，49989606592d7ff06ee4b83120bf5a81ed1e4c3860696dcd7e663be1c66ef43f&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# curl -X POST http://10.96.241.84:5002/alert?token=49989606592d7ff06ee4b83120bf5a81ed1e4c3860696dcd7e663be1c66ef43f \
--H &amp;quot;Content-Type: application/json&amp;quot; \
--d &#39;&amp;#123;
-  &amp;quot;alerts&amp;quot;: [
-    &amp;#123;
-      &amp;quot;status&amp;quot;: &amp;quot;firing&amp;quot;,
-      &amp;quot;labels&amp;quot;: &amp;#123;
-        &amp;quot;severity&amp;quot;: &amp;quot;critical&amp;quot;,
-        &amp;quot;alertname&amp;quot;: &amp;quot;InstanceDown&amp;quot;,
-        &amp;quot;instance&amp;quot;: &amp;quot;example1&amp;quot;
-      &amp;#125;,
-      &amp;quot;annotations&amp;quot;: &amp;#123;
-        &amp;quot;summary&amp;quot;: &amp;quot;Instance example1 down&amp;quot;,
-        &amp;quot;description&amp;quot;: &amp;quot;The instance example1 is down.&amp;quot;
-      &amp;#125;,
-      &amp;quot;startsAt&amp;quot;: &amp;quot;2024-12-20T15:04:05Z&amp;quot;,
-      &amp;quot;endsAt&amp;quot;: &amp;quot;0001-01-01T00:00:00Z&amp;quot;
-    &amp;#125;,
-   &amp;#123;
-      &amp;quot;status&amp;quot;: &amp;quot;resolved&amp;quot;,
-      &amp;quot;labels&amp;quot;: &amp;#123;
-        &amp;quot;severity&amp;quot;: &amp;quot;critical&amp;quot;,
-        &amp;quot;alertname&amp;quot;: &amp;quot;InstanceDown&amp;quot;,
-        &amp;quot;instance&amp;quot;: &amp;quot;example1&amp;quot;
-      &amp;#125;,
-      &amp;quot;annotations&amp;quot;: &amp;#123;
-        &amp;quot;summary&amp;quot;: &amp;quot;Instance example1 is back up&amp;quot;,
-        &amp;quot;description&amp;quot;: &amp;quot;The instance example1 has recovered.&amp;quot;
-      &amp;#125;,
-      &amp;quot;startsAt&amp;quot;: &amp;quot;2024-12-20T15:04:05Z&amp;quot;,
-      &amp;quot;endsAt&amp;quot;: &amp;quot;2024-12-20T16:04:05Z&amp;quot;
-    &amp;#125;
-  ]
-&amp;#125;&#39;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;23-创建alertmanager配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#23-创建alertmanager配置&#34;&gt;#&lt;/a&gt; 2.3 创建 AlertManager 配置&lt;/h5&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 02-alert-webhook-dingding&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# cat 01-webhook-dingding-deploy.yaml &lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;apiVersion: apps/v1&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;kind: Deployment&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;metadata:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  name: webhook-dingding&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  namespace: monitoring&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;spec:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  replicas: &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  selector:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    matchLabels:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      app: dingding&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;12&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  template:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;13&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    metadata:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;14&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      labels:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;15&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        app: dingding&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;16&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    spec:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;17&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      containers:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;18&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      - name: dingding&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;19&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        image: oldxu3957/webhook_dingding_oldxu:v1.0&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;20&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        args: &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;--port&#34;&lt;/span&gt;,&lt;span class=&#34;token string&#34;&gt;&#34;5002&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;21&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        ports:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;22&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - containerPort: &lt;span class=&#34;token number&#34;&gt;5002&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;23&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;24&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 02-alert-webhook-dingding&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl apply -f 01-webhook-dingding-deploy.yaml&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;25&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 02-alert-webhook-dingding&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl get pods -n monitoring&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;26&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;NAME                                READY   STATUS    RESTARTS   AGE&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;27&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;webhook-dingding-6d68854649-r6smd   &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;/1     Running   &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;          14s&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;28&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;webhook-wechat-54b5bbf677-rmr26     &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;/1     Running   &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;          13m&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;2、编写 Service&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 02-alert-webhook-dingding&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# cat 02-webhook-dingding-service.yaml &lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;apiVersion: v1&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;kind: Service&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;metadata:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  name: webhook-dingding-svc&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  namespace: monitoring&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;spec:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  selector:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    app: dingding&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  ports:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  - port: &lt;span class=&#34;token number&#34;&gt;5002&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;12&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    targetPort: &lt;span class=&#34;token number&#34;&gt;5002&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;13&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;14&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 02-alert-webhook-dingding&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl apply -f 02-webhook-dingding-service.yaml &lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;15&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 02-alert-webhook-dingding&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl get svc -n monitoring&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;16&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;NAME                   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;S&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt;    AGE&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;17&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;webhook-dingding-svc   ClusterIP   &lt;span class=&#34;token number&#34;&gt;10.96&lt;/span&gt;.241.84   &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;        &lt;span class=&#34;token number&#34;&gt;5002&lt;/span&gt;/TCP   0s&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;18&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;webhook-wechat-svc     ClusterIP   &lt;span class=&#34;token number&#34;&gt;10.96&lt;/span&gt;.82.7     &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;        &lt;span class=&#34;token number&#34;&gt;5001&lt;/span&gt;/TCP   12m&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;3、测试 webhook-wechat 是否能正常发送消息，49989606592d7ff06ee4b83120bf5a81ed1e4c3860696dcd7e663be1c66ef43f&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# curl -X POST http://10.96.241.84:5002/alert?token=49989606592d7ff06ee4b83120bf5a81ed1e4c3860696dcd7e663be1c66ef43f \&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token parameter variable&#34;&gt;-H&lt;/span&gt; &lt;span class=&#34;token string&#34;&gt;&#34;Content-Type: application/json&#34;&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token parameter variable&#34;&gt;-d&lt;/span&gt; &lt;span class=&#34;token string&#34;&gt;&#39;&amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  &#34;alerts&#34;: [&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    &amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;status&#34;: &#34;firing&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;labels&#34;: &amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;severity&#34;: &#34;critical&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;alertname&#34;: &#34;InstanceDown&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;instance&#34;: &#34;example1&#34;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &amp;#125;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;12&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;annotations&#34;: &amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;13&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;summary&#34;: &#34;Instance example1 down&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;14&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;description&#34;: &#34;The instance example1 is down.&#34;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;15&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &amp;#125;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;16&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;startsAt&#34;: &#34;2024-12-20T15:04:05Z&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;17&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;endsAt&#34;: &#34;0001-01-01T00:00:00Z&#34;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;18&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    &amp;#125;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;19&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;   &amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;20&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;status&#34;: &#34;resolved&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;21&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;labels&#34;: &amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;22&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;severity&#34;: &#34;critical&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;23&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;alertname&#34;: &#34;InstanceDown&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;24&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;instance&#34;: &#34;example1&#34;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;25&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &amp;#125;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;26&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;annotations&#34;: &amp;#123;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;27&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;summary&#34;: &#34;Instance example1 is back up&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;28&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &#34;description&#34;: &#34;The instance example1 has recovered.&#34;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;29&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &amp;#125;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;30&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;startsAt&#34;: &#34;2024-12-20T15:04:05Z&#34;,&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;31&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      &#34;endsAt&#34;: &#34;2024-12-20T16:04:05Z&#34;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;32&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    &amp;#125;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;33&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  ]&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;34&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&amp;#125;&#39;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h5 id=&#34;23-创建alertmanager配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#23-创建alertmanager配置&#34;&gt;#&lt;/a&gt; 2.3 创建 AlertManager 配置&lt;/h5&gt;
 &lt;p&gt;1、使⽤ ConfigMap 创建 AlertManager 所需的配置⽂件，名称为： alert-configs&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;[root@k8s-master01 03-alertmanager]# cat 01-alert-configs-configmap.yaml 
 apiVersion: v1
@@ -229,7 +65,7 @@ data:
       smtp_smarthost: &#39;smtp.qq.com:25&#39;
       smtp_from: &#39;373370405@qq.com&#39;  	
       smtp_auth_username: &#39;373370405@qq.com&#39;
-      smtp_auth_password: &#39;jmtpwlkuijaybhic&#39;
+      smtp_auth_password: &#39;******&#39;
       smtp_hello: &#39;qq.com&#39;
       smtp_require_tls: false
     
@@ -323,31 +159,7 @@ alert-template     1      19s
 kube-root-ca.crt   1      27m
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h5 id=&#34;24-创建headlessservice&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#24-创建headlessservice&#34;&gt;#&lt;/a&gt; 2.4 创建 HeadLessService&lt;/h5&gt;
-&lt;pre&gt;&lt;code&gt;[root@k8s-master01 03-alertmanager]# cat 03-alertmanager-headlessService.yaml 
-apiVersion: v1
-kind: Service
-metadata:
-  name: alertmanager-svc
-  namespace: monitoring
-spec:
-  clusterIP: &amp;quot;None&amp;quot;
-  selector:
-    app: alert
-  ports:
-  - name: web
-    port: 9093
-    targetPort: 9093
-  - name: cluster
-    port: 9094
-    targetPort: 9094
-[root@k8s-master01 03-alertmanager]# kubectl apply -f 03-alertmanager-headlessService.yaml 
-[root@k8s-master01 03-alertmanager]# kubectl get svc -n monitoring
-NAME                   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)             AGE
-alertmanager-svc       ClusterIP   None           &amp;lt;none&amp;gt;        9093/TCP,9094/TCP   6s
-webhook-dingding-svc   ClusterIP   10.96.241.84   &amp;lt;none&amp;gt;        5002/TCP            12m
-webhook-wechat-svc     ClusterIP   10.96.82.7     &amp;lt;none&amp;gt;        5001/TCP            24m
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;25-部署alertmanager服务&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#25-部署alertmanager服务&#34;&gt;#&lt;/a&gt; 2.5 部署 AlertManager 服务&lt;/h5&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 03-alertmanager&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# cat 03-alertmanager-headlessService.yaml &lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;apiVersion: v1&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;kind: Service&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;metadata:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  name: alertmanager-svc&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  namespace: monitoring&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;spec:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  clusterIP: &lt;span class=&#34;token string&#34;&gt;&#34;None&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  selector:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    app: alert&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  ports:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;12&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  - name: web&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;13&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    port: &lt;span class=&#34;token number&#34;&gt;9093&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;14&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    targetPort: &lt;span class=&#34;token number&#34;&gt;9093&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;15&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  - name: cluster&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;16&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    port: &lt;span class=&#34;token number&#34;&gt;9094&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;17&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    targetPort: &lt;span class=&#34;token number&#34;&gt;9094&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;18&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 03-alertmanager&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl apply -f 03-alertmanager-headlessService.yaml &lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;19&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 03-alertmanager&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl get svc -n monitoring&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;20&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;NAME                   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;S&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt;             AGE&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;21&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;alertmanager-svc       ClusterIP   None           &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;        &lt;span class=&#34;token number&#34;&gt;9093&lt;/span&gt;/TCP,9094/TCP   6s&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;22&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;webhook-dingding-svc   ClusterIP   &lt;span class=&#34;token number&#34;&gt;10.96&lt;/span&gt;.241.84   &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;        &lt;span class=&#34;token number&#34;&gt;5002&lt;/span&gt;/TCP            12m&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;23&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;webhook-wechat-svc     ClusterIP   &lt;span class=&#34;token number&#34;&gt;10.96&lt;/span&gt;.82.7     &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;none&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;        &lt;span class=&#34;token number&#34;&gt;5001&lt;/span&gt;/TCP            24m&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h5 id=&#34;25-部署alertmanager服务&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#25-部署alertmanager服务&#34;&gt;#&lt;/a&gt; 2.5 部署 AlertManager 服务&lt;/h5&gt;
 &lt;p&gt;使⽤ statefulSet 编写 AlertManager 的⾼可⽤清单⽂件&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;1、定义 Alertmanager 实例的启动命令，包含了对应的 “配置⽂件路径 “、“数据存储路径” 以及 “Gossip 集群通信” 相关的参数。&lt;/li&gt;
@@ -355,127 +167,13 @@ webhook-wechat-svc     ClusterIP   10.96.82.7     &amp;lt;none&amp;gt;        50
 &lt;li&gt;3、Alertmanager 的每个实例，都需要使⽤ PVC 模板来提供数据持久化；&lt;/li&gt;
 &lt;li&gt;4、AlertManager 在启动时可以采⽤并⾏的⽅式，因为集群之间没有先后依赖关系；&lt;/li&gt;
 &lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;[root@k8s-master01 03-alertmanager]# cat 04-alertmanager-statefulset.yaml 
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: alertmanager
-  namespace: monitoring
-spec:
-  serviceName: &amp;quot;alertmanager-svc&amp;quot;
-  podManagementPolicy: &amp;quot;Parallel&amp;quot;  #采用并行方式
-  replicas: 3
-  selector:
-    matchLabels:
-      app: alert
-  template:
-    metadata:
-      labels:
-        app: alert
-    spec:
-      volumes:
-      - name: alert-cfg
-        configMap:
-          name: alert-configs
-      - name: alert-temp-cfg
-        configMap:
-          name: alert-template
-      containers:
-      - name: alertmanager
-        image: prom/alertmanager:v0.26.0
-        args:
-        - &amp;quot;--web.listen-address=:9093&amp;quot;
-        - &amp;quot;--cluster.listen-address=0.0.0.0:9094&amp;quot;
-        - &amp;quot;--cluster.peer=alertmanager-0.alertmanager-svc:9094&amp;quot;
-        - &amp;quot;--cluster.peer=alertmanager-1.alertmanager-svc:9094&amp;quot;
-        - &amp;quot;--cluster.peer=alertmanager-2.alertmanager-svc:9094&amp;quot;
-        - &amp;quot;--cluster.peer-timeout=60s&amp;quot;
-        - &amp;quot;--config.file=/etc/alertmanager/alertmanager.yml&amp;quot;
-        - &amp;quot;--storage.path=/etc/alertmanager/data&amp;quot;
-        - &amp;quot;--data.retention=120h&amp;quot;
-        volumeMounts:
-        - name: alert-cfg
-          mountPath: /etc/alertmanager/
-        - name: alert-temp-cfg
-          mountPath: /etc/alertmanager/template
-        - name: alert-data
-          mountPath: /etc/alertmanager/data
-        ports:
-        - name: web
-          containerPort: 9093
-        - name: cluster
-          containerPort: 9094
-        resources:
-          requests:
-            cpu: 200m
-            memory: 200Mi
-          limits:
-            cpu: 300m
-            memory: 300Mi
-
-  volumeClaimTemplates:
-    - metadata:
-        name: alert-data
-      spec:
-        accessModes: [&amp;quot;ReadWriteMany&amp;quot;]
-        storageClassName: &amp;quot;nfs-storage&amp;quot;
-        resources:
-          requests:
-            storage: 3Gi
-
-[root@k8s-master01 03-alertmanager]# kubectl apply -f 04-alertmanager-statefulset.yaml
-[root@k8s-master01 03-alertmanager]# kubectl get pods -n monitoring
-NAME                                READY   STATUS    RESTARTS   AGE
-alertmanager-0                      1/1     Running   0          97s
-alertmanager-1                      1/1     Running   0          97s
-alertmanager-2                      1/1     Running   0          97s
-webhook-dingding-6d68854649-r6smd   1/1     Running   0          19m
-webhook-wechat-54b5bbf677-rmr26     1/1     Running   0          32m
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h5 id=&#34;26-发布alertmanager服务&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#26-发布alertmanager服务&#34;&gt;#&lt;/a&gt; 2.6 发布 AlertManager 服务&lt;/h5&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 03-alertmanager&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# cat 04-alertmanager-statefulset.yaml &lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;apiVersion: apps/v1&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;kind: StatefulSet&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;metadata:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  name: alertmanager&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  namespace: monitoring&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;spec:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  serviceName: &lt;span class=&#34;token string&#34;&gt;&#34;alertmanager-svc&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  podManagementPolicy: &lt;span class=&#34;token string&#34;&gt;&#34;Parallel&#34;&lt;/span&gt;  &lt;span class=&#34;token comment&#34;&gt;#采用并行方式&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  replicas: &lt;span class=&#34;token number&#34;&gt;3&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  selector:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;12&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    matchLabels:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;13&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      app: alert&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;14&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  template:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;15&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    metadata:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;16&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      labels:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;17&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        app: alert&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;18&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    spec:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;19&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      volumes:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;20&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      - name: alert-cfg&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;21&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        configMap:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;22&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          name: alert-configs&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;23&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      - name: alert-temp-cfg&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;24&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        configMap:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;25&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          name: alert-template&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;26&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      containers:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;27&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      - name: alertmanager&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;28&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        image: prom/alertmanager:v0.26.0&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;29&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        args:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;30&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - &lt;span class=&#34;token string&#34;&gt;&#34;--web.listen-address=:9093&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;31&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - &lt;span class=&#34;token string&#34;&gt;&#34;--cluster.listen-address=0.0.0.0:9094&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;32&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - &lt;span class=&#34;token string&#34;&gt;&#34;--cluster.peer=alertmanager-0.alertmanager-svc:9094&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;33&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - &lt;span class=&#34;token string&#34;&gt;&#34;--cluster.peer=alertmanager-1.alertmanager-svc:9094&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;34&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - &lt;span class=&#34;token string&#34;&gt;&#34;--cluster.peer=alertmanager-2.alertmanager-svc:9094&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;35&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - &lt;span class=&#34;token string&#34;&gt;&#34;--cluster.peer-timeout=60s&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;36&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - &lt;span class=&#34;token string&#34;&gt;&#34;--config.file=/etc/alertmanager/alertmanager.yml&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;37&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - &lt;span class=&#34;token string&#34;&gt;&#34;--storage.path=/etc/alertmanager/data&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;38&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - &lt;span class=&#34;token string&#34;&gt;&#34;--data.retention=120h&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;39&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        volumeMounts:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;40&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - name: alert-cfg&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;41&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          mountPath: /etc/alertmanager/&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;42&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - name: alert-temp-cfg&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;43&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          mountPath: /etc/alertmanager/template&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;44&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - name: alert-data&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;45&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          mountPath: /etc/alertmanager/data&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;46&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        ports:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;47&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - name: web&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;48&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          containerPort: &lt;span class=&#34;token number&#34;&gt;9093&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;49&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        - name: cluster&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;50&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          containerPort: &lt;span class=&#34;token number&#34;&gt;9094&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;51&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        resources:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;52&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          requests:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;53&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;            cpu: 200m&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;54&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;            memory: 200Mi&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;55&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          limits:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;56&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;            cpu: 300m&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;57&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;            memory: 300Mi&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;58&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  volumeClaimTemplates:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;59&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    - metadata:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;60&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        name: alert-data&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;61&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      spec:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;62&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        accessModes: &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;ReadWriteMany&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;63&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        storageClassName: &lt;span class=&#34;token string&#34;&gt;&#34;nfs-storage&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;64&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        resources:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;65&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          requests:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;66&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;            storage: 3Gi&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;67&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;68&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 03-alertmanager&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl apply -f 04-alertmanager-statefulset.yaml&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;69&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 03-alertmanager&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl get pods -n monitoring&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;70&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;NAME                                READY   STATUS    RESTARTS   AGE&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;71&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;alertmanager-0                      &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;/1     Running   &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;          97s&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;72&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;alertmanager-1                      &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;/1     Running   &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;          97s&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;73&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;alertmanager-2                      &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;/1     Running   &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;          97s&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;74&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;webhook-dingding-6d68854649-r6smd   &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;/1     Running   &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;          19m&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;75&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;webhook-wechat-54b5bbf677-rmr26     &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;/1     Running   &lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;          32m&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h5 id=&#34;26-发布alertmanager服务&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#26-发布alertmanager服务&#34;&gt;#&lt;/a&gt; 2.6 发布 AlertManager 服务&lt;/h5&gt;
 &lt;p&gt;1、编写 Ingress 资源清单&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@k8s-master01 03-alertmanager]# cat 05-alertmanager-ingress.yaml 
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: alert-ingress
-  namespace: monitoring
-spec:
-  ingressClassName: &amp;quot;nginx&amp;quot;
-  rules:
-  - host: &amp;quot;k8s-alert.hmallleasing.com&amp;quot;
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: alertmanager-svc
-            port:
-              number: 9093
-
-[root@k8s-master01 03-alertmanager]# kubectl apply -f 05-alertmanager-ingress.yaml 
-[root@k8s-master01 03-alertmanager]# kubectl get ingress -n monitoring
-NAME            CLASS   HOSTS                        ADDRESS                                        PORTS   AGE
-alert-ingress   nginx   k8s-alert.hmallleasing.com   192.168.40.103,192.168.40.104,192.168.40.105   80      21s
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;2、访问 AlertManager 的⻚⾯&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 03-alertmanager&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# cat 05-alertmanager-ingress.yaml &lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;apiVersion: networking.k8s.io/v1&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;kind: Ingress&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;metadata:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  name: alert-ingress&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  namespace: monitoring&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;spec:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  ingressClassName: &lt;span class=&#34;token string&#34;&gt;&#34;nginx&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  rules:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;  - host: &lt;span class=&#34;token string&#34;&gt;&#34;k8s-alert.hmallleasing.com&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;    http:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;12&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      paths:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;13&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;      - path: /&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;14&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        pathType: Prefix&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;15&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        backend:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;16&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;          service:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;17&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;            name: alertmanager-svc&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;18&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;            port:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;19&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;              number: &lt;span class=&#34;token number&#34;&gt;9093&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;20&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;21&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 03-alertmanager&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl apply -f 05-alertmanager-ingress.yaml &lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;22&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 03-alertmanager&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl get ingress -n monitoring&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;23&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;NAME            CLASS   HOSTS                        ADDRESS                                        PORTS   AGE&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;24&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;alert-ingress   nginx   k8s-alert.hmallleasing.com   &lt;span class=&#34;token number&#34;&gt;192.168&lt;/span&gt;.40.103,192.168.40.104,192.168.40.105   &lt;span class=&#34;token number&#34;&gt;80&lt;/span&gt;      21s&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;2、访问 AlertManager 的⻚⾯&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;C:%5CUsers%5CAdministrator%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20240310213846950.png&#34; alt=&#34;image-20240310213846950&#34; /&gt;&lt;/p&gt;
 &lt;h5 id=&#34;27-测试alertmanager告警&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#27-测试alertmanager告警&#34;&gt;#&lt;/a&gt; 2.7 测试 AlertManager 告警&lt;/h5&gt;
 &lt;p&gt;1、模拟故障测试 AlertManager 告警是否能正常发送&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@k8s-master01 ~]# kubectl run tools --image=uhub.service.ucloud.cn/oldxu/tools:v1.0
-[root@k8s-master01 ~]# kubectl exec -it tools -- /bin/bash
-
-# 路由给钉钉
-/alert_test_oldxu --alertURL=&amp;quot;http://alertmanager-svc.monitoring.svc.cluster.local:9093/api/v1/alerts&amp;quot; --label=&amp;quot;alertname=CPU故障,instance=dingding,severity=critical,job=node_exporter&amp;quot;
-
-# 路由给微信
-/alert_test_oldxu --alertURL=&amp;quot;http://alertmanager-svc.monitoring.svc.cluster.local:9093/api/v1/alerts&amp;quot; --label=&amp;quot;alertname=节点故障,instance=wechat,severity=critical,job=kube-nodes&amp;quot;
-
-# 路由给邮件
-/alert_test_oldxu --alertURL=&amp;quot;http://alertmanager-svc.monitoring.svc.cluster.local:9093/api/v1/alerts&amp;quot; --label=&amp;quot;alertname=redis故障,instance=email,severity=critical,job=redis_exporter&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;3-部署prometheus至kubernetes&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-部署prometheus至kubernetes&#34;&gt;#&lt;/a&gt; 3、部署 Prometheus ⾄ Kubernetes&lt;/h4&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl run tools --image=uhub.service.ucloud.cn/oldxu/tools:v1.0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@k8s-master01 ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# kubectl exec -it tools -- /bin/bash&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 路由给钉钉&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;/alert_test_oldxu &lt;span class=&#34;token parameter variable&#34;&gt;--alertURL&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;http://alertmanager-svc.monitoring.svc.cluster.local:9093/api/v1/alerts&#34;&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;--label&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;alertname=CPU故障,instance=dingding,severity=critical,job=node_exporter&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 路由给微信&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;/alert_test_oldxu &lt;span class=&#34;token parameter variable&#34;&gt;--alertURL&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;http://alertmanager-svc.monitoring.svc.cluster.local:9093/api/v1/alerts&#34;&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;--label&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;alertname=节点故障,instance=wechat,severity=critical,job=kube-nodes&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 路由给邮件&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;/alert_test_oldxu &lt;span class=&#34;token parameter variable&#34;&gt;--alertURL&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;http://alertmanager-svc.monitoring.svc.cluster.local:9093/api/v1/alerts&#34;&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;--label&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token string&#34;&gt;&#34;alertname=redis故障,instance=email,severity=critical,job=redis_exporter&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;3-部署prometheus至kubernetes&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#3-部署prometheus至kubernetes&#34;&gt;#&lt;/a&gt; 3、部署 Prometheus ⾄ Kubernetes&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;1、创建 ConfigMap，准备 Prometheus 配置⽂件，定义 AlertManager 的地址、以及 Rules 规则⽂件的路径等&lt;/li&gt;
 &lt;li&gt;2、创建 ConfigMap，准备 Prometheus 告警相关的规则⽂件；&lt;/li&gt;
