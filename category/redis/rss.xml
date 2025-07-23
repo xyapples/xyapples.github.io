@@ -9,22 +9,22 @@
         <lastBuildDate>Mon, 12 May 2025 21:21:44 +0800</lastBuildDate>
         <category>Aliyun</category>
         <category>DevOps</category>
-        <category>Docker</category>
         <category>ELKStack</category>
-        <category>Harbor</category>
         <category>Kubernetes</category>
-        <category>LVS</category>
+        <category>Harbor</category>
         <category>Linux</category>
         <category>rsync</category>
         <category>Samba</category>
         <category>Vsftp</category>
+        <category>LVS</category>
         <category>MySQL</category>
-        <category>Openvpn</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
+        <category>Openvpn</category>
         <category>Redis</category>
-        <category>Windows</category>
         <category>Tomcat</category>
+        <category>Docker</category>
+        <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1490514396.html</guid>
             <title>Redis Cluster集群部署</title>
