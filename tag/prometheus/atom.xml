@@ -4,13 +4,13 @@
     <title>LinuxSre云原生 • Posts by &#34;prometheus&#34; tag</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-07-15T02:33:49.000Z</updated>
-    <category term="Aliyun" />
     <category term="DevOps" />
+    <category term="Aliyun" />
     <category term="Docker" />
     <category term="ELKStack" />
     <category term="Harbor" />
-    <category term="LVS" />
     <category term="Kubernetes" />
+    <category term="LVS" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Samba" />
@@ -3669,7 +3669,7 @@ scrape_configs:
           summary: &amp;quot;&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&#39; 域名的 SSL 证书即将过期&amp;quot;
           description: &amp;quot;&amp;#123;&amp;#123; $labels.namespace &amp;#125;&amp;#125; 名称空间 &amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&#39; 域名的 SSL 证书将在 &amp;#123;&amp;#123; $value &amp;#125;&amp;#125; 天内过期。&amp;quot;
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;8-prometheus监控redis应用的pod&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#8-prometheus监控redis应用的pod&#34;&gt;#&lt;/a&gt; 8、Prometheus 监控 Redis 应⽤的 Pod&lt;/h4&gt;
+&lt;h4 id=&#34;八-prometheus监控redis应用的pod&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#八-prometheus监控redis应用的pod&#34;&gt;#&lt;/a&gt; 八、Prometheus 监控 Redis 应⽤的 Pod&lt;/h4&gt;
 &lt;h5 id=&#34;81-监控redis应用场景说明&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#81-监控redis应用场景说明&#34;&gt;#&lt;/a&gt; 8.1 监控 Redis 应⽤场景说明&lt;/h5&gt;
 &lt;p&gt;运⾏ redis 的 Pod，⽽后为其创建⼀个 Service，我们现在希望监控它的 Pod 状态，Pod 资源的使⽤，redis 的指标、以及 redis 的 Service 的延迟和存活性。&lt;/p&gt;
 &lt;ul&gt;
@@ -4540,7 +4540,7 @@ scrape_configs:
           summary: &amp;quot;&#39;&amp;#123;&amp;#123; $labels.instance &amp;#125;&amp;#125;&#39; Redis实例命令平均响应时间超过250ms&amp;quot;
           description: &amp;quot;&#39;&amp;#123;&amp;#123; $labels.namespace &amp;#125;&amp;#125;&#39; 名称空间中 &#39;&amp;#123;&amp;#123; $labels.pod_name &amp;#125;&amp;#125;&#39; Pod的执行命令平均响应时间超过了250毫秒。当前平均响应时间: &amp;#123;&amp;#123; $value &amp;#125;&amp;#125;秒。&amp;quot;
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&#34;9-prometheus监控java业务应用的pod&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#9-prometheus监控java业务应用的pod&#34;&gt;#&lt;/a&gt; 9、Prometheus 监控 java 业务应⽤的 Pod&lt;/h4&gt;
+&lt;h4 id=&#34;九-prometheus监控java业务应用的pod&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#九-prometheus监控java业务应用的pod&#34;&gt;#&lt;/a&gt; 九、Prometheus 监控 java 业务应⽤的 Pod&lt;/h4&gt;
 &lt;h5 id=&#34;91-监控业务应用场景说明&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#91-监控业务应用场景说明&#34;&gt;#&lt;/a&gt; 9.1 监控业务应⽤场景说明&lt;/h5&gt;
 &lt;p&gt;运⾏ javaapp 的业务应⽤ Pod，⽽后为其创建⼀个 Service、Ingress，现在我们希望监控 Pod 状态，Pod 资源的使⽤，jvm 内存相关指标、Service 的 TCP 检测、以及域名响应状态、延迟、存活性等检测。&lt;/p&gt;
 &lt;ul&gt;
