@@ -7,24 +7,24 @@
         <language>zh-CN</language>
         <pubDate>Mon, 23 Jun 2025 19:40:03 +0800</pubDate>
         <lastBuildDate>Mon, 23 Jun 2025 19:40:03 +0800</lastBuildDate>
-        <category>Aliyun</category>
         <category>DevOps</category>
+        <category>Aliyun</category>
         <category>Docker</category>
         <category>Kubernetes</category>
         <category>ELKStack</category>
         <category>Harbor</category>
-        <category>Linux</category>
         <category>LVS</category>
+        <category>Linux</category>
         <category>rsync</category>
         <category>Samba</category>
         <category>Vsftp</category>
-        <category>Openvpn</category>
         <category>MySQL</category>
+        <category>Openvpn</category>
         <category>Prometheus</category>
-        <category>Rabbitmq</category>
         <category>Redis</category>
-        <category>Windows</category>
         <category>Tomcat</category>
+        <category>Rabbitmq</category>
+        <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2508697220.html</guid>
             <title>Chrony时间同步服务</title>
