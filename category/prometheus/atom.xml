@@ -4,13 +4,13 @@
     <title>LinuxSre云原生 • Posts by &#34;prometheus&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-07-15T02:33:49.000Z</updated>
-    <category term="DevOps" />
     <category term="Aliyun" />
+    <category term="DevOps" />
     <category term="Docker" />
-    <category term="Kubernetes" />
     <category term="ELKStack" />
     <category term="Harbor" />
     <category term="LVS" />
+    <category term="Kubernetes" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Samba" />
@@ -18,13 +18,13 @@
     <category term="MySQL" />
     <category term="Openvpn" />
     <category term="Prometheus" />
+    <category term="Rabbitmq" />
     <category term="Redis" />
     <category term="Tomcat" />
-    <category term="Rabbitmq" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/2041568856.html</id>
-        <title></title>
+        <title>Prometheus监控Kubernetes</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/2041568856.html"/>
         <content type="html">&lt;h3 id=&#34;prometheus监控kubernetes&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#prometheus监控kubernetes&#34;&gt;#&lt;/a&gt; Prometheus 监控 Kubernetes&lt;/h3&gt;
 &lt;h4 id=&#34;一-监控kubernetes环境准备&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-监控kubernetes环境准备&#34;&gt;#&lt;/a&gt; 一、监控 Kubernetes 环境准备&lt;/h4&gt;
