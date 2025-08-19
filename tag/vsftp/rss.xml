@@ -5,23 +5,23 @@
         <link>http://ixuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Fri, 20 Jun 2025 22:12:00 +0800</pubDate>
-        <lastBuildDate>Fri, 20 Jun 2025 22:12:00 +0800</lastBuildDate>
+        <pubDate>Wed, 20 Aug 2025 22:12:00 +0800</pubDate>
+        <lastBuildDate>Wed, 20 Aug 2025 22:12:00 +0800</lastBuildDate>
         <category>Aliyun</category>
         <category>DevOps</category>
         <category>Docker</category>
         <category>ELKStack</category>
+        <category>LVS</category>
         <category>Harbor</category>
         <category>Kubernetes</category>
-        <category>LVS</category>
         <category>Linux</category>
         <category>rsync</category>
         <category>Samba</category>
         <category>Vsftp</category>
         <category>MySQL</category>
         <category>Openvpn</category>
-        <category>Prometheus</category>
         <category>Rabbitmq</category>
+        <category>Prometheus</category>
         <category>Redis</category>
         <category>Tomcat</category>
         <category>Windows</category>
@@ -30,7 +30,7 @@
             <title>Vsftp服务实践</title>
             <link>http://ixuyong.cn/posts/2889248111.html</link>
             <category>Vsftp</category>
-            <pubDate>Fri, 20 Jun 2025 22:12:00 +0800</pubDate>
+            <pubDate>Wed, 20 Aug 2025 22:12:00 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;vsftp服务实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#vsftp服务实践&#34;&gt;#&lt;/a&gt; Vsftp 服务实践&lt;/h3&gt;
 &lt;h4 id=&#34;一-vsftp-概述&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-vsftp-概述&#34;&gt;#&lt;/a&gt; 一、VSFTP 概述&lt;/h4&gt;
 &lt;p&gt;FTP 是 File Transfer Protocol（文件传输协议）的英文简称，用于 Internet 上的文件的双向传输。使用 FTP 来传输时，是具有一定程度的危险性， 因为数据在因特网上面是完全没有受到保护的明文传输方式。&lt;/p&gt;

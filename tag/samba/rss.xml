@@ -5,23 +5,23 @@
         <link>http://ixuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Fri, 20 Jun 2025 22:12:07 +0800</pubDate>
-        <lastBuildDate>Fri, 20 Jun 2025 22:12:07 +0800</lastBuildDate>
+        <pubDate>Tue, 19 Aug 2025 22:12:07 +0800</pubDate>
+        <lastBuildDate>Tue, 19 Aug 2025 22:12:07 +0800</lastBuildDate>
         <category>Aliyun</category>
         <category>DevOps</category>
         <category>Docker</category>
         <category>ELKStack</category>
+        <category>LVS</category>
         <category>Harbor</category>
         <category>Kubernetes</category>
-        <category>LVS</category>
         <category>Linux</category>
         <category>rsync</category>
         <category>Samba</category>
         <category>Vsftp</category>
         <category>MySQL</category>
         <category>Openvpn</category>
-        <category>Prometheus</category>
         <category>Rabbitmq</category>
+        <category>Prometheus</category>
         <category>Redis</category>
         <category>Tomcat</category>
         <category>Windows</category>
@@ -30,7 +30,7 @@
             <title>Samba服务实践</title>
             <link>http://ixuyong.cn/posts/269104229.html</link>
             <category>Samba</category>
-            <pubDate>Fri, 20 Jun 2025 22:12:07 +0800</pubDate>
+            <pubDate>Tue, 19 Aug 2025 22:12:07 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;samba服务实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#samba服务实践&#34;&gt;#&lt;/a&gt; Samba 服务实践&lt;/h3&gt;
 &lt;h4 id=&#34;一-samba-概述&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#一-samba-概述&#34;&gt;#&lt;/a&gt; 一、Samba 概述&lt;/h4&gt;
 &lt;p&gt;SMB（Server Messages Block，信息服务块）是一种在局域网上共享文件和打印机的一种通信协议，它为局域网内的不同操作系统的计算机之间提供文件及打印机等资源的共享服务。SMB 协议是客户机 / 服务器型协议，客户机通过该协议可以访问服务器上的共享文件系统、打印机及其他资源。如图：&lt;/p&gt;
