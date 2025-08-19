@@ -10,14 +10,14 @@
         <category>Aliyun</category>
         <category>DevOps</category>
         <category>Docker</category>
-        <category>Harbor</category>
         <category>ELKStack</category>
-        <category>LVS</category>
+        <category>Harbor</category>
         <category>Kubernetes</category>
+        <category>LVS</category>
         <category>Linux</category>
         <category>rsync</category>
-        <category>Vsftp</category>
         <category>Samba</category>
+        <category>Vsftp</category>
         <category>MySQL</category>
         <category>Openvpn</category>
         <category>Prometheus</category>
