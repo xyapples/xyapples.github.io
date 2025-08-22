@@ -3,26 +3,35 @@
     <id>http://ixuyong.cn</id>
     <title>LinuxSre云原生 • Posts by &#34;nginx&#34; tag</title>
     <link href="http://ixuyong.cn" />
-    <updated>2025-08-22T13:50:04.000Z</updated>
+    <updated>2025-08-23T13:50:04.000Z</updated>
     <category term="Aliyun" />
     <category term="DevOps" />
     <category term="Docker" />
-    <category term="ELKStack" />
     <category term="Harbor" />
-    <category term="LVS" />
     <category term="Kubernetes" />
+    <category term="ELKStack" />
+    <category term="LVS" />
     <category term="Linux" />
-    <category term="rsync" />
     <category term="Samba" />
+    <category term="rsync" />
     <category term="Vsftp" />
-    <category term="Nginx" />
     <category term="MySQL" />
     <category term="Openvpn" />
+    <category term="Nginx" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
     <category term="Redis" />
-    <category term="Tomcat" />
     <category term="Windows" />
+    <category term="Tomcat" />
+    <entry>
+        <id>http://ixuyong.cn/posts/3682494305.html</id>
+        <title>Nginx搭建流行架构</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/3682494305.html"/>
+        <content type="html">&lt;h3 id=&#34;nginx搭建流行架构&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx搭建流行架构&#34;&gt;#&lt;/a&gt; Nginx 搭建流行架构&lt;/h3&gt;
+</content>
+        <category term="Nginx" />
+        <updated>2025-08-23T13:50:04.000Z</updated>
+    </entry>
     <entry>
         <id>http://ixuyong.cn/posts/3682494305.html</id>
         <title>Nginx常用模块</title>

@@ -5,27 +5,36 @@
         <link>http://ixuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Fri, 22 Aug 2025 21:50:04 +0800</pubDate>
-        <lastBuildDate>Fri, 22 Aug 2025 21:50:04 +0800</lastBuildDate>
+        <pubDate>Sat, 23 Aug 2025 21:50:04 +0800</pubDate>
+        <lastBuildDate>Sat, 23 Aug 2025 21:50:04 +0800</lastBuildDate>
         <category>Aliyun</category>
         <category>DevOps</category>
         <category>Docker</category>
-        <category>ELKStack</category>
         <category>Harbor</category>
-        <category>LVS</category>
         <category>Kubernetes</category>
+        <category>ELKStack</category>
+        <category>LVS</category>
         <category>Linux</category>
-        <category>rsync</category>
         <category>Samba</category>
+        <category>rsync</category>
         <category>Vsftp</category>
-        <category>Nginx</category>
         <category>MySQL</category>
         <category>Openvpn</category>
+        <category>Nginx</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
         <category>Redis</category>
-        <category>Tomcat</category>
         <category>Windows</category>
+        <category>Tomcat</category>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/3682494305.html</guid>
+            <title>Nginx搭建流行架构</title>
+            <link>http://ixuyong.cn/posts/3682494305.html</link>
+            <category>Nginx</category>
+            <pubDate>Sat, 23 Aug 2025 21:50:04 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;nginx搭建流行架构&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx搭建流行架构&#34;&gt;#&lt;/a&gt; Nginx 搭建流行架构&lt;/h3&gt;
+ ]]></description>
+        </item>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/3682494305.html</guid>
             <title>Nginx常用模块</title>
