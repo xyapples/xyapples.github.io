@@ -4,25 +4,25 @@
     <title>LinuxSre云原生 • Posts by &#34;aliyun&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-08T02:55:56.000Z</updated>
-    <category term="Aliyun" />
     <category term="DevOps" />
-    <category term="Docker" />
-    <category term="Harbor" />
-    <category term="Kubernetes" />
+    <category term="Aliyun" />
     <category term="ELKStack" />
-    <category term="LVS" />
+    <category term="Docker" />
+    <category term="Kubernetes" />
+    <category term="Harbor" />
     <category term="Linux" />
-    <category term="Samba" />
     <category term="rsync" />
+    <category term="Samba" />
     <category term="Vsftp" />
-    <category term="MySQL" />
-    <category term="Openvpn" />
     <category term="Nginx" />
+    <category term="LVS" />
+    <category term="MySQL" />
     <category term="Prometheus" />
-    <category term="Rabbitmq" />
+    <category term="Openvpn" />
     <category term="Redis" />
-    <category term="Windows" />
     <category term="Tomcat" />
+    <category term="Rabbitmq" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/1528713798.html</id>
         <title>阿里云ECS、SLB、RDS、CDN、ESS应用与实践</title>
