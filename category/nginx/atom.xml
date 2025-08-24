@@ -6,27 +6,27 @@
     <updated>2025-08-23T13:50:04.000Z</updated>
     <category term="Aliyun" />
     <category term="DevOps" />
-    <category term="Docker" />
     <category term="ELKStack" />
+    <category term="Docker" />
     <category term="Harbor" />
-    <category term="LVS" />
     <category term="Kubernetes" />
+    <category term="LVS" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Samba" />
     <category term="Vsftp" />
-    <category term="MySQL" />
-    <category term="Openvpn" />
     <category term="Nginx" />
+    <category term="MySQL" />
     <category term="Prometheus" />
+    <category term="Openvpn" />
     <category term="Rabbitmq" />
     <category term="Redis" />
     <category term="Tomcat" />
     <category term="Windows" />
     <entry>
-        <id>http://ixuyong.cn/posts/3682494305.html</id>
+        <id>http://ixuyong.cn/posts/865547436.html</id>
         <title>Nginx基础架构LNMP</title>
-        <link rel="alternate" href="http://ixuyong.cn/posts/3682494305.html"/>
+        <link rel="alternate" href="http://ixuyong.cn/posts/865547436.html"/>
         <content type="html">&lt;h3 id=&#34;nginx基础架构lnmp&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx基础架构lnmp&#34;&gt;#&lt;/a&gt; Nginx 基础架构 LNMP&lt;/h3&gt;
 &lt;h4 id=&#34;1-lnmp架构基本概述&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-lnmp架构基本概述&#34;&gt;#&lt;/a&gt; 1. LNMP 架构基本概述&lt;/h4&gt;
 &lt;h5 id=&#34;11-什么是lnmp&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-什么是lnmp&#34;&gt;#&lt;/a&gt; 1.1 什么是 LNMP&lt;/h5&gt;
