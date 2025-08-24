@@ -7,24 +7,24 @@
         <language>zh-CN</language>
         <pubDate>Thu, 29 May 2025 20:48:49 +0800</pubDate>
         <lastBuildDate>Thu, 29 May 2025 20:48:49 +0800</lastBuildDate>
-        <category>DevOps</category>
         <category>Aliyun</category>
-        <category>ELKStack</category>
+        <category>DevOps</category>
         <category>Docker</category>
-        <category>Kubernetes</category>
+        <category>ELKStack</category>
         <category>Harbor</category>
+        <category>Kubernetes</category>
+        <category>LVS</category>
         <category>Linux</category>
         <category>rsync</category>
         <category>Samba</category>
         <category>Vsftp</category>
-        <category>Nginx</category>
-        <category>LVS</category>
         <category>MySQL</category>
+        <category>Nginx</category>
         <category>Prometheus</category>
         <category>Openvpn</category>
         <category>Redis</category>
-        <category>Tomcat</category>
         <category>Rabbitmq</category>
+        <category>Tomcat</category>
         <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1384812626.html</guid>
