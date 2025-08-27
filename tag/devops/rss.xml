@@ -18,14 +18,14 @@
         <category>rsync</category>
         <category>Samba</category>
         <category>Vsftp</category>
+        <category>MySQL</category>
         <category>Nginx</category>
         <category>Openvpn</category>
-        <category>MySQL</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
         <category>Redis</category>
-        <category>Windows</category>
         <category>Tomcat</category>
+        <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2330853882.html</guid>
             <title>K8S基于Jenkins实现微服务应用CICD实践（四）</title>
