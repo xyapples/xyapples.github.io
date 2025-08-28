@@ -15,14 +15,14 @@
     <category term="rsync" />
     <category term="Samba" />
     <category term="Vsftp" />
-    <category term="MySQL" />
     <category term="Nginx" />
-    <category term="Openvpn" />
+    <category term="MySQL" />
     <category term="Prometheus" />
+    <category term="Openvpn" />
     <category term="Rabbitmq" />
+    <category term="Windows" />
     <category term="Redis" />
     <category term="Tomcat" />
-    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/2628187572.html</id>
         <title>MySQL运维DBA应用与实践</title>
