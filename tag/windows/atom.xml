@@ -15,14 +15,14 @@
     <category term="rsync" />
     <category term="Samba" />
     <category term="Vsftp" />
-    <category term="Nginx" />
     <category term="MySQL" />
-    <category term="Prometheus" />
+    <category term="Nginx" />
     <category term="Openvpn" />
+    <category term="Prometheus" />
     <category term="Rabbitmq" />
-    <category term="Windows" />
     <category term="Redis" />
     <category term="Tomcat" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/3071070979.html</id>
         <title>一键永久激活Window、office教程</title>
