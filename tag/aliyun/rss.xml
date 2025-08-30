@@ -11,21 +11,21 @@
         <category>DevOps</category>
         <category>Docker</category>
         <category>ELKStack</category>
+        <category>Kubernetes</category>
         <category>Harbor</category>
         <category>LVS</category>
-        <category>Kubernetes</category>
         <category>Linux</category>
         <category>rsync</category>
         <category>Samba</category>
-        <category>Vsftp</category>
         <category>MySQL</category>
+        <category>Vsftp</category>
         <category>Nginx</category>
-        <category>Rabbitmq</category>
         <category>Openvpn</category>
+        <category>Prometheus</category>
+        <category>Rabbitmq</category>
         <category>Redis</category>
         <category>Tomcat</category>
         <category>Windows</category>
-        <category>Prometheus</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1528713798.html</guid>
             <title>阿里云ECS、SLB、RDS、CDN、ESS应用与实践</title>

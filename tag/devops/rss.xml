@@ -11,21 +11,21 @@
         <category>DevOps</category>
         <category>Docker</category>
         <category>ELKStack</category>
+        <category>Kubernetes</category>
         <category>Harbor</category>
         <category>LVS</category>
-        <category>Kubernetes</category>
         <category>Linux</category>
         <category>rsync</category>
         <category>Samba</category>
-        <category>Vsftp</category>
         <category>MySQL</category>
+        <category>Vsftp</category>
         <category>Nginx</category>
-        <category>Rabbitmq</category>
         <category>Openvpn</category>
+        <category>Prometheus</category>
+        <category>Rabbitmq</category>
         <category>Redis</category>
         <category>Tomcat</category>
         <category>Windows</category>
-        <category>Prometheus</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2330853882.html</guid>
             <title>K8S基于Jenkins实现微服务应用CICD实践（四）</title>
