@@ -3,12 +3,12 @@
     <id>http://ixuyong.cn</id>
     <title>LinuxSre云原生 • Posts by &#34;nginx&#34; tag</title>
     <link href="http://ixuyong.cn" />
-    <updated>2025-08-28T13:53:24.000Z</updated>
+    <updated>2025-08-30T13:25:28.000Z</updated>
     <category term="Aliyun" />
     <category term="DevOps" />
     <category term="Docker" />
-    <category term="Harbor" />
     <category term="ELKStack" />
+    <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="LVS" />
     <category term="Linux" />
@@ -17,16 +17,24 @@
     <category term="Vsftp" />
     <category term="MySQL" />
     <category term="Nginx" />
-    <category term="默认tags" />
     <category term="Openvpn" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
-    <category term="Tomcat" />
     <category term="Redis" />
+    <category term="Tomcat" />
     <category term="Windows" />
     <entry>
+        <id>http://ixuyong.cn/posts/3071070979.html</id>
+        <title>Nginx负载均衡会话共享（六）</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/3071070979.html"/>
+        <content type="html">&lt;h3 id=&#34;nginx负载均衡会话共享&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx负载均衡会话共享&#34;&gt;#&lt;/a&gt; Nginx 负载均衡会话共享&lt;/h3&gt;
+</content>
+        <category term="Nginx" />
+        <updated>2025-08-30T13:25:28.000Z</updated>
+    </entry>
+    <entry>
         <id>http://ixuyong.cn/posts/1979768636.html</id>
-        <title>Nginx代理-负载均衡实践</title>
+        <title>Nginx代理-负载均衡实践（五）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/1979768636.html"/>
         <content type="html">&lt;h3 id=&#34;nginx代理-负载均衡实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx代理-负载均衡实践&#34;&gt;#&lt;/a&gt; Nginx 代理 - 负载均衡实践&lt;/h3&gt;
 &lt;h4 id=&#34;1nginx负载均衡基本概述&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1nginx负载均衡基本概述&#34;&gt;#&lt;/a&gt; 1.Nginx 负载均衡基本概述&lt;/h4&gt;
@@ -236,7 +244,7 @@
     </entry>
     <entry>
         <id>http://ixuyong.cn/posts/1601152722.html</id>
-        <title>Nginx反向代理服务</title>
+        <title>Nginx反向代理服务（四）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/1601152722.html"/>
         <content type="html">&lt;h3 id=&#34;nginx反向代理服务&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx反向代理服务&#34;&gt;#&lt;/a&gt; Nginx 反向代理服务&lt;/h3&gt;
 &lt;h4 id=&#34;1nginx代理概述&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1nginx代理概述&#34;&gt;#&lt;/a&gt; 1.Nginx 代理概述&lt;/h4&gt;
@@ -329,7 +337,7 @@
     </entry>
     <entry>
         <id>http://ixuyong.cn/posts/865547436.html</id>
-        <title>Nginx基础架构LNMP</title>
+        <title>Nginx基础架构LNMP（三）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/865547436.html"/>
         <content type="html">&lt;h3 id=&#34;nginx基础架构lnmp&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx基础架构lnmp&#34;&gt;#&lt;/a&gt; Nginx 基础架构 LNMP&lt;/h3&gt;
 &lt;h4 id=&#34;1-lnmp架构基本概述&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-lnmp架构基本概述&#34;&gt;#&lt;/a&gt; 1. LNMP 架构基本概述&lt;/h4&gt;
@@ -562,7 +570,7 @@
     </entry>
     <entry>
         <id>http://ixuyong.cn/posts/3682494305.html</id>
-        <title>Nginx常用模块</title>
+        <title>Nginx常用模块（二）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/3682494305.html"/>
         <content type="html">&lt;h3 id=&#34;nginx常用模块&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx常用模块&#34;&gt;#&lt;/a&gt; Nginx 常用模块&lt;/h3&gt;
 &lt;h4 id=&#34;1-nginx安装部署&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1-nginx安装部署&#34;&gt;#&lt;/a&gt; 1. Nginx 安装部署&lt;/h4&gt;

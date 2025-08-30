@@ -7,8 +7,8 @@
     <category term="Aliyun" />
     <category term="DevOps" />
     <category term="Docker" />
-    <category term="Harbor" />
     <category term="ELKStack" />
+    <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="LVS" />
     <category term="Linux" />
@@ -17,12 +17,11 @@
     <category term="Vsftp" />
     <category term="MySQL" />
     <category term="Nginx" />
-    <category term="默认tags" />
     <category term="Openvpn" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
-    <category term="Tomcat" />
     <category term="Redis" />
+    <category term="Tomcat" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/3071070979.html</id>
