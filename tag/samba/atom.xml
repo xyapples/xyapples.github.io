@@ -7,21 +7,22 @@
     <category term="Aliyun" />
     <category term="DevOps" />
     <category term="Docker" />
+    <category term="Harbor" />
     <category term="ELKStack" />
     <category term="Kubernetes" />
-    <category term="Harbor" />
     <category term="LVS" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Samba" />
-    <category term="MySQL" />
     <category term="Vsftp" />
+    <category term="MySQL" />
     <category term="Nginx" />
+    <category term="默认tags" />
     <category term="Openvpn" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
-    <category term="Redis" />
     <category term="Tomcat" />
+    <category term="Redis" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/269104229.html</id>
