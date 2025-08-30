@@ -14,13 +14,13 @@
     <category term="Linux" />
     <category term="rsync" />
     <category term="Samba" />
+    <category term="Nginx" />
     <category term="Vsftp" />
     <category term="MySQL" />
-    <category term="Nginx" />
-    <category term="Openvpn" />
     <category term="Prometheus" />
-    <category term="Rabbitmq" />
+    <category term="Openvpn" />
     <category term="Redis" />
+    <category term="Rabbitmq" />
     <category term="Tomcat" />
     <category term="Windows" />
     <entry>
