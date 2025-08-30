@@ -4,10 +4,10 @@
     <title>LinuxSre云原生 • Posts by &#34;lvs&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-20T14:28:55.000Z</updated>
-    <category term="DevOps" />
     <category term="Aliyun" />
-    <category term="ELKStack" />
+    <category term="DevOps" />
     <category term="Docker" />
+    <category term="ELKStack" />
     <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="LVS" />
@@ -17,11 +17,11 @@
     <category term="Vsftp" />
     <category term="MySQL" />
     <category term="Nginx" />
-    <category term="Prometheus" />
     <category term="Openvpn" />
-    <category term="Tomcat" />
-    <category term="Redis" />
+    <category term="Prometheus" />
     <category term="Rabbitmq" />
+    <category term="Redis" />
+    <category term="Tomcat" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/1598774589.html</id>
