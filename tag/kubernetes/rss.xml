@@ -12,20 +12,20 @@
         <category>Docker</category>
         <category>ELKStack</category>
         <category>Harbor</category>
+        <category>LVS</category>
         <category>Kubernetes</category>
         <category>Linux</category>
-        <category>LVS</category>
         <category>rsync</category>
         <category>Samba</category>
-        <category>Nginx</category>
         <category>Vsftp</category>
-        <category>Prometheus</category>
-        <category>Rabbitmq</category>
         <category>MySQL</category>
-        <category>Redis</category>
+        <category>Nginx</category>
+        <category>Rabbitmq</category>
         <category>Openvpn</category>
+        <category>Redis</category>
         <category>Tomcat</category>
         <category>Windows</category>
+        <category>Prometheus</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/626047790.html</guid>
             <title>消费租赁系统微服务应用交付实践</title>

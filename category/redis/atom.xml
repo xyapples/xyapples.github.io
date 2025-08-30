@@ -9,20 +9,20 @@
     <category term="Docker" />
     <category term="ELKStack" />
     <category term="Harbor" />
+    <category term="LVS" />
     <category term="Kubernetes" />
     <category term="Linux" />
-    <category term="LVS" />
     <category term="rsync" />
     <category term="Samba" />
-    <category term="Nginx" />
     <category term="Vsftp" />
-    <category term="Prometheus" />
-    <category term="Rabbitmq" />
     <category term="MySQL" />
-    <category term="Redis" />
+    <category term="Nginx" />
+    <category term="Rabbitmq" />
     <category term="Openvpn" />
+    <category term="Redis" />
     <category term="Tomcat" />
     <category term="Windows" />
+    <category term="Prometheus" />
     <entry>
         <id>http://ixuyong.cn/posts/1490514396.html</id>
         <title>Redis Cluster集群部署</title>
