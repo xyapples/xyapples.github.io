@@ -3,26 +3,61 @@
     <id>http://ixuyong.cn</id>
     <title>LinuxSre云原生 • Posts by &#34;nginx&#34; tag</title>
     <link href="http://ixuyong.cn" />
-    <updated>2025-08-31T13:40:01.000Z</updated>
+    <updated>2025-09-01T11:27:33.000Z</updated>
+    <category term="Docker" />
     <category term="DevOps" />
     <category term="Aliyun" />
     <category term="ELKStack" />
-    <category term="Docker" />
     <category term="Harbor" />
     <category term="Kubernetes" />
-    <category term="Linux" />
-    <category term="rsync" />
-    <category term="Samba" />
-    <category term="Vsftp" />
-    <category term="Nginx" />
     <category term="LVS" />
+    <category term="Linux" />
     <category term="MySQL" />
+    <category term="Samba" />
+    <category term="Nginx" />
+    <category term="rsync" />
+    <category term="Vsftp" />
+    <category term="Openvpn" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
     <category term="Redis" />
-    <category term="Openvpn" />
     <category term="Tomcat" />
     <category term="Windows" />
+    <entry>
+        <id>http://ixuyong.cn/posts/449551545.html</id>
+        <title>Nginx安全-HTTPS加密实践（十二）</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/449551545.html"/>
+        <content type="html"></content>
+        <category term="Nginx" />
+        <updated>2025-09-01T11:27:33.000Z</updated>
+    </entry>
+    <entry>
+        <id>http://ixuyong.cn/posts/245964480.html</id>
+        <title>Nginx Rewrite场景实战（十一）</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/245964480.html"/>
+        <content type="html">&lt;h3 id=&#34;nginx-rewrite场景实战&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx-rewrite场景实战&#34;&gt;#&lt;/a&gt; Nginx Rewrite 场景实战&lt;/h3&gt;
+</content>
+        <category term="Nginx" />
+        <updated>2025-09-01T11:25:18.000Z</updated>
+    </entry>
+    <entry>
+        <id>http://ixuyong.cn/posts/2674400645.html</id>
+        <title>Nginx代理-Uwsgi实践(十)</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/2674400645.html"/>
+        <content type="html">&lt;h3 id=&#34;nginx代理-uwsgi实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx代理-uwsgi实践&#34;&gt;#&lt;/a&gt; Nginx 代理 - Uwsgi 实践&lt;/h3&gt;
+</content>
+        <category term="Nginx" />
+        <updated>2025-09-01T11:21:48.000Z</updated>
+    </entry>
+    <entry>
+        <id>http://ixuyong.cn/posts/2279050448.html</id>
+        <title>Nginx代理-动静分离(九)</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/2279050448.html"/>
+        <content type="html">&lt;h3 id=&#34;nginx代理-动静分离&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx代理-动静分离&#34;&gt;#&lt;/a&gt; Nginx 代理 - 动静分离&lt;/h3&gt;
+</content>
+        <category term="Nginx" />
+        <updated>2025-09-01T11:18:51.000Z</updated>
+    </entry>
     <entry>
         <id>http://ixuyong.cn/posts/1240534980.html</id>
         <title>Nginx TCP四层负载均衡(八)</title>

@@ -5,27 +5,62 @@
         <link>http://ixuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Sun, 31 Aug 2025 21:40:01 +0800</pubDate>
-        <lastBuildDate>Sun, 31 Aug 2025 21:40:01 +0800</lastBuildDate>
+        <pubDate>Mon, 01 Sep 2025 19:27:33 +0800</pubDate>
+        <lastBuildDate>Mon, 01 Sep 2025 19:27:33 +0800</lastBuildDate>
+        <category>Docker</category>
         <category>DevOps</category>
         <category>Aliyun</category>
         <category>ELKStack</category>
-        <category>Docker</category>
         <category>Harbor</category>
         <category>Kubernetes</category>
-        <category>Linux</category>
-        <category>rsync</category>
-        <category>Samba</category>
-        <category>Vsftp</category>
-        <category>Nginx</category>
         <category>LVS</category>
+        <category>Linux</category>
         <category>MySQL</category>
+        <category>Samba</category>
+        <category>Nginx</category>
+        <category>rsync</category>
+        <category>Vsftp</category>
+        <category>Openvpn</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
         <category>Redis</category>
-        <category>Openvpn</category>
         <category>Tomcat</category>
         <category>Windows</category>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/449551545.html</guid>
+            <title>Nginx安全-HTTPS加密实践（十二）</title>
+            <link>http://ixuyong.cn/posts/449551545.html</link>
+            <category>Nginx</category>
+            <pubDate>Mon, 01 Sep 2025 19:27:33 +0800</pubDate>
+            <description><![CDATA[  ]]></description>
+        </item>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/245964480.html</guid>
+            <title>Nginx Rewrite场景实战（十一）</title>
+            <link>http://ixuyong.cn/posts/245964480.html</link>
+            <category>Nginx</category>
+            <pubDate>Mon, 01 Sep 2025 19:25:18 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;nginx-rewrite场景实战&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx-rewrite场景实战&#34;&gt;#&lt;/a&gt; Nginx Rewrite 场景实战&lt;/h3&gt;
+ ]]></description>
+        </item>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/2674400645.html</guid>
+            <title>Nginx代理-Uwsgi实践(十)</title>
+            <link>http://ixuyong.cn/posts/2674400645.html</link>
+            <category>Nginx</category>
+            <pubDate>Mon, 01 Sep 2025 19:21:48 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;nginx代理-uwsgi实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx代理-uwsgi实践&#34;&gt;#&lt;/a&gt; Nginx 代理 - Uwsgi 实践&lt;/h3&gt;
+ ]]></description>
+        </item>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/2279050448.html</guid>
+            <title>Nginx代理-动静分离(九)</title>
+            <link>http://ixuyong.cn/posts/2279050448.html</link>
+            <category>Nginx</category>
+            <pubDate>Mon, 01 Sep 2025 19:18:51 +0800</pubDate>
+            <description><![CDATA[ &lt;h3 id=&#34;nginx代理-动静分离&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx代理-动静分离&#34;&gt;#&lt;/a&gt; Nginx 代理 - 动静分离&lt;/h3&gt;
+ ]]></description>
+        </item>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1240534980.html</guid>
             <title>Nginx TCP四层负载均衡(八)</title>
