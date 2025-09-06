@@ -7,25 +7,25 @@
         <language>zh-CN</language>
         <pubDate>Thu, 19 Jun 2025 20:54:54 +0800</pubDate>
         <lastBuildDate>Thu, 19 Jun 2025 20:54:54 +0800</lastBuildDate>
-        <category>Aliyun</category>
         <category>DevOps</category>
-        <category>ELKStack</category>
-        <category>Kubernetes</category>
+        <category>Aliyun</category>
         <category>Docker</category>
+        <category>ELKStack</category>
         <category>Harbor</category>
+        <category>Kubernetes</category>
         <category>Linux</category>
         <category>Samba</category>
         <category>rsync</category>
+        <category>Vsftp</category>
         <category>Nginx</category>
         <category>LVS</category>
-        <category>Vsftp</category>
-        <category>Prometheus</category>
-        <category>Rabbitmq</category>
-        <category>Openvpn</category>
         <category>MySQL</category>
+        <category>Prometheus</category>
         <category>Redis</category>
+        <category>Openvpn</category>
         <category>Tomcat</category>
         <category>Windows</category>
+        <category>Rabbitmq</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2330853882.html</guid>
             <title>K8S基于Jenkins实现微服务应用CICD实践（四）</title>
