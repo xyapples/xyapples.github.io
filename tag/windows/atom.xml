@@ -8,21 +8,21 @@
     <category term="Aliyun" />
     <category term="Docker" />
     <category term="ELKStack" />
-    <category term="Harbor" />
     <category term="Kubernetes" />
+    <category term="Harbor" />
     <category term="Linux" />
     <category term="Samba" />
     <category term="rsync" />
     <category term="Vsftp" />
-    <category term="Nginx" />
     <category term="LVS" />
     <category term="MySQL" />
+    <category term="Nginx" />
     <category term="Prometheus" />
-    <category term="Redis" />
     <category term="Openvpn" />
-    <category term="Tomcat" />
-    <category term="Windows" />
     <category term="Rabbitmq" />
+    <category term="Tomcat" />
+    <category term="Redis" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/3071070979.html</id>
         <title>一键永久激活Window、office教程</title>
