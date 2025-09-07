@@ -3,26 +3,35 @@
     <id>http://ixuyong.cn</id>
     <title>LinuxSre云原生 • Posts by &#34;nginx&#34; category</title>
     <link href="http://ixuyong.cn" />
-    <updated>2025-09-02T11:25:18.000Z</updated>
-    <category term="DevOps" />
+    <updated>2025-09-07T12:57:55.000Z</updated>
     <category term="Aliyun" />
+    <category term="DevOps" />
     <category term="Docker" />
     <category term="ELKStack" />
-    <category term="Kubernetes" />
     <category term="Harbor" />
-    <category term="Linux" />
-    <category term="Samba" />
-    <category term="rsync" />
-    <category term="Vsftp" />
+    <category term="Kubernetes" />
     <category term="LVS" />
+    <category term="Linux" />
+    <category term="rsync" />
+    <category term="Samba" />
+    <category term="Vsftp" />
     <category term="MySQL" />
     <category term="Nginx" />
-    <category term="Prometheus" />
     <category term="Openvpn" />
+    <category term="Prometheus" />
     <category term="Rabbitmq" />
-    <category term="Tomcat" />
     <category term="Redis" />
     <category term="Windows" />
+    <category term="Tomcat" />
+    <entry>
+        <id>http://ixuyong.cn/posts/2170503498.html</id>
+        <title>Nginx高可用-Keepalived（十三）</title>
+        <link rel="alternate" href="http://ixuyong.cn/posts/2170503498.html"/>
+        <content type="html">&lt;h3 id=&#34;nginx高可用-keepalived&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx高可用-keepalived&#34;&gt;#&lt;/a&gt; Nginx 高可用 - Keepalived&lt;/h3&gt;
+</content>
+        <category term="Nginx" />
+        <updated>2025-09-07T12:57:55.000Z</updated>
+    </entry>
     <entry>
         <id>http://ixuyong.cn/posts/245964480.html</id>
         <title>Nginx Rewrite场景实战（十一）</title>
