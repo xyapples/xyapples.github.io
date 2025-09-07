@@ -10,8 +10,8 @@
         <category>Aliyun</category>
         <category>DevOps</category>
         <category>Docker</category>
-        <category>ELKStack</category>
         <category>Harbor</category>
+        <category>ELKStack</category>
         <category>Kubernetes</category>
         <category>LVS</category>
         <category>Linux</category>
@@ -19,11 +19,11 @@
         <category>Samba</category>
         <category>Vsftp</category>
         <category>MySQL</category>
-        <category>Openvpn</category>
         <category>Nginx</category>
+        <category>Openvpn</category>
         <category>Prometheus</category>
-        <category>Redis</category>
         <category>Rabbitmq</category>
+        <category>Redis</category>
         <category>Tomcat</category>
         <category>Windows</category>
         <item>
@@ -33,7 +33,7 @@
             <category>Nginx</category>
             <pubDate>Sun, 07 Sep 2025 20:57:55 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;nginx高可用-keepalived&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nginx高可用-keepalived&#34;&gt;#&lt;/a&gt; Nginx 高可用 - Keepalived&lt;/h3&gt;
-&lt;h4 id=&#34;1高可用基本概述&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1高可用基本概述&#34;&gt;#&lt;/a&gt; **1.** 高可用基本概述&lt;/h4&gt;
+&lt;h4 id=&#34;1高可用基本概述&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1高可用基本概述&#34;&gt;#&lt;/a&gt; 1. 高可用基本概述&lt;/h4&gt;
 &lt;h5 id=&#34;11-什么是高可用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-什么是高可用&#34;&gt;#&lt;/a&gt; &lt;strong&gt;1.1&lt;/strong&gt; &lt;strong&gt;什么是高可用&lt;/strong&gt;&lt;/h5&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -73,7 +73,7 @@
 &lt;li&gt;那么在这种情况下，当 PC 请求 VIP 的时候，无论是 Master 处理还是 Backup 处理，PC 仅会在 ARP 缓存表中记录 VMAC 与 VIP 的对应关系。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/OAokQUX.jpeg&#34; alt=&#34;3.jpg&#34; /&gt;&lt;/p&gt;
-&lt;h4 id=&#34;2高可用keepalived&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2高可用keepalived&#34;&gt;#&lt;/a&gt; **2.** 高可用 Keepalived&lt;/h4&gt;
+&lt;h4 id=&#34;2高可用keepalived&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#2高可用keepalived&#34;&gt;#&lt;/a&gt; 2. 高可用 Keepalived&lt;/h4&gt;
 &lt;h5 id=&#34;21-keeplaived基本介绍&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#21-keeplaived基本介绍&#34;&gt;#&lt;/a&gt; &lt;strong&gt;2.1 Keeplaived&lt;/strong&gt; 基本介绍&lt;/h5&gt;
 &lt;p&gt;Keepalived 基于 vrrp 实现，原生设计是为了高可用 lvs 服务。&lt;/p&gt;
 &lt;ul&gt;
