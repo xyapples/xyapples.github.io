@@ -7,17 +7,17 @@
         <language>zh-CN</language>
         <pubDate>Tue, 19 Aug 2025 22:12:07 +0800</pubDate>
         <lastBuildDate>Tue, 19 Aug 2025 22:12:07 +0800</lastBuildDate>
-        <category>Aliyun</category>
         <category>DevOps</category>
+        <category>Aliyun</category>
         <category>Docker</category>
         <category>ELKStack</category>
         <category>Harbor</category>
         <category>Kubernetes</category>
-        <category>LVS</category>
         <category>Linux</category>
         <category>rsync</category>
-        <category>Vsftp</category>
         <category>Samba</category>
+        <category>Vsftp</category>
+        <category>LVS</category>
         <category>Nginx</category>
         <category>MySQL</category>
         <category>Openvpn</category>
