@@ -6,23 +6,23 @@
     <updated>2025-09-10T14:28:55.000Z</updated>
     <category term="Aliyun" />
     <category term="DevOps" />
-    <category term="ELKStack" />
     <category term="Docker" />
     <category term="Harbor" />
-    <category term="Kubernetes" />
+    <category term="ELKStack" />
     <category term="LVS" />
+    <category term="Kubernetes" />
+    <category term="MySQL" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Vsftp" />
     <category term="Samba" />
-    <category term="Nginx" />
-    <category term="MySQL" />
-    <category term="Prometheus" />
     <category term="Openvpn" />
-    <category term="Rabbitmq" />
+    <category term="Nginx" />
+    <category term="Prometheus" />
     <category term="Redis" />
     <category term="Tomcat" />
     <category term="Windows" />
+    <category term="Rabbitmq" />
     <entry>
         <id>http://ixuyong.cn/posts/1598774589.html</id>
         <title>企业级负载均衡LVS场景实战（二）</title>
@@ -343,14 +343,20 @@
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/FG9qL9H.png&#34; alt=&#34;3.png&#34; /&gt;&lt;/p&gt;
 &lt;h6 id=&#34;623-sed&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#623-sed&#34;&gt;#&lt;/a&gt; 6.2.3 SED&lt;/h6&gt;
 &lt;p&gt;SED: Shortest Expected Delay 最短期望延迟，尽可能让权重高的优先接收请求，不在考虑非活动状态，把当前出于活动状态的数据 + 1，通过算法计算当前连接数最少的节点，而后将新的请求调度至该节点。&lt;/p&gt;
-&lt;p&gt;算法：在 WLC 基础上改进，Overhead = (ACTIVE + 1) * 256/Weight&lt;/p&gt;
+&lt;p&gt;算法：在 WLC 基础上改进，Overhead = (ACTIVE* 256 + 1) /Weight&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/yTxt5Cs.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
 &lt;h6 id=&#34;624-nq&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#624-nq&#34;&gt;#&lt;/a&gt; 6.2.4 NQ&lt;/h6&gt;
 &lt;p&gt;NQ：Never Queue 永不排队 / 最少队列调度&lt;/p&gt;
 &lt;p&gt;原理：SED 算法由于某台服务器的权重较小，比较空闲，甚至接收不到请求，而权重打的服务器会很忙，而 NQ 算法是说不管权重多大都会被分配到请求。简答来说，就是无需队列，如果有 Real Server 的连接数为 0 会直接分配过去，后续采用 SED 算法。&lt;/p&gt;
 &lt;p&gt;算法：Overhead = (ACTIVE + 1) * 256/Weight&lt;/p&gt;
 &lt;h6 id=&#34;625-lblc&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#625-lblc&#34;&gt;#&lt;/a&gt; 6.2.5 LBLC&lt;/h6&gt;
+&lt;p&gt;LBLC：Locality-Based Least-connection 动态目标地址 hash 调度算法，解决 DH 调度算法负载不均衡。&lt;/p&gt;
+&lt;p&gt;应用场景：LVS-cache - 源站，此前 DH 算法始终调度到后端 cache1 节点，会造成 cache1 负载过高，LBLC 会根据负载均衡动态调度到后端其他 cache 节点。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/TYuL4CY.png&#34; alt=&#34;1.png&#34; /&gt;&lt;/p&gt;
 &lt;h6 id=&#34;626-lblcr&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#626-lblcr&#34;&gt;#&lt;/a&gt; 6.2.6 LBLCR&lt;/h6&gt;
+&lt;p&gt;LBLCR：Locality-Based Least-connection with Replication 带复制功能的 LBLC 算法，解决 LBLC 负载不均衡的问题，从负载重的复制到负载轻的 RS。&lt;/p&gt;
+&lt;p&gt;应用场景：LVS-cache - 源站，此前 LBLC 算法始终调度到后端 Cache1 节点，会造成 Cache1 负载过高，会根据负载均衡动态调度到后端其他 Cace 节点，同时也会将缓存数据同步一份至 Cace1、Cace2 节点。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://wp-cdn.4ce.cn/v2/MoJ7y1h.png&#34; alt=&#34;2.png&#34; /&gt;&lt;/p&gt;
 </content>
         <category term="LVS" />
         <updated>2025-09-10T14:02:57.000Z</updated>
