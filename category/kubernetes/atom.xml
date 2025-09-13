@@ -4,25 +4,25 @@
     <title>LinuxSre云原生 • Posts by &#34;kubernetes&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-05-18T13:42:46.000Z</updated>
-    <category term="Aliyun" />
     <category term="DevOps" />
+    <category term="Aliyun" />
     <category term="Docker" />
-    <category term="Harbor" />
     <category term="ELKStack" />
-    <category term="LVS" />
+    <category term="Harbor" />
     <category term="Kubernetes" />
-    <category term="MySQL" />
+    <category term="LVS" />
     <category term="Linux" />
-    <category term="rsync" />
-    <category term="Vsftp" />
     <category term="Samba" />
-    <category term="Openvpn" />
+    <category term="rsync" />
     <category term="Nginx" />
+    <category term="Vsftp" />
+    <category term="Openvpn" />
+    <category term="MySQL" />
     <category term="Prometheus" />
-    <category term="Redis" />
-    <category term="Tomcat" />
-    <category term="Windows" />
     <category term="Rabbitmq" />
+    <category term="Redis" />
+    <category term="Windows" />
+    <category term="Tomcat" />
     <entry>
         <id>http://ixuyong.cn/posts/626047790.html</id>
         <title>消费租赁系统微服务应用交付实践</title>

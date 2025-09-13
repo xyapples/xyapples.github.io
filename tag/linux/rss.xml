@@ -7,25 +7,25 @@
         <language>zh-CN</language>
         <pubDate>Sun, 17 Aug 2025 21:17:29 +0800</pubDate>
         <lastBuildDate>Sun, 17 Aug 2025 21:17:29 +0800</lastBuildDate>
-        <category>Aliyun</category>
         <category>DevOps</category>
+        <category>Aliyun</category>
         <category>Docker</category>
-        <category>Harbor</category>
         <category>ELKStack</category>
-        <category>LVS</category>
+        <category>Harbor</category>
         <category>Kubernetes</category>
-        <category>MySQL</category>
+        <category>LVS</category>
         <category>Linux</category>
-        <category>rsync</category>
-        <category>Vsftp</category>
         <category>Samba</category>
-        <category>Openvpn</category>
+        <category>rsync</category>
         <category>Nginx</category>
+        <category>Vsftp</category>
+        <category>Openvpn</category>
+        <category>MySQL</category>
         <category>Prometheus</category>
-        <category>Redis</category>
-        <category>Tomcat</category>
-        <category>Windows</category>
         <category>Rabbitmq</category>
+        <category>Redis</category>
+        <category>Windows</category>
+        <category>Tomcat</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/430579059.html</guid>
             <title>NFS网络文件系统</title>
