@@ -8,8 +8,8 @@
         <pubDate>Sun, 17 Aug 2025 21:17:29 +0800</pubDate>
         <lastBuildDate>Sun, 17 Aug 2025 21:17:29 +0800</lastBuildDate>
         <category>Aliyun</category>
-        <category>DevOps</category>
         <category>Docker</category>
+        <category>DevOps</category>
         <category>ELKStack</category>
         <category>Harbor</category>
         <category>Iptables</category>
@@ -17,16 +17,16 @@
         <category>LVS</category>
         <category>Linux</category>
         <category>rsync</category>
-        <category>Samba</category>
         <category>Vsftp</category>
+        <category>Samba</category>
         <category>MySQL</category>
         <category>Nginx</category>
         <category>Openvpn</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
         <category>Redis</category>
-        <category>Tomcat</category>
         <category>Windows</category>
+        <category>Tomcat</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/430579059.html</guid>
             <title>NFS网络文件系统</title>
