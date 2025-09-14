@@ -5,8 +5,8 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-08-20T14:12:00.000Z</updated>
     <category term="Aliyun" />
-    <category term="Docker" />
     <category term="DevOps" />
+    <category term="Docker" />
     <category term="ELKStack" />
     <category term="Harbor" />
     <category term="Iptables" />
@@ -14,16 +14,16 @@
     <category term="LVS" />
     <category term="Linux" />
     <category term="rsync" />
-    <category term="Vsftp" />
     <category term="Samba" />
+    <category term="Vsftp" />
     <category term="MySQL" />
     <category term="Nginx" />
     <category term="Openvpn" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
     <category term="Redis" />
-    <category term="Windows" />
     <category term="Tomcat" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/2889248111.html</id>
         <title>Vsftp服务实践</title>
@@ -1067,6 +1067,29 @@
 &lt;tr&gt;
 &lt;td&gt;LOGO&lt;/td&gt;
 &lt;td&gt;&lt;a href=&#34;https://favicon.io/&#34;&gt;https://favicon.io/&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;13-收藏博客&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#13-收藏博客&#34;&gt;#&lt;/a&gt; 13. 收藏博客&lt;/h4&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;昵称&lt;/th&gt;
+&lt;th&gt;博客链接&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;小粉优化大师&lt;/td&gt;
+&lt;td&gt;&lt;a href=&#34;https://www.cnblogs.com/ygbh/p/17384988.html&#34;&gt;https://www.cnblogs.com/ygbh/p/17384988.html&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
