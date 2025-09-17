@@ -5,25 +5,25 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-05-14T12:29:07.000Z</updated>
     <category term="DevOps" />
-    <category term="Aliyun" />
     <category term="Docker" />
     <category term="ELKStack" />
-    <category term="Harbor" />
-    <category term="Kubernetes" />
+    <category term="Aliyun" />
     <category term="Iptables" />
-    <category term="LVS" />
+    <category term="Kubernetes" />
+    <category term="Harbor" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Samba" />
     <category term="Vsftp" />
-    <category term="MySQL" />
     <category term="Nginx" />
-    <category term="Openvpn" />
+    <category term="LVS" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
+    <category term="Openvpn" />
     <category term="Redis" />
     <category term="Tomcat" />
     <category term="Windows" />
+    <category term="MySQL" />
     <entry>
         <id>http://ixuyong.cn/posts/1888662579.html</id>
         <title>Containerd常用命令</title>
