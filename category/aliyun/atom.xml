@@ -4,25 +4,25 @@
     <title>LinuxSre云原生 • Posts by &#34;aliyun&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-08T02:55:56.000Z</updated>
-    <category term="DevOps" />
     <category term="Aliyun" />
+    <category term="DevOps" />
     <category term="Docker" />
     <category term="ELKStack" />
     <category term="Harbor" />
-    <category term="Iptables" />
-    <category term="LVS" />
     <category term="Kubernetes" />
+    <category term="Iptables" />
     <category term="Linux" />
-    <category term="MySQL" />
-    <category term="rsync" />
     <category term="Samba" />
+    <category term="rsync" />
     <category term="Vsftp" />
+    <category term="LVS" />
     <category term="Nginx" />
+    <category term="MySQL" />
     <category term="Openvpn" />
     <category term="Prometheus" />
-    <category term="Tomcat" />
     <category term="Rabbitmq" />
     <category term="Redis" />
+    <category term="Tomcat" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/1528713798.html</id>
