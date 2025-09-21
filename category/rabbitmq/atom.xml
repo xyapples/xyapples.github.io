@@ -4,26 +4,26 @@
     <title>LinuxSre云原生 • Posts by &#34;rabbitmq&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-05-29T12:48:49.000Z</updated>
+    <category term="Aliyun" />
     <category term="DevOps" />
     <category term="ELKStack" />
-    <category term="Aliyun" />
-    <category term="Kubernetes" />
-    <category term="Harbor" />
     <category term="Docker" />
+    <category term="Harbor" />
+    <category term="Kubernetes" />
     <category term="Iptables" />
-    <category term="Linux" />
-    <category term="Vsftp" />
     <category term="LVS" />
+    <category term="Linux" />
     <category term="rsync" />
-    <category term="Nginx" />
-    <category term="Rabbitmq" />
     <category term="Samba" />
-    <category term="Prometheus" />
+    <category term="Vsftp" />
+    <category term="Nginx" />
     <category term="MySQL" />
+    <category term="Prometheus" />
     <category term="Openvpn" />
+    <category term="Rabbitmq" />
     <category term="Redis" />
-    <category term="Windows" />
     <category term="Tomcat" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/1384812626.html</id>
         <title>Kubenetes部署Rabbitmq集群</title>
