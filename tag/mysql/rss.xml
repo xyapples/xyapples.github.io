@@ -7,13 +7,12 @@
         <language>zh-CN</language>
         <pubDate>Wed, 09 Apr 2025 22:02:40 +0800</pubDate>
         <lastBuildDate>Wed, 09 Apr 2025 22:02:40 +0800</lastBuildDate>
-        <category>Aliyun</category>
         <category>DevOps</category>
-        <category>ELKStack</category>
         <category>Docker</category>
+        <category>ELKStack</category>
         <category>Harbor</category>
-        <category>Kubernetes</category>
         <category>Iptables</category>
+        <category>Kubernetes</category>
         <category>LVS</category>
         <category>Linux</category>
         <category>rsync</category>
@@ -21,12 +20,14 @@
         <category>Vsftp</category>
         <category>Nginx</category>
         <category>MySQL</category>
-        <category>Prometheus</category>
-        <category>Openvpn</category>
         <category>Rabbitmq</category>
+        <category>Openvpn</category>
+        <category>Prometheus</category>
         <category>Redis</category>
+        <category>Shell</category>
         <category>Tomcat</category>
         <category>Windows</category>
+        <category>Aliyun</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2628187572.html</guid>
             <title>MySQL运维DBA应用与实践</title>

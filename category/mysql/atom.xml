@@ -4,13 +4,12 @@
     <title>LinuxSre云原生 • Posts by &#34;mysql&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-04-09T14:02:40.000Z</updated>
-    <category term="Aliyun" />
     <category term="DevOps" />
-    <category term="ELKStack" />
     <category term="Docker" />
+    <category term="ELKStack" />
     <category term="Harbor" />
-    <category term="Kubernetes" />
     <category term="Iptables" />
+    <category term="Kubernetes" />
     <category term="LVS" />
     <category term="Linux" />
     <category term="rsync" />
@@ -18,12 +17,14 @@
     <category term="Vsftp" />
     <category term="Nginx" />
     <category term="MySQL" />
-    <category term="Prometheus" />
-    <category term="Openvpn" />
     <category term="Rabbitmq" />
+    <category term="Openvpn" />
+    <category term="Prometheus" />
     <category term="Redis" />
+    <category term="Shell" />
     <category term="Tomcat" />
     <category term="Windows" />
+    <category term="Aliyun" />
     <entry>
         <id>http://ixuyong.cn/posts/2628187572.html</id>
         <title>MySQL运维DBA应用与实践</title>
