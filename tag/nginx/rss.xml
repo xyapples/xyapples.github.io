@@ -7,27 +7,27 @@
         <language>zh-CN</language>
         <pubDate>Mon, 08 Sep 2025 21:15:16 +0800</pubDate>
         <lastBuildDate>Mon, 08 Sep 2025 21:15:16 +0800</lastBuildDate>
+        <category>Aliyun</category>
+        <category>ELKStack</category>
         <category>DevOps</category>
         <category>Docker</category>
-        <category>ELKStack</category>
         <category>Harbor</category>
         <category>Iptables</category>
         <category>Kubernetes</category>
         <category>LVS</category>
         <category>Linux</category>
         <category>rsync</category>
-        <category>Samba</category>
         <category>Vsftp</category>
-        <category>Nginx</category>
+        <category>Samba</category>
         <category>MySQL</category>
-        <category>Rabbitmq</category>
+        <category>Nginx</category>
         <category>Openvpn</category>
         <category>Prometheus</category>
         <category>Redis</category>
+        <category>Rabbitmq</category>
         <category>Shell</category>
         <category>Tomcat</category>
         <category>Windows</category>
-        <category>Aliyun</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1292941645.html</guid>
             <title>Nginx平滑升级（十四）</title>
