@@ -7,8 +7,9 @@
         <language>zh-CN</language>
         <pubDate>Wed, 09 Apr 2025 22:02:40 +0800</pubDate>
         <lastBuildDate>Wed, 09 Apr 2025 22:02:40 +0800</lastBuildDate>
-        <category>DevOps</category>
         <category>Aliyun</category>
+        <category>Ansible</category>
+        <category>DevOps</category>
         <category>Docker</category>
         <category>ELKStack</category>
         <category>Harbor</category>
@@ -26,9 +27,8 @@
         <category>Rabbitmq</category>
         <category>Redis</category>
         <category>Shell</category>
-        <category>Windows</category>
         <category>Tomcat</category>
-        <category>Ansible</category>
+        <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2628187572.html</guid>
             <title>MySQL运维DBA应用与实践</title>

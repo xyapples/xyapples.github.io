@@ -7,8 +7,9 @@
         <language>zh-CN</language>
         <pubDate>Mon, 20 Oct 2025 21:42:53 +0800</pubDate>
         <lastBuildDate>Mon, 20 Oct 2025 21:42:53 +0800</lastBuildDate>
-        <category>DevOps</category>
         <category>Aliyun</category>
+        <category>Ansible</category>
+        <category>DevOps</category>
         <category>Docker</category>
         <category>ELKStack</category>
         <category>Harbor</category>
@@ -26,9 +27,8 @@
         <category>Rabbitmq</category>
         <category>Redis</category>
         <category>Shell</category>
-        <category>Windows</category>
         <category>Tomcat</category>
-        <category>Ansible</category>
+        <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2633625892.html</guid>
             <title>Shell文本处理工具awk</title>
