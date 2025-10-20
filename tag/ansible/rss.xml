@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<rss version="2.0">
+    <channel>
+        <title>LinuxSre云原生 • Posts by &#34;ansible&#34; tag</title>
+        <link>http://ixuyong.cn</link>
+        <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
+        <language>zh-CN</language>
+        <pubDate>Mon, 20 Oct 2025 22:02:15 +0800</pubDate>
+        <lastBuildDate>Mon, 20 Oct 2025 22:02:15 +0800</lastBuildDate>
+        <category>DevOps</category>
+        <category>Aliyun</category>
+        <category>Docker</category>
+        <category>ELKStack</category>
+        <category>Harbor</category>
+        <category>Iptables</category>
+        <category>Kubernetes</category>
+        <category>LVS</category>
+        <category>Linux</category>
+        <category>rsync</category>
+        <category>Samba</category>
+        <category>Vsftp</category>
+        <category>MySQL</category>
+        <category>Nginx</category>
+        <category>Openvpn</category>
+        <category>Prometheus</category>
+        <category>Rabbitmq</category>
+        <category>Redis</category>
+        <category>Shell</category>
+        <category>Windows</category>
+        <category>Tomcat</category>
+        <category>Ansible</category>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/0.html</guid>
+            <title></title>
+            <link>http://ixuyong.cn/posts/0.html</link>
+            <category>Ansible</category>
+            <pubDate>Mon, 20 Oct 2025 22:02:15 +0800</pubDate>
+            <description><![CDATA[ &lt;p&gt;Ansible 自动化配置管理实践&lt;/p&gt;
+ ]]></description>
+        </item>
+    </channel>
+</rss>

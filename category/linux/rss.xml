@@ -7,11 +7,11 @@
         <language>zh-CN</language>
         <pubDate>Fri, 19 Sep 2025 22:12:25 +0800</pubDate>
         <lastBuildDate>Fri, 19 Sep 2025 22:12:25 +0800</lastBuildDate>
-        <category>Aliyun</category>
         <category>DevOps</category>
+        <category>Aliyun</category>
         <category>Docker</category>
-        <category>Harbor</category>
         <category>ELKStack</category>
+        <category>Harbor</category>
         <category>Iptables</category>
         <category>Kubernetes</category>
         <category>LVS</category>
@@ -19,15 +19,16 @@
         <category>rsync</category>
         <category>Samba</category>
         <category>Vsftp</category>
-        <category>Nginx</category>
         <category>MySQL</category>
+        <category>Nginx</category>
         <category>Openvpn</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
         <category>Redis</category>
         <category>Shell</category>
-        <category>Tomcat</category>
         <category>Windows</category>
+        <category>Tomcat</category>
+        <category>Ansible</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/4120829732.html</guid>
             <title>DNS域名解析服务</title>
