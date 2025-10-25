@@ -6,26 +6,26 @@
     <updated>2025-06-19T12:54:54.000Z</updated>
     <category term="Aliyun" />
     <category term="Ansible" />
-    <category term="DevOps" />
     <category term="Docker" />
+    <category term="DevOps" />
     <category term="ELKStack" />
-    <category term="Harbor" />
     <category term="Iptables" />
+    <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="LVS" />
-    <category term="MySQL" />
     <category term="Linux" />
-    <category term="rsync" />
     <category term="Samba" />
+    <category term="rsync" />
     <category term="Vsftp" />
     <category term="Nginx" />
+    <category term="MySQL" />
     <category term="Openvpn" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
     <category term="Redis" />
     <category term="Shell" />
-    <category term="Windows" />
     <category term="Tomcat" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/2330853882.html</id>
         <title>K8S基于Jenkins实现微服务应用CICD实践（四）</title>
