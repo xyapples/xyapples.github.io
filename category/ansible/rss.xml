@@ -8,24 +8,24 @@
         <pubDate>Sat, 25 Oct 2025 20:13:11 +0800</pubDate>
         <lastBuildDate>Sat, 25 Oct 2025 20:13:11 +0800</lastBuildDate>
         <category>Aliyun</category>
+        <category>Ansible</category>
         <category>DevOps</category>
         <category>Docker</category>
-        <category>Ansible</category>
         <category>ELKStack</category>
         <category>Harbor</category>
         <category>Iptables</category>
         <category>Kubernetes</category>
+        <category>LVS</category>
         <category>MySQL</category>
         <category>Linux</category>
-        <category>Vsftp</category>
-        <category>Samba</category>
         <category>rsync</category>
+        <category>Samba</category>
+        <category>Vsftp</category>
         <category>Nginx</category>
-        <category>LVS</category>
         <category>Openvpn</category>
-        <category>Redis</category>
-        <category>Rabbitmq</category>
         <category>Prometheus</category>
+        <category>Rabbitmq</category>
+        <category>Redis</category>
         <category>Shell</category>
         <category>Windows</category>
         <category>Tomcat</category>
@@ -328,6 +328,87 @@
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manger ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m systemd -a &#34;name=httpd state=restarted&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;4. 停止 Httpd 服务&lt;/p&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manger ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m systemd -a &#34;name=httpd state==stopped&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;5. 启动 Httpd 服务，并加入开机自启&lt;/p&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manger ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m systemd -a &#34;name=httpd state=started enabled=yes&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h5 id=&#34;66-file模块&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#66-file模块&#34;&gt;#&lt;/a&gt; &lt;strong&gt;6.6 file&lt;/strong&gt; 模块&lt;/h5&gt;
+&lt;p&gt;功能：为被控端创建文件或目录，设定权限属性；&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;strong&gt;参数&lt;/strong&gt;&lt;/th&gt;
+&lt;th&gt;&lt;strong&gt;选项&lt;/strong&gt;&lt;/th&gt;
+&lt;th&gt;&lt;strong&gt;含义&lt;/strong&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;path&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;指定远程服务器的路径&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;recurse&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;递归方式 (可以是递归授权)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;state&lt;/td&gt;
+&lt;td&gt;touch、directory、link、absent&lt;/td&gt;
+&lt;td&gt;类型&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;owner&lt;/td&gt;
+&lt;td&gt;root(Defaults)&lt;/td&gt;
+&lt;td&gt;文件复制到远程并设定属主&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;group&lt;/td&gt;
+&lt;td&gt;root(Defaults)&lt;/td&gt;
+&lt;td&gt;文件复制到远程并设定属组&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;mode&lt;/td&gt;
+&lt;td&gt;file=644，directory=755&lt;/td&gt;
+&lt;td&gt;文件复制到远程并设定权限&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;1. 创建一个 /data 目录，授权为 www 身份，递归授权目录&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manger ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m file -a &#39;path=/data owner=www group=www mode=&#34;0755&#34; state=directory recurse=yes&#39;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;2. 在 /data 目录中创建一个文件&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manger ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m file -a &#39;path=/data/books owner=www group=www mode=&#34;0644&#34; state=touch&#39;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h5 id=&#34;67-group模块&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#67-group模块&#34;&gt;#&lt;/a&gt; &lt;strong&gt;6.7 group&lt;/strong&gt; 模块&lt;/h5&gt;
+&lt;p&gt;功能：管理被控端用户组；&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;strong&gt;参数&lt;/strong&gt;&lt;/th&gt;
+&lt;th&gt;&lt;strong&gt;选项&lt;/strong&gt;&lt;/th&gt;
+&lt;th&gt;&lt;strong&gt;含义&lt;/strong&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;name&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;指定创建的组名&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;gid&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;为组设置可选 gid&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;state&lt;/td&gt;
+&lt;td&gt;present(Default)、absent&lt;/td&gt;
+&lt;td&gt;是否将组创建在远程主机上&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;system&lt;/td&gt;
+&lt;td&gt;yes、no(Default)&lt;/td&gt;
+&lt;td&gt;是否创建系统组&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;1. 创建 www 基本组，指定 uid 为 666&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manger ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m group -a &#39;name=www gid=666 state=present&#39;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;2. 创建 www 系统组&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manger ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m group -a &#39;name=mysqldb system=yes state=present&#39;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;3. 删除 mysqldb 基本组&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manger ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m group -a &#34;name=mysqldb state=absent&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h5 id=&#34;&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#&#34;&gt;#&lt;/a&gt; &lt;/h5&gt;
  ]]></description>
         </item>
     </channel>
