@@ -13,25 +13,24 @@
     <category term="Iptables" />
     <category term="Kubernetes" />
     <category term="LVS" />
-    <category term="MySQL" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Samba" />
     <category term="Vsftp" />
+    <category term="MySQL" />
     <category term="Nginx" />
     <category term="Openvpn" />
-    <category term="Rabbitmq" />
     <category term="Prometheus" />
+    <category term="Rabbitmq" />
     <category term="Redis" />
+    <category term="Tomcat" />
     <category term="Shell" />
     <category term="Windows" />
-    <category term="Tomcat" />
     <entry>
         <id>http://ixuyong.cn/posts/281439196.html</id>
         <title>Ansible基础快速入门</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/281439196.html"/>
-        <content type="html">&lt;h3 id=&#34;ansible基础快速入门&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#ansible基础快速入门&#34;&gt;#&lt;/a&gt; Ansible 基础快速入门&lt;/h3&gt;
-</content>
+        <content type="html"></content>
         <category term="Ansible" />
         <updated>2025-10-23T14:02:15.000Z</updated>
     </entry>
