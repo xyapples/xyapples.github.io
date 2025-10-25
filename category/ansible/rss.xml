@@ -8,20 +8,20 @@
         <pubDate>Sat, 25 Oct 2025 20:13:11 +0800</pubDate>
         <lastBuildDate>Sat, 25 Oct 2025 20:13:11 +0800</lastBuildDate>
         <category>Aliyun</category>
+        <category>DevOps</category>
         <category>Ansible</category>
         <category>Docker</category>
-        <category>DevOps</category>
         <category>ELKStack</category>
-        <category>Iptables</category>
         <category>Harbor</category>
         <category>Kubernetes</category>
+        <category>Iptables</category>
         <category>LVS</category>
         <category>Linux</category>
-        <category>Samba</category>
         <category>rsync</category>
+        <category>Samba</category>
         <category>Vsftp</category>
-        <category>Nginx</category>
         <category>MySQL</category>
+        <category>Nginx</category>
         <category>Openvpn</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
@@ -408,8 +408,90 @@
 &lt;p&gt;1. 创建 www 基本组，指定 uid 为 666&lt;/p&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manger ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m group -a &#39;name=www gid=666 state=present&#39;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;2. 创建 www 系统组&lt;/p&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manger ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m group -a &#39;name=mysqldb system=yes state=present&#39;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;3. 删除 mysqldb 基本组&lt;/p&gt;
-&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manger ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m group -a &#34;name=mysqldb state=absent&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h5 id=&#34;&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#&#34;&gt;#&lt;/a&gt; &lt;/h5&gt;
-&lt;h5 id=&#34;69-mount模块&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#69-mount模块&#34;&gt;#&lt;/a&gt; 6.9 mount 模块&lt;/h5&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manger ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m group -a &#34;name=mysqldb state=absent&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h5 id=&#34;68-user模块&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#68-user模块&#34;&gt;#&lt;/a&gt; &lt;strong&gt;6.8 user&lt;/strong&gt; 模块&lt;/h5&gt;
+&lt;p&gt;功能：管理被控端用户；&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;strong&gt;参数&lt;/strong&gt;&lt;/th&gt;
+&lt;th&gt;&lt;strong&gt;选项&lt;/strong&gt;&lt;/th&gt;
+&lt;th&gt;&lt;strong&gt;含义&lt;/strong&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;name&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;创建或删除的用户名&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;uid&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;指定 uid&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;group&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;为用户设置指定基本组&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;groups&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;为用户设置附加组&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;append&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;追加&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;shell&lt;/td&gt;
+&lt;td&gt;present(Default)、absent&lt;/td&gt;
+&lt;td&gt;为用户设置登陆时的 Shell&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;create_home&lt;/td&gt;
+&lt;td&gt;yes(Default)、no&lt;/td&gt;
+&lt;td&gt;为用户创建主目录&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;state&lt;/td&gt;
+&lt;td&gt;present(Default)、absent&lt;/td&gt;
+&lt;td&gt;用户是否应该存在&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;remove&lt;/td&gt;
+&lt;td&gt;yes、no(Default)&lt;/td&gt;
+&lt;td&gt;删除与用户关联的目录，只有当 state=absent 时生效&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;generate_ssh_key&lt;/td&gt;
+&lt;td&gt;yes、no(Default)&lt;/td&gt;
+&lt;td&gt;为相关用户生成 ssh 密钥。不会覆盖现有的 ssh 密钥&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;ssh_key_bits&lt;/td&gt;
+&lt;td&gt;2048&lt;/td&gt;
+&lt;td&gt;创建用户 ssh 密钥中位数&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;ssh_key_file&lt;/td&gt;
+&lt;td&gt;.ssh/id_rsa(Default)&lt;/td&gt;
+&lt;td&gt;可以实现 ssh 密钥改名，或变更存放 ssh 密钥位置&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;password&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;设定对应的密码，必须是加密后的字符串才行，否则不生效&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;1. 创建 www 用户，指定 uid 666，基本组 www&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manager project&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m user -a &#39;name=www uid=666 group=www shell=/sbin/nologin create_home=no&#39;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;2. 创建 db 用户，基本组是 root，附加组，adm，sys&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manager project&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m user -a &#39;name=db group=root groups=adm,sys append=yes shell=/bin/bash create_home=yes&#39;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;3. 创建一个 devops 用户，密码 talent，需要正常登录系统；&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manager project&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m user -a &#39;name=devops password=$6$salt$MUVhjPhKyI2uE9sPg7185PcBQFlDwLGPbVTx.CsD6GXQbRGsUfmjsSfb9e9ej2.vLgmBI5CtgFq1plbD0a6tM. shell=/bin/bash create_home=yes&#39;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;4. 创建一个 dev 用户，并为其生成对应的秘钥&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manager project&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m user -a &#39;name=dev generate_ssh_key=yes ssh_key_bits=2048 ssh_key_file=~/.ssh/id_rsa&#39;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;5. 移除 db 用户&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;root@manager ~&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token comment&#34;&gt;# ansible webservers -m user -a &#34;name=db remove=yes state=absent&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h5 id=&#34;69-mount模块&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#69-mount模块&#34;&gt;#&lt;/a&gt; 6.9 mount 模块&lt;/h5&gt;
 &lt;p&gt;功能：管理被控端设备挂载；&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
