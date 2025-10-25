@@ -8,11 +8,10 @@
         <pubDate>Mon, 12 May 2025 21:21:44 +0800</pubDate>
         <lastBuildDate>Mon, 12 May 2025 21:21:44 +0800</lastBuildDate>
         <category>Aliyun</category>
-        <category>Ansible</category>
         <category>DevOps</category>
         <category>Docker</category>
-        <category>Harbor</category>
         <category>ELKStack</category>
+        <category>Harbor</category>
         <category>Iptables</category>
         <category>Kubernetes</category>
         <category>LVS</category>
@@ -26,8 +25,8 @@
         <category>Prometheus</category>
         <category>Rabbitmq</category>
         <category>Redis</category>
-        <category>Tomcat</category>
         <category>Shell</category>
+        <category>Tomcat</category>
         <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/1490514396.html</guid>

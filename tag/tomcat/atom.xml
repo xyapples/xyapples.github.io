@@ -5,11 +5,10 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-06-08T02:51:57.000Z</updated>
     <category term="Aliyun" />
-    <category term="Ansible" />
     <category term="DevOps" />
     <category term="Docker" />
-    <category term="Harbor" />
     <category term="ELKStack" />
+    <category term="Harbor" />
     <category term="Iptables" />
     <category term="Kubernetes" />
     <category term="LVS" />
@@ -23,8 +22,8 @@
     <category term="Prometheus" />
     <category term="Rabbitmq" />
     <category term="Redis" />
-    <category term="Tomcat" />
     <category term="Shell" />
+    <category term="Tomcat" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/754945111.html</id>
