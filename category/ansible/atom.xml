@@ -4,26 +4,26 @@
     <title>LinuxSre云原生 • Posts by &#34;ansible&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-10-25T12:34:11.000Z</updated>
-    <category term="DevOps" />
-    <category term="Ansible" />
     <category term="Aliyun" />
+    <category term="Ansible" />
+    <category term="DevOps" />
     <category term="Docker" />
     <category term="ELKStack" />
-    <category term="Kubernetes" />
-    <category term="Iptables" />
-    <category term="LVS" />
     <category term="Harbor" />
+    <category term="Iptables" />
+    <category term="Kubernetes" />
+    <category term="LVS" />
     <category term="Linux" />
+    <category term="MySQL" />
     <category term="rsync" />
     <category term="Samba" />
     <category term="Vsftp" />
     <category term="Nginx" />
     <category term="Openvpn" />
     <category term="Prometheus" />
-    <category term="MySQL" />
     <category term="Rabbitmq" />
-    <category term="Shell" />
     <category term="Redis" />
+    <category term="Shell" />
     <category term="Tomcat" />
     <category term="Windows" />
     <entry>
@@ -32,7 +32,7 @@
         <link rel="alternate" href="http://ixuyong.cn/posts/2304648507.html"/>
         <content type="html">&lt;h3 id=&#34;ansible-playbook入门二&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#ansible-playbook入门二&#34;&gt;#&lt;/a&gt; Ansible Playbook 入门（二）&lt;/h3&gt;
 &lt;h4 id=&#34;1ansible快速入门&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1ansible快速入门&#34;&gt;#&lt;/a&gt; 1.Ansible 快速入门&lt;/h4&gt;
-&lt;h5 id=&#34;11-什么是playbo&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-什么是playbo&#34;&gt;#&lt;/a&gt; 1.1 什么是 Playbo&lt;/h5&gt;
+&lt;h5 id=&#34;11-什么是playbook&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-什么是playbook&#34;&gt;#&lt;/a&gt; 1.1 什么是 Playbook&lt;/h5&gt;
 &lt;p&gt;playbook 是一个 由 yml 语法编写的文本文件，它由 play 和 task 两部分组成。&lt;/p&gt;
 &lt;p&gt;play： 主要定义要操作主机或者主机组&lt;/p&gt;
 &lt;p&gt;task：主要定义对主机或主机组具体执行的任务，可以是一个任务，也可以是多个任务（模块）&lt;/p&gt;

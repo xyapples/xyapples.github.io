@@ -7,26 +7,26 @@
         <language>zh-CN</language>
         <pubDate>Sat, 25 Oct 2025 20:34:11 +0800</pubDate>
         <lastBuildDate>Sat, 25 Oct 2025 20:34:11 +0800</lastBuildDate>
-        <category>DevOps</category>
-        <category>Ansible</category>
         <category>Aliyun</category>
+        <category>Ansible</category>
+        <category>DevOps</category>
         <category>Docker</category>
         <category>ELKStack</category>
-        <category>Kubernetes</category>
-        <category>Iptables</category>
-        <category>LVS</category>
         <category>Harbor</category>
+        <category>Iptables</category>
+        <category>Kubernetes</category>
+        <category>LVS</category>
         <category>Linux</category>
+        <category>MySQL</category>
         <category>rsync</category>
         <category>Samba</category>
         <category>Vsftp</category>
         <category>Nginx</category>
         <category>Openvpn</category>
         <category>Prometheus</category>
-        <category>MySQL</category>
         <category>Rabbitmq</category>
-        <category>Shell</category>
         <category>Redis</category>
+        <category>Shell</category>
         <category>Tomcat</category>
         <category>Windows</category>
         <item>
@@ -37,7 +37,7 @@
             <pubDate>Sat, 25 Oct 2025 20:34:11 +0800</pubDate>
             <description><![CDATA[ &lt;h3 id=&#34;ansible-playbook入门二&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#ansible-playbook入门二&#34;&gt;#&lt;/a&gt; Ansible Playbook 入门（二）&lt;/h3&gt;
 &lt;h4 id=&#34;1ansible快速入门&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#1ansible快速入门&#34;&gt;#&lt;/a&gt; 1.Ansible 快速入门&lt;/h4&gt;
-&lt;h5 id=&#34;11-什么是playbo&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-什么是playbo&#34;&gt;#&lt;/a&gt; 1.1 什么是 Playbo&lt;/h5&gt;
+&lt;h5 id=&#34;11-什么是playbook&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#11-什么是playbook&#34;&gt;#&lt;/a&gt; 1.1 什么是 Playbook&lt;/h5&gt;
 &lt;p&gt;playbook 是一个 由 yml 语法编写的文本文件，它由 play 和 task 两部分组成。&lt;/p&gt;
 &lt;p&gt;play： 主要定义要操作主机或者主机组&lt;/p&gt;
 &lt;p&gt;task：主要定义对主机或主机组具体执行的任务，可以是一个任务，也可以是多个任务（模块）&lt;/p&gt;
