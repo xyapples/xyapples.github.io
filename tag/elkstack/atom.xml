@@ -11,21 +11,21 @@
     <category term="ELKStack" />
     <category term="Harbor" />
     <category term="Iptables" />
-    <category term="Kubernetes" />
-    <category term="LVS" />
     <category term="Linux" />
-    <category term="rsync" />
     <category term="Samba" />
+    <category term="rsync" />
     <category term="Vsftp" />
-    <category term="MySQL" />
+    <category term="LVS" />
+    <category term="Kubernetes" />
     <category term="Nginx" />
-    <category term="Openvpn" />
+    <category term="MySQL" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
+    <category term="Openvpn" />
     <category term="Redis" />
     <category term="Shell" />
-    <category term="Tomcat" />
     <category term="Windows" />
+    <category term="Tomcat" />
     <entry>
         <id>http://ixuyong.cn/posts/570469260.html</id>
         <title>ELK收集Kubernetes组件日志分析与实践</title>
