@@ -4,7 +4,6 @@
     <title>LinuxSre云原生 • Posts by &#34;tomcat&#34; category</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-06-08T02:51:57.000Z</updated>
-    <category term="Aliyun" />
     <category term="Ansible" />
     <category term="DevOps" />
     <category term="Docker" />
@@ -12,16 +11,17 @@
     <category term="Harbor" />
     <category term="Iptables" />
     <category term="Kubernetes" />
-    <category term="LVS" />
+    <category term="Aliyun" />
     <category term="Linux" />
-    <category term="rsync" />
     <category term="Samba" />
+    <category term="rsync" />
     <category term="Vsftp" />
-    <category term="MySQL" />
+    <category term="LVS" />
     <category term="Nginx" />
     <category term="Openvpn" />
-    <category term="Prometheus" />
+    <category term="MySQL" />
     <category term="Rabbitmq" />
+    <category term="Prometheus" />
     <category term="Redis" />
     <category term="Shell" />
     <category term="Tomcat" />

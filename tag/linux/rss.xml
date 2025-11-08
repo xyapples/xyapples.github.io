@@ -7,7 +7,6 @@
         <language>zh-CN</language>
         <pubDate>Fri, 19 Sep 2025 22:12:25 +0800</pubDate>
         <lastBuildDate>Fri, 19 Sep 2025 22:12:25 +0800</lastBuildDate>
-        <category>Aliyun</category>
         <category>Ansible</category>
         <category>DevOps</category>
         <category>Docker</category>
@@ -15,16 +14,17 @@
         <category>Harbor</category>
         <category>Iptables</category>
         <category>Kubernetes</category>
-        <category>LVS</category>
+        <category>Aliyun</category>
         <category>Linux</category>
-        <category>rsync</category>
         <category>Samba</category>
+        <category>rsync</category>
         <category>Vsftp</category>
-        <category>MySQL</category>
+        <category>LVS</category>
         <category>Nginx</category>
         <category>Openvpn</category>
-        <category>Prometheus</category>
+        <category>MySQL</category>
         <category>Rabbitmq</category>
+        <category>Prometheus</category>
         <category>Redis</category>
         <category>Shell</category>
         <category>Tomcat</category>
