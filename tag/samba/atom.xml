@@ -4,28 +4,28 @@
     <title>LinuxSre云原生 • Posts by &#34;samba&#34; tag</title>
     <link href="http://ixuyong.cn" />
     <updated>2025-08-19T14:12:07.000Z</updated>
-    <category term="Ansible" />
     <category term="Aliyun" />
+    <category term="Ansible" />
     <category term="DevOps" />
-    <category term="ELKStack" />
     <category term="Docker" />
     <category term="Harbor" />
+    <category term="ELKStack" />
     <category term="Iptables" />
-    <category term="LVS" />
     <category term="Kubernetes" />
-    <category term="MySQL" />
     <category term="Linux" />
     <category term="rsync" />
-    <category term="Nginx" />
     <category term="Samba" />
     <category term="Vsftp" />
+    <category term="LVS" />
+    <category term="MySQL" />
+    <category term="Nginx" />
     <category term="Openvpn" />
     <category term="Prometheus" />
+    <category term="Redis" />
     <category term="Rabbitmq" />
     <category term="Shell" />
-    <category term="Windows" />
-    <category term="Redis" />
     <category term="Tomcat" />
+    <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/269104229.html</id>
         <title>Samba服务实践</title>

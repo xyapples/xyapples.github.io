@@ -7,28 +7,28 @@
         <language>zh-CN</language>
         <pubDate>Thu, 10 Apr 2025 21:32:09 +0800</pubDate>
         <lastBuildDate>Thu, 10 Apr 2025 21:32:09 +0800</lastBuildDate>
-        <category>Ansible</category>
         <category>Aliyun</category>
+        <category>Ansible</category>
         <category>DevOps</category>
-        <category>ELKStack</category>
         <category>Docker</category>
         <category>Harbor</category>
+        <category>ELKStack</category>
         <category>Iptables</category>
-        <category>LVS</category>
         <category>Kubernetes</category>
-        <category>MySQL</category>
         <category>Linux</category>
         <category>rsync</category>
-        <category>Nginx</category>
         <category>Samba</category>
         <category>Vsftp</category>
+        <category>LVS</category>
+        <category>MySQL</category>
+        <category>Nginx</category>
         <category>Openvpn</category>
         <category>Prometheus</category>
+        <category>Redis</category>
         <category>Rabbitmq</category>
         <category>Shell</category>
-        <category>Windows</category>
-        <category>Redis</category>
         <category>Tomcat</category>
+        <category>Windows</category>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/3071070979.html</guid>
             <title>一键永久激活Window、office教程</title>
