@@ -5,12 +5,12 @@
         <link>http://ixuyong.cn</link>
         <description>专注于 Linux 运维、云计算、云原⽣等技术</description>
         <language>zh-CN</language>
-        <pubDate>Wed, 26 Nov 2025 20:50:18 +0800</pubDate>
-        <lastBuildDate>Wed, 26 Nov 2025 20:50:18 +0800</lastBuildDate>
+        <pubDate>Wed, 26 Nov 2025 21:03:05 +0800</pubDate>
+        <lastBuildDate>Wed, 26 Nov 2025 21:03:05 +0800</lastBuildDate>
         <category>Aliyun</category>
-        <category>DevOps</category>
         <category>Ansible</category>
         <category>Docker</category>
+        <category>DevOps</category>
         <category>ELKStack</category>
         <category>Harbor</category>
         <category>Iptables</category>
@@ -21,14 +21,22 @@
         <category>Samba</category>
         <category>Vsftp</category>
         <category>Nginx</category>
-        <category>Openvpn</category>
         <category>MySQL</category>
+        <category>Openvpn</category>
         <category>Rabbitmq</category>
         <category>Prometheus</category>
-        <category>Shell</category>
         <category>Redis</category>
+        <category>Shell</category>
         <category>Tomcat</category>
         <category>Windows</category>
+        <item>
+            <guid isPermalink="true">http://ixuyong.cn/posts/3198692923.html</guid>
+            <title>Jenkins Pipeine实践</title>
+            <link>http://ixuyong.cn/posts/3198692923.html</link>
+            <category>DevOps</category>
+            <pubDate>Wed, 26 Nov 2025 21:03:05 +0800</pubDate>
+            <description><![CDATA[  ]]></description>
+        </item>
         <item>
             <guid isPermalink="true">http://ixuyong.cn/posts/2561708653.html</guid>
             <title>Jenkins SonarQube实践（六）</title>
