@@ -5,32 +5,33 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-11-26T13:03:05.000Z</updated>
     <category term="Aliyun" />
-    <category term="Ansible" />
     <category term="Docker" />
+    <category term="Ansible" />
     <category term="DevOps" />
     <category term="ELKStack" />
-    <category term="Harbor" />
     <category term="Iptables" />
+    <category term="Harbor" />
     <category term="Kubernetes" />
     <category term="LVS" />
+    <category term="Nginx" />
+    <category term="MySQL" />
     <category term="Linux" />
     <category term="rsync" />
     <category term="Samba" />
     <category term="Vsftp" />
-    <category term="Nginx" />
-    <category term="MySQL" />
     <category term="Openvpn" />
-    <category term="Rabbitmq" />
     <category term="Prometheus" />
     <category term="Redis" />
+    <category term="Rabbitmq" />
     <category term="Shell" />
     <category term="Tomcat" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/3198692923.html</id>
-        <title>Jenkins Pipeine实践</title>
+        <title>Jenkins Pipeine实践（七）</title>
         <link rel="alternate" href="http://ixuyong.cn/posts/3198692923.html"/>
-        <content type="html"></content>
+        <content type="html">&lt;h3 id=&#34;jenkins-pipeine实践&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#jenkins-pipeine实践&#34;&gt;#&lt;/a&gt; Jenkins Pipeine 实践&lt;/h3&gt;
+</content>
         <category term="DevOps" />
         <updated>2025-11-26T13:03:05.000Z</updated>
     </entry>
