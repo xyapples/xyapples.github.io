@@ -5,26 +5,26 @@
     <link href="http://ixuyong.cn" />
     <updated>2025-09-10T14:28:55.000Z</updated>
     <category term="Aliyun" />
-    <category term="Ansible" />
     <category term="DevOps" />
+    <category term="Ansible" />
     <category term="Docker" />
     <category term="ELKStack" />
     <category term="Harbor" />
-    <category term="Kubernetes" />
     <category term="Iptables" />
-    <category term="Linux" />
-    <category term="Samba" />
-    <category term="rsync" />
-    <category term="Vsftp" />
+    <category term="Kubernetes" />
     <category term="LVS" />
+    <category term="Linux" />
+    <category term="rsync" />
+    <category term="Samba" />
+    <category term="Vsftp" />
     <category term="MySQL" />
     <category term="Nginx" />
     <category term="Openvpn" />
     <category term="Prometheus" />
     <category term="Rabbitmq" />
+    <category term="Redis" />
     <category term="Shell" />
     <category term="Tomcat" />
-    <category term="Redis" />
     <category term="Windows" />
     <entry>
         <id>http://ixuyong.cn/posts/1598774589.html</id>
