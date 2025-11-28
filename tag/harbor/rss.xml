@@ -7,12 +7,12 @@
         <language>zh-CN</language>
         <pubDate>Sun, 30 Mar 2025 16:17:00 +0800</pubDate>
         <lastBuildDate>Sun, 30 Mar 2025 16:17:00 +0800</lastBuildDate>
-        <category>Aliyun</category>
         <category>DevOps</category>
+        <category>Aliyun</category>
         <category>Ansible</category>
         <category>Docker</category>
-        <category>ELKStack</category>
         <category>Harbor</category>
+        <category>ELKStack</category>
         <category>Iptables</category>
         <category>Kubernetes</category>
         <category>LVS</category>
@@ -20,11 +20,11 @@
         <category>rsync</category>
         <category>Samba</category>
         <category>Vsftp</category>
-        <category>MySQL</category>
         <category>Nginx</category>
-        <category>Openvpn</category>
+        <category>MySQL</category>
         <category>Prometheus</category>
         <category>Rabbitmq</category>
+        <category>Openvpn</category>
         <category>Redis</category>
         <category>Shell</category>
         <category>Tomcat</category>
