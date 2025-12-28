@@ -8,24 +8,24 @@
     <category term="Ansible" />
     <category term="DevOps" />
     <category term="Docker" />
-    <category term="Harbor" />
-    <category term="Iptables" />
     <category term="ELKStack" />
+    <category term="Iptables" />
     <category term="Kubernetes" />
+    <category term="Harbor" />
     <category term="LVS" />
     <category term="Linux" />
-    <category term="rsync" />
     <category term="Samba" />
+    <category term="rsync" />
     <category term="Vsftp" />
     <category term="Nginx" />
+    <category term="MySQL" />
+    <category term="Openvpn" />
     <category term="Rabbitmq" />
     <category term="Prometheus" />
-    <category term="Openvpn" />
     <category term="Redis" />
     <category term="Shell" />
-    <category term="Tomcat" />
     <category term="Windows" />
-    <category term="MySQL" />
+    <category term="Tomcat" />
     <entry>
         <id>http://ixuyong.cn/posts/737291847.html</id>
         <title>Prometheus监控实战（五）</title>
